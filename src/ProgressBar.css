@@ -1,0 +1,11 @@
+.ProgressBar {
+  background-color: red;
+  height: 10px;
+  margin: 5px 0;
+}
+
+.ProgressBar .Bar {
+  background-color: blue;
+  height: 10px;
+  transition: width 200ms;
+}

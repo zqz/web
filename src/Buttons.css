@@ -1,0 +1,15 @@
+.Buttons {
+  display: flex;
+}
+
+.Buttons .Button {
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.Buttons .Button:hover {
+  text-decoration: underline;
+}
+

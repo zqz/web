@@ -1,0 +1,46 @@
+.FileItem {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: solid 1px black;
+}
+
+.FileItem:nth-last-child(1) {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.FileItem .Top {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+
+.FileItem .Top .Left {
+  text-align: left;
+  flex-grow: 1;
+}
+
+.FileItem .Top .Name {
+  font-weight: bold;
+}
+
+.FileItem .Top .Percent {
+  margin-left: 10px;
+}
+
+.FileItem .Top .Progress {
+  font-family: monospace;
+}
+
+.FileItem .Bottom {
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+}
+
+.FileItem .Bottom .Hash {
+}

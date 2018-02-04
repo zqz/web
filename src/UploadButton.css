@@ -1,0 +1,11 @@
+.UploadButton {
+  background-color: red;
+}
+
+.UploadButton .Fake {
+  cursor: pointer;
+}
+
+.UploadButton .Real {
+  display: none;
+}
