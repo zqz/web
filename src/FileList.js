@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
 import Size from './Size';
 import './FileList.css';
 
@@ -28,7 +29,7 @@ class FileList extends Component {
 
       files.push(
         <div key={key} className="File">
-          <span>{file.name}</span>
+          <Link to={"/file/" + file.hash}>{file.name}</Link>
           <span>{file.hash} - <Size bytes={file.size}/></span>
         </div>
       );
@@ -39,7 +40,6 @@ class FileList extends Component {
         <strong>Files</strong>
         {files}
       </div>
-
     );
   }
 }
