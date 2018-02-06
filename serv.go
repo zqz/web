@@ -299,8 +299,41 @@ func files(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func file(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
+
+	if len(hash) == 0 {
+		renderError(w, http.StatusBadRequest, "failed to read token")
+		return
+	}
+
+	u, ok := uploads[hash]
+
+	if !ok {
+		renderError(w, http.StatusNotFound, "no file exists")
+		return
+	}
+
+	etag := u.hash
+	w.Header().Set("Content-Type", u.contentType)
+	w.Header().Set("Etag", etag)
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Content-Disposition", "inline; filename="+u.name)
+
+	if match := r.Header.Get("If-None-Match"); match != "" {
+		if strings.Contains(match, etag) {
+			// go lib.TrackDownload(f.DB, file.ID, r, true)
+			w.WriteHeader(http.StatusNotModified)
+			return
+		}
+	}
+
+	u.Read(w)
+}
+
 func main() {
 	r := chi.NewRouter()
+
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
@@ -311,6 +344,7 @@ func main() {
 	}).Handler)
 
 	r.Get("/files", files)
+	r.Get("/file/{hash}", file)
 	r.Get("/upload/{token}", uploadStatus)
 	r.Post("/upload/{token}", upload)
 	r.Post("/prepare", prepare)
