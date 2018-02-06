@@ -3,9 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
@@ -13,8 +16,10 @@ import (
 	"github.com/goware/cors"
 )
 
-var uploads map[string]*Upload
+var tmpPath string = "/tmp/zqz/"
+var finalPath string = "/tmp/final/"
 
+var uploads map[string]*Upload
 var src = rand.NewSource(time.Now().UnixNano())
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -48,20 +53,60 @@ func init() {
 
 type Upload struct {
 	name          string
-	data          []byte
 	hash          string
+	contentType   string
 	token         string
 	totalSize     int
 	bytesReceived int
 }
 
+func (u Upload) uploaded() bool {
+	return u.bytesReceived == u.totalSize
+}
+
+func (u Upload) tmpPath() string {
+	return tmpPath + u.hash
+}
+
+func (u Upload) finalPath() string {
+	return finalPath + u.hash
+}
+
+func (u *Upload) write(data io.Reader) error {
+	f, err := os.OpenFile(u.tmpPath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	// ignore here. likely only ever an EOF error which is expected.
+	i, _ := io.Copy(f, data)
+	u.bytesReceived += int(i)
+
+	return nil
+}
+
+func (u Upload) Read(w io.Writer) error {
+	f, err := os.Open(u.finalPath())
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(w, f)
+
+	return err
+}
+
 type File struct {
-	Alias string    `json:"alias"`
-	Name  string    `json:"name"`
-	Path  string    `json:"path"`
-	Hash  string    `json:"hash"`
-	Size  int       `json:"size"`
-	Date  time.Time `json:"date"`
+	Alias       string    `json:"alias"`
+	Name        string    `json:"name"`
+	Path        string    `json:"path"`
+	Hash        string    `json:"hash"`
+	ContentType string    `json:"type"`
+	Size        int       `json:"size"`
+	Date        time.Time `json:"date"`
 }
 
 type Error struct {
@@ -85,9 +130,10 @@ func renderError(w http.ResponseWriter, s int, m string) {
 }
 
 type PreparationRequest struct {
-	Name string `json:"name"`
-	Size int    `json:"size"`
-	Hash string `json:"hash"`
+	Name        string `json:"name"`
+	Size        int    `json:"size"`
+	ContentType string `json:"type"`
+	Hash        string `json:"hash"`
 }
 
 type PreparationResponse struct {
@@ -97,6 +143,7 @@ type PreparationResponse struct {
 
 type StatusResponse struct {
 	Name          string `json:"name"`
+	ContentType   string `json:"type"`
 	Hash          string `json:"hash"`
 	BytesReceived int    `json:"bytes_received"`
 	Size          int    `json:"size"`
@@ -124,12 +171,11 @@ func prepare(w http.ResponseWriter, r *http.Request) {
 	if ok != true {
 		u = &Upload{
 			// token:     token,
-			totalSize: p.Size,
-			name:      p.Name,
-			hash:      p.Hash,
+			totalSize:   p.Size,
+			name:        p.Name,
+			hash:        p.Hash,
+			contentType: p.ContentType,
 		}
-
-		u.data = make([]byte, 0)
 
 		uploads[p.Hash] = u
 	}
@@ -171,6 +217,7 @@ func uploadStatus(w http.ResponseWriter, r *http.Request) {
 
 	us := StatusResponse{
 		Name:          u.name,
+		ContentType:   u.contentType,
 		Size:          u.totalSize,
 		BytesReceived: u.bytesReceived,
 		Hash:          u.hash,
@@ -200,39 +247,31 @@ func upload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if u.bytesReceived == u.totalSize {
+	if u.uploaded() {
 		fmt.Println("already uploaded")
 		return
 	}
 
-	b, err := ioutil.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil {
-		renderError(w, http.StatusBadRequest, "Failed to read request body"+err.Error())
-		fmt.Println("received this time:", len(b))
-		u.data = append(u.data, b...)
-		u.bytesReceived = len(u.data)
-		fmt.Println("received so far:", u.bytesReceived)
-
-		return
+	if err := u.write(r.Body); err != nil {
+		fmt.Println("failed to write file", err)
 	}
 
-	u.data = append(u.data, b...)
-	u.bytesReceived = len(u.data)
 	fmt.Println("received total:", u.bytesReceived)
 
-	if u.bytesReceived == u.totalSize {
+	if u.uploaded() {
 		fmt.Println("finished")
+		os.Rename(u.tmpPath(), u.finalPath())
 	}
 
 	f := File{
-		Name: u.name,
-		Size: u.bytesReceived,
-		Date: time.Now(),
-		Hash: u.hash,
+		Name:        u.name,
+		Size:        u.bytesReceived,
+		Date:        time.Now(),
+		Hash:        u.hash,
+		ContentType: u.contentType,
 	}
 
-	b, err = json.Marshal(f)
+	b, err := json.Marshal(f)
 	if err != nil {
 		renderError(w, http.StatusInternalServerError, "Failed to build response")
 	}
