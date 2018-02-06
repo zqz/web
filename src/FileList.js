@@ -37,8 +37,10 @@ class FileList extends Component {
 
     return(
       <div className="FileList">
-        <strong>Files</strong>
-        {files}
+        <div className="Container">
+          <strong>Files</strong>
+          {files}
+        </div>
       </div>
     );
   }

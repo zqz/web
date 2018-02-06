@@ -1,0 +1,8 @@
+.Header {
+  background-color: grey;
+}
+
+.Header .Container {
+  display: flex;
+  justify-content: space-between;
+}

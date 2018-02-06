@@ -1,5 +1,8 @@
 .FileList {
   margin-top: 10px;
+}
+
+.FileList .Container {
   display: flex;
   flex-direction: column;
 }

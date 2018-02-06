@@ -31,7 +31,7 @@ class Uploader extends Component {
   }
 
   componentWillMount() {
-    var tstFile = new Blob(['Foobar'], {type: 'image/png'});
+    var tstFile = new Blob(['Foobar'], {type: 'text/plain'});
     tstFile.name = 'Example File';
 
     this.addFiles([
@@ -150,20 +150,22 @@ class Uploader extends Component {
   render() {
     return (
       <div className="Uploader">
-        <div>{this.state.uploadState}</div>
-        <UploadMenu
-          onChange={this.onChange}
-          startAll={this.startAll}
-          stopAll={this.stopAll}
-          removeAll={this.removeAll}
-        />
-        <UploadQueue
-          files={this.state.files}
-          onStart={this.onStart}
-          onStop={this.onStop}
-          onFinish={this.onFinish}
-          onRemove={this.onRemove}
-        />
+        <div className="Container">
+          <div>{this.state.uploadState}</div>
+          <UploadMenu
+            onChange={this.onChange}
+            startAll={this.startAll}
+            stopAll={this.stopAll}
+            removeAll={this.removeAll}
+          />
+          <UploadQueue
+            files={this.state.files}
+            onStart={this.onStart}
+            onStop={this.onStop}
+            onFinish={this.onFinish}
+            onRemove={this.onRemove}
+          />
+        </div>
       </div>
     );
   }

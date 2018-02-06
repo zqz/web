@@ -120,7 +120,8 @@ class FileData {
       name: this.file.name,
       hash: this.file.hash,
       size: this.file.size,
-    }
+      type: this.file.type
+    };
 
     var pxhr = new XMLHttpRequest();
     pxhr.addEventListener('readystatechange', (e) => {

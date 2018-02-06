@@ -1,0 +1,8 @@
+.Footer {
+  background-color: grey;
+}
+
+.Footer .Container {
+  display: flex;
+  justify-content: space-between;
+}
