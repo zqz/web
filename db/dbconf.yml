@@ -1,0 +1,12 @@
+production:
+  driver: postgres
+  open: $DATABASE_URL
+
+development:
+  driver: postgres
+  open: dbname=zqz2-dev sslmode=disable
+
+test:
+  driver: postgres
+  open: dbname=zqz2-test sslmode=disable
+

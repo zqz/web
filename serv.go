@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,7 +15,35 @@ import (
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/goware/cors"
+	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/queries/qm"
+	"github.com/zqz/upl/models"
 )
+
+var con *sqlx.DB
+
+func connect(str string) (*sqlx.DB, error) {
+	if len(str) == 0 {
+		return nil, errors.New("Empty DB string")
+	}
+
+	var err error
+	if parsedURL, err := pq.ParseURL(str); err == nil && parsedURL != "" {
+		str = parsedURL
+	}
+
+	var con *sqlx.DB
+	if con, err = sqlx.Connect("postgres", str); err != nil {
+		return nil, err
+	}
+
+	if err = con.Ping(); err != nil {
+		return nil, err
+	}
+
+	return con, nil
+}
 
 var tmpPath string = "/tmp/zqz/"
 var finalPath string = "/tmp/final/"
@@ -87,8 +116,8 @@ func (u *Upload) write(data io.Reader) error {
 	return nil
 }
 
-func (u Upload) Read(w io.Writer) error {
-	f, err := os.Open(u.finalPath())
+func read(path string, w io.Writer) error {
+	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
@@ -104,6 +133,7 @@ type File struct {
 	Name        string    `json:"name"`
 	Path        string    `json:"path"`
 	Hash        string    `json:"hash"`
+	Token       string    `json:"token"`
 	ContentType string    `json:"type"`
 	Size        int       `json:"size"`
 	Date        time.Time `json:"date"`
@@ -145,11 +175,31 @@ type StatusResponse struct {
 	Name          string `json:"name"`
 	ContentType   string `json:"type"`
 	Hash          string `json:"hash"`
+	Token         string `json:"token"`
 	BytesReceived int    `json:"bytes_received"`
 	Size          int    `json:"size"`
 }
 
-func prepare(w http.ResponseWriter, r *http.Request) {
+func prepareResponseForHash(hash string) *PreparationResponse {
+	if f, err := models.Files(con, qm.Where("hash=?", hash)).One(); err == nil {
+		return &PreparationResponse{
+			Token:         f.Hash,
+			BytesReceived: f.Size,
+		}
+	}
+
+	if u, ok := uploads[hash]; ok == true {
+		return &PreparationResponse{
+			Token:         u.hash,
+			BytesReceived: u.bytesReceived,
+		}
+	}
+
+	return nil
+}
+
+// create an upload, no data.
+func dataMeta(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		renderError(w, http.StatusBadRequest, "Failed to read request")
@@ -165,11 +215,10 @@ func prepare(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// token := randstr(10)
-	u, ok := uploads[p.Hash]
+	pr := prepareResponseForHash(p.Hash)
 
-	if ok != true {
-		u = &Upload{
+	if pr == nil {
+		u := &Upload{
 			// token:     token,
 			totalSize:   p.Size,
 			name:        p.Name,
@@ -178,11 +227,11 @@ func prepare(w http.ResponseWriter, r *http.Request) {
 		}
 
 		uploads[p.Hash] = u
-	}
 
-	pr := PreparationResponse{
-		Token:         u.hash,
-		BytesReceived: u.bytesReceived,
+		pr = &PreparationResponse{
+			Token:         p.Hash,
+			BytesReceived: 0,
+		}
 	}
 
 	b, err = json.Marshal(pr)
@@ -201,26 +250,27 @@ func prepare(w http.ResponseWriter, r *http.Request) {
 	spew.Dump(p)
 }
 
-func uploadStatus(w http.ResponseWriter, r *http.Request) {
-	token := chi.URLParam(r, "token")
+func fileStatus(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
 
-	if len(token) == 0 {
+	if len(hash) == 0 {
 		renderError(w, http.StatusBadRequest, "Failed to read token")
 		return
 	}
 
-	u, ok := uploads[token]
-	if !ok {
+	f, err := models.Files(con, qm.Where("Hash=?", hash)).One()
+	if err != nil {
 		renderError(w, http.StatusNotFound, "no file matched")
 		return
 	}
 
 	us := StatusResponse{
-		Name:          u.name,
-		ContentType:   u.contentType,
-		Size:          u.totalSize,
-		BytesReceived: u.bytesReceived,
-		Hash:          u.hash,
+		Name:          f.Name,
+		ContentType:   f.ContentType,
+		Size:          f.Size,
+		BytesReceived: f.Size,
+		Hash:          f.Hash,
+		Token:         f.Token,
 	}
 
 	b, err := json.Marshal(us)
@@ -233,17 +283,38 @@ func uploadStatus(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func upload(w http.ResponseWriter, r *http.Request) {
-	token := chi.URLParam(r, "token")
+var uploadedFiles map[string]bool
 
-	if len(token) == 0 {
-		renderError(w, http.StatusBadRequest, "Failed to read token")
+func fileUploaded(hash string) bool {
+	if _, ok := uploadedFiles[hash]; ok {
+		return true
+	}
+
+	if f, _ := models.Files(con, qm.Where("hash=?", hash)).One(); f != nil {
+		uploadedFiles[hash] = true
+		return true
+	}
+
+	return false
+}
+
+// uploadData
+func data(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
+
+	if len(hash) == 0 {
+		renderError(w, http.StatusBadRequest, "no hash specified")
 		return
 	}
 
-	u, ok := uploads[token]
+	if fileUploaded(hash) {
+		renderError(w, http.StatusBadRequest, "file already uploaded")
+		return
+	}
+
+	u, ok := uploads[hash]
 	if !ok {
-		renderError(w, http.StatusBadRequest, "Invalid Token")
+		renderError(w, http.StatusBadRequest, "no file with hash")
 		return
 	}
 
@@ -258,18 +329,28 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("received total:", u.bytesReceived)
 
-	if u.uploaded() {
-		fmt.Println("finished")
-		os.Rename(u.tmpPath(), u.finalPath())
+	if !u.uploaded() {
+		return
 	}
 
-	f := File{
+	fmt.Println("finished")
+	os.Rename(u.tmpPath(), u.finalPath())
+
+	f := models.File{
 		Name:        u.name,
 		Size:        u.bytesReceived,
-		Date:        time.Now(),
 		Hash:        u.hash,
+		Token:       randStr(5),
 		ContentType: u.contentType,
 	}
+
+	err := f.Insert(con)
+	if err != nil {
+		fmt.Println("Failed to insert f", err)
+		return
+	}
+
+	delete(uploads, u.hash)
 
 	b, err := json.Marshal(f)
 	if err != nil {
@@ -284,11 +365,18 @@ func upload(w http.ResponseWriter, r *http.Request) {
 
 func files(w http.ResponseWriter, r *http.Request) {
 	f := make([]File, 0)
-	for _, u := range uploads {
+
+	dbfiles, err := models.Files(con).All()
+	if err != nil {
+		fmt.Println("failed to get all files")
+	}
+
+	for _, df := range dbfiles {
 		file := File{
-			Name: u.name,
-			Size: u.totalSize,
-			Hash: u.hash,
+			Name:  df.Name,
+			Size:  df.Size,
+			Hash:  df.Hash,
+			Token: df.Token,
 		}
 
 		f = append(f, file)
@@ -299,26 +387,25 @@ func files(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func file(w http.ResponseWriter, r *http.Request) {
-	hash := chi.URLParam(r, "hash")
+func fileDownload(w http.ResponseWriter, r *http.Request) {
+	token := chi.URLParam(r, "token")
 
-	if len(hash) == 0 {
+	if len(token) == 0 {
 		renderError(w, http.StatusBadRequest, "failed to read token")
 		return
 	}
 
-	u, ok := uploads[hash]
-
-	if !ok {
+	f, err := models.Files(con, qm.Where("Token=?", token)).One()
+	if err != nil {
 		renderError(w, http.StatusNotFound, "no file exists")
 		return
 	}
 
-	etag := u.hash
-	w.Header().Set("Content-Type", u.contentType)
+	etag := f.Hash
+	w.Header().Set("Content-Type", f.ContentType)
 	w.Header().Set("Etag", etag)
 	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Content-Disposition", "inline; filename="+u.name)
+	w.Header().Set("Content-Disposition", "inline; filename="+f.Name)
 
 	if match := r.Header.Get("If-None-Match"); match != "" {
 		if strings.Contains(match, etag) {
@@ -328,10 +415,25 @@ func file(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	u.Read(w)
+	read(finalPath+f.Hash, w)
 }
 
 func main() {
+	if err := os.Mkdir(tmpPath, 0744); err == nil {
+		fmt.Println("creating tmp folder")
+	}
+	if err := os.Mkdir(finalPath, 0744); err == nil {
+		fmt.Println("creating final folder")
+	}
+
+	var err error
+	con, err = connect("postgres://localhost:5432/zqz2-dev?sslmode=disable")
+
+	if err != nil {
+		fmt.Println("error connecting to db", err)
+		return
+	}
+
 	r := chi.NewRouter()
 
 	r.Use(cors.New(cors.Options{
@@ -344,10 +446,10 @@ func main() {
 	}).Handler)
 
 	r.Get("/files", files)
-	r.Get("/file/{hash}", file)
-	r.Get("/upload/{token}", uploadStatus)
-	r.Post("/upload/{token}", upload)
-	r.Post("/prepare", prepare)
+	r.Get("/file/{token}/download", fileDownload)
+	r.Get("/file/{hash}", fileStatus)
+	r.Post("/data/meta", dataMeta)
+	r.Post("/data/{hash}", data)
 
 	http.ListenAndServe(":3001", r)
 }

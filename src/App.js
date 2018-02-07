@@ -13,10 +13,12 @@ class App extends Component {
       <BrowserRouter>
       <div className="App">
         <Header />
-        <Uploader/>
-        <Route exact path="/" component={FileList}/>
-        <Route path="/file/:id" component={FileView}/>
-        <div className="Spacing"></div>
+          <div class="Container">
+            <Uploader/>
+            <Route exact path="/" component={FileList}/>
+            <Route path="/file/:hash" component={FileView}/>
+          </div>
+          <div className="Spacing"></div>
         <Footer />
       </div>
       </BrowserRouter>

@@ -7,9 +7,9 @@ class Header extends Component {
     return (
       <div className="Header">
         <div className="Container">
-          <div className="Logo">
+          <Link to='/' className="Logo">
             zqz.ca
-          </div>
+          </Link>
           <div className="Navigation">
             <Link to="/">Files</Link>
           </div>

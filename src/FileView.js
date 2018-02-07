@@ -10,9 +10,9 @@ class FileView extends Component {
   }
 
   componentDidMount() {
-    var fileid = this.props.match.params.id;
+    var fileid = this.props.match.params.hash;
     console.log(fileid);
-    fetch('http://localhost:3001/upload/' + fileid)
+    fetch('http://localhost:3001/file/' + fileid)
     .then(r => {
       return r.json();
     })
@@ -22,13 +22,20 @@ class FileView extends Component {
   }
 
   render() {
-    if (this.state.file === null) {
+    var file = this.state.file;
+
+    if (file === null) {
       return (<div>no file</div>);
     }
 
     return(
       <div className="FileView">
-        <a href={"http://localhost:3001/file/" + this.state.file.hash}>download</a>
+        <div>
+          <strong>{file.name}</strong>
+        </div>
+        <div>Size: {file.size}</div>
+        <div>Date: {file.date}</div>
+        <a href={"http://localhost:3001/file/" + file.token + '/download'}>download</a>
       </div>
     );
   }

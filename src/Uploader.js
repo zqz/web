@@ -150,22 +150,20 @@ class Uploader extends Component {
   render() {
     return (
       <div className="Uploader">
-        <div className="Container">
-          <div>{this.state.uploadState}</div>
-          <UploadMenu
-            onChange={this.onChange}
-            startAll={this.startAll}
-            stopAll={this.stopAll}
-            removeAll={this.removeAll}
-          />
-          <UploadQueue
-            files={this.state.files}
-            onStart={this.onStart}
-            onStop={this.onStop}
-            onFinish={this.onFinish}
-            onRemove={this.onRemove}
-          />
-        </div>
+        <div>{this.state.uploadState}</div>
+        <UploadMenu
+          onChange={this.onChange}
+          startAll={this.startAll}
+          stopAll={this.stopAll}
+          removeAll={this.removeAll}
+        />
+        <UploadQueue
+          files={this.state.files}
+          onStart={this.onStart}
+          onStop={this.onStop}
+          onFinish={this.onFinish}
+          onRemove={this.onRemove}
+        />
       </div>
     );
   }

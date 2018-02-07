@@ -14,7 +14,7 @@ class FileData {
     this.onHashCallback = null;
     this.onExistsCallback = null;
     this.xhr = null;
-    this.token = null;
+    // this.token = null;
     this.bytesPreviouslySent = 0;
     this.bytesSent = 0;
 
@@ -111,7 +111,7 @@ class FileData {
       this.onExistsCallback(response);
     });
 
-    pxhr.open('GET', 'http://localhost:3001/upload/' + this.file.hash, true);
+    pxhr.open('GET', 'http://localhost:3001/file/' + this.file.hash, true);
     pxhr.send();
   }
 
@@ -134,13 +134,13 @@ class FileData {
 
         var response = JSON.parse(text);
         console.log(response);
-        this.token = response.token;
+        // this.token = response.token;
         this.bytesPreviouslySent = response.bytes_received;
         this.start();
       }
     });
 
-    pxhr.open('POST', 'http://localhost:3001/prepare', true);
+    pxhr.open('POST', 'http://localhost:3001/data/meta', true);
     pxhr.send(JSON.stringify(data));
   }
 
@@ -182,7 +182,7 @@ class FileData {
       this.onAbortCallback();
     });
 
-    this.xhr.open('POST', 'http://localhost:3001/upload/' + this.token, true);
+    this.xhr.open('POST', 'http://localhost:3001/data/' + this.file.hash, true);
     this.xhr.send(this.file.slice(this.bytesPreviouslySent));
 
     this.state = 'started';
