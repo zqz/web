@@ -12,7 +12,7 @@ type Persister interface {
 
 type MetaStorer interface {
 	FetchMeta(string) (*Meta, error)
-	StoreMeta(*Meta) error
+	StoreMeta(Meta) error
 }
 
 type FileDB struct {
@@ -55,7 +55,7 @@ func (db FileDB) Read(hash string, wc io.Writer) (int64, error) {
 	return io.Copy(wc, reader)
 }
 
-func (db FileDB) StoreMeta(meta *Meta) error {
+func (db FileDB) StoreMeta(meta Meta) error {
 	if db.m == nil {
 		return errors.New("no storage specified")
 	}
@@ -89,6 +89,10 @@ func (db FileDB) StoreMeta(meta *Meta) error {
 func (db FileDB) FetchMeta(hash string) (*Meta, error) {
 	if db.m == nil {
 		return nil, errors.New("no storage specified")
+	}
+
+	if hash == "" {
+		return nil, errors.New("no hash specified")
 	}
 
 	return db.m.FetchMeta(hash)

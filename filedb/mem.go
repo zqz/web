@@ -70,14 +70,14 @@ func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
 	return meta, nil
 }
 
-func (m MemoryMetaStorage) StoreMeta(meta *Meta) error {
+func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
 	// m.entries[meta.Hash]
 
 	// 	if ok {
 	// 		return errors.New("file already exists")
 	// 	}
 
-	m.entries[meta.Hash] = meta
+	m.entries[meta.Hash] = &meta
 
 	return nil
 }
