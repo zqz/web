@@ -53,11 +53,14 @@ func (m MemoryPersistence) Put(hash string) (io.WriteCloser, error) {
 func (m MemoryPersistence) Get(hash string) (io.ReadCloser, error) {
 	b, ok := m.entries[hash]
 
+	data := b.Bytes()
+	buf := bytes.NewBuffer(data)
+
 	if !ok {
 		return nil, errors.New("no file with hash: " + hash)
 	}
 
-	return nopReadCloser{b}, nil
+	return nopReadCloser{buf}, nil
 }
 
 func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {

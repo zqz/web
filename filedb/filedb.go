@@ -1,7 +1,9 @@
 package filedb
 
 import (
+	"crypto/sha1"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -27,32 +29,75 @@ func NewFileDB(p Persister, m MetaStorer) FileDB {
 	}
 }
 
-func (db FileDB) Write(hash string, rc io.ReadCloser) (int64, error) {
+func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
+	if db.m == nil {
+		return nil, errors.New("no storage specified")
+	}
 	if db.p == nil {
-		return 0, errors.New("no persistence specified")
+		return nil, errors.New("no persistence specified")
+	}
+
+	m, err := db.FetchMeta(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	if m.Size == m.BytesReceived {
+		return m, errors.New("file already uploaded")
 	}
 
 	writer, err := db.p.Put(hash)
 
 	if err != nil {
-		return 0, nil
+		return nil, err
 	}
 
-	return io.Copy(writer, rc)
+	n, _ := io.Copy(writer, rc)
+
+	m.BytesReceived += int(n)
+
+	err = db.m.StoreMeta(*m)
+	if err != nil {
+		return nil, err
+	}
+
+	if !m.finished() {
+		return m, errors.New("got partial data")
+	}
+
+	w, err := db.p.Get(m.Hash)
+	if err != nil {
+		return nil, err
+	}
+	defer w.Close()
+
+	h, err := calcHash(w)
+
+	if h != m.Hash {
+		return nil, errors.New("hash does not match")
+	}
+
+	return m, nil
 }
 
-func (db FileDB) Read(hash string, wc io.Writer) (int64, error) {
+func (db FileDB) Read(hash string, wc io.Writer) error {
 	if db.p == nil {
-		return 0, errors.New("no persistence specified")
+		return errors.New("no persistence specified")
+	}
+
+	if db.m == nil {
+		return errors.New("no storage specified")
 	}
 
 	reader, err := db.p.Get(hash)
 
 	if err != nil {
-		return 0, err
+		return err
 	}
 
-	return io.Copy(wc, reader)
+	_, err = io.Copy(wc, reader)
+
+	return err
 }
 
 func (db FileDB) StoreMeta(meta Meta) error {
@@ -96,4 +141,14 @@ func (db FileDB) FetchMeta(hash string) (*Meta, error) {
 	}
 
 	return db.m.FetchMeta(hash)
+}
+
+func calcHash(src io.Reader) (string, error) {
+	h := sha1.New()
+
+	if _, err := io.Copy(h, src); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", h.Sum(nil)), nil
 }

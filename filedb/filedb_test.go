@@ -8,38 +8,20 @@ import (
 )
 
 func TestWriteNoPersistence(t *testing.T) {
-	db := FileDB{}
-	n, err := db.Write("hash", nopReadCloser{})
+	db := FileDB{
+		m: NewMemoryMetaStorage(),
+	}
+
+	m, err := db.Write("hash", nopReadCloser{})
+	assert.Nil(t, m)
 	assert.Equal(t, "no persistence specified", err.Error())
-	assert.Equal(t, int64(0), n)
 }
 
 func TestReadNoPersistence(t *testing.T) {
 	db := FileDB{}
-	n, err := db.Read("hash", nopWriteCloser{})
+
+	err := db.Read("hash", nopWriteCloser{})
 	assert.Equal(t, "no persistence specified", err.Error())
-	assert.Equal(t, int64(0), n)
-}
-
-func TestHelloWorld(t *testing.T) {
-	db := FileDB{
-		p: NewMemoryPersistence(),
-	}
-
-	str := "hello world"
-	rc := nopReadCloser{bytes.NewBufferString(str)}
-
-	n, err := db.Write("hash", rc)
-	assert.Nil(t, err)
-	assert.Equal(t, len(str), int(n))
-
-	var b bytes.Buffer
-	wc := nopWriteCloser{&b}
-
-	n, err = db.Read("hash", wc)
-	assert.Nil(t, err)
-	assert.Equal(t, len(str), int(n))
-	assert.Equal(t, "hello world", b.String())
 }
 
 func TestStoreMetaNoStorage(t *testing.T) {
@@ -182,14 +164,16 @@ func TestFetchMeta(t *testing.T) {
 	assert.Equal(t, 0, meta.BytesReceived)
 }
 
-func TestCantWriteOnceReceivedAllData(t *testing.T) {
+func TestWriteSuccess(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
 	m := Meta{
-		Hash: "foo",
+		Hash: hash,
 		Size: 5,
 		Name: "foobar",
 	}
@@ -199,12 +183,102 @@ func TestCantWriteOnceReceivedAllData(t *testing.T) {
 
 	str := "bytes"
 	rc := nopReadCloser{bytes.NewBufferString(str)}
-	n, err := db.Write("hash", rc)
+	meta, err := db.Write(hash, rc)
 
 	assert.Nil(t, err)
-	assert.Equal(t, 5, int(n))
-
-	meta, err := db.FetchMeta(m.Hash)
-
+	assert.Equal(t, 5, meta.Size)
 	assert.Equal(t, 5, meta.BytesReceived)
+	assert.Equal(t, "foobar", meta.Name)
+	assert.Equal(t, hash, meta.Hash)
+}
+
+func TestReturnErrorOnBadHash(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "badhash"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "bytes"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	meta, err := db.Write(hash, rc)
+
+	assert.Nil(t, meta)
+	assert.Equal(t, "hash does not match", err.Error())
+}
+
+func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "bytes"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	meta, err := db.Write(hash, rc)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 5, meta.BytesReceived)
+
+	rc = nopReadCloser{bytes.NewBufferString(str)}
+	meta, err = db.Write(hash, rc)
+
+	assert.Equal(t, "file already uploaded", err.Error())
+	assert.Equal(t, 5, meta.BytesReceived)
+}
+
+func TestFull(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "bytes"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	meta, err := db.Write(hash, rc)
+
+	assert.Nil(t, err)
+	assert.Equal(t, 5, meta.Size)
+	assert.Equal(t, 5, meta.BytesReceived)
+	assert.Equal(t, "foobar", meta.Name)
+	assert.Equal(t, hash, meta.Hash)
+
+	var b bytes.Buffer
+	wc := nopWriteCloser{&b}
+	err = db.Read(hash, wc)
+
+	assert.Nil(t, err)
+	assert.Equal(t, "bytes", b.String())
 }
