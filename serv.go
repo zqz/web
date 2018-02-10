@@ -6,22 +6,19 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
-	"os"
 	"strings"
-	"time"
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/goware/cors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
-	"github.com/volatiletech/sqlboiler/queries/qm"
-	"github.com/zqz/upl/models"
+	"github.com/zqz/upl/filedb"
 )
 
 var con *sqlx.DB
+var db filedb.FileDB
 
 func connect(str string) (*sqlx.DB, error) {
 	if len(str) == 0 {
@@ -45,98 +42,18 @@ func connect(str string) (*sqlx.DB, error) {
 	return con, nil
 }
 
-var tmpPath string = "/tmp/zqz/"
-var finalPath string = "/tmp/final/"
+func renderJSON(w http.ResponseWriter, o interface{}) {
+	b, err := json.Marshal(o)
 
-var uploads map[string]*Upload
-var src = rand.NewSource(time.Now().UnixNano())
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-func randStr(n int) string {
-	b := make([]byte, n)
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return string(b)
-}
-
-func init() {
-	uploads = make(map[string]*Upload)
-}
-
-type Upload struct {
-	name          string
-	hash          string
-	contentType   string
-	token         string
-	totalSize     int
-	bytesReceived int
-}
-
-func (u Upload) uploaded() bool {
-	return u.bytesReceived == u.totalSize
-}
-
-func (u Upload) tmpPath() string {
-	return tmpPath + u.hash
-}
-
-func (u Upload) finalPath() string {
-	return finalPath + u.hash
-}
-
-func (u *Upload) write(data io.Reader) error {
-	f, err := os.OpenFile(u.tmpPath(), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		return err
+		renderError(w, http.StatusInternalServerError, "failed to created json")
+		return
 	}
 
-	defer f.Close()
+	spew.Dump(o)
 
-	// ignore here. likely only ever an EOF error which is expected.
-	i, _ := io.Copy(f, data)
-	u.bytesReceived += int(i)
-
-	return nil
-}
-
-func read(path string, w io.Writer) error {
-	f, err := os.Open(path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	_, err = io.Copy(w, f)
-
-	return err
-}
-
-type File struct {
-	Alias       string    `json:"alias"`
-	Name        string    `json:"name"`
-	Path        string    `json:"path"`
-	Hash        string    `json:"hash"`
-	Token       string    `json:"token"`
-	ContentType string    `json:"type"`
-	Size        int       `json:"size"`
-	Date        time.Time `json:"date"`
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 }
 
 type Error struct {
@@ -150,262 +67,104 @@ func renderError(w http.ResponseWriter, s int, m string) {
 
 	fmt.Println("error: ", s, m)
 
-	b, err := json.Marshal(e)
-	if err != nil {
-		return
-	}
-
+	renderJSON(w, e)
 	w.WriteHeader(s)
-	w.Write(b)
 }
 
-type PreparationRequest struct {
-	Name        string `json:"name"`
-	Size        int    `json:"size"`
-	ContentType string `json:"type"`
-	Hash        string `json:"hash"`
-}
-
-type PreparationResponse struct {
-	Token         string `json:"token"`
-	BytesReceived int    `json:"bytes_received"`
-}
-
-type StatusResponse struct {
-	Name          string `json:"name"`
-	ContentType   string `json:"type"`
-	Hash          string `json:"hash"`
-	Token         string `json:"token"`
-	BytesReceived int    `json:"bytes_received"`
-	Size          int    `json:"size"`
-}
-
-func prepareResponseForHash(hash string) *PreparationResponse {
-	if f, err := models.Files(con, qm.Where("hash=?", hash)).One(); err == nil {
-		return &PreparationResponse{
-			Token:         f.Hash,
-			BytesReceived: f.Size,
-		}
-	}
-
-	if u, ok := uploads[hash]; ok == true {
-		return &PreparationResponse{
-			Token:         u.hash,
-			BytesReceived: u.bytesReceived,
-		}
-	}
-
-	return nil
-}
-
-// create an upload, no data.
-func dataMeta(w http.ResponseWriter, r *http.Request) {
-	b, err := ioutil.ReadAll(r.Body)
+func parseMeta(r io.ReadCloser) (*filedb.Meta, error) {
+	b, err := ioutil.ReadAll(r)
 	if err != nil {
-		renderError(w, http.StatusBadRequest, "Failed to read request")
+		return nil, err
+	}
+
+	defer r.Close()
+	m := filedb.Meta{}
+	if err = json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+
+	return &m, err
+}
+
+func postMeta(w http.ResponseWriter, r *http.Request) {
+	m, err := parseMeta(r.Body)
+	if err != nil {
+		renderError(w, http.StatusBadRequest, "failed to read request")
 		return
 	}
 
-	defer r.Body.Close()
-
-	p := PreparationRequest{}
-	err = json.Unmarshal(b, &p)
+	err = db.StoreMeta(m)
 	if err != nil {
-		renderError(w, http.StatusBadRequest, "Failed to read prepare request")
+		renderError(w, http.StatusInternalServerError, "failed to store meta")
 		return
 	}
 
-	pr := prepareResponseForHash(p.Hash)
-
-	if pr == nil {
-		u := &Upload{
-			// token:     token,
-			totalSize:   p.Size,
-			name:        p.Name,
-			hash:        p.Hash,
-			contentType: p.ContentType,
-		}
-
-		uploads[p.Hash] = u
-
-		pr = &PreparationResponse{
-			Token:         p.Hash,
-			BytesReceived: 0,
-		}
-	}
-
-	b, err = json.Marshal(pr)
-	if err != nil {
-		renderError(
-			w,
-			http.StatusInternalServerError,
-			"Failed to create prepare response",
-		)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-
-	spew.Dump(p)
+	renderJSON(w, m)
 }
 
-func fileStatus(w http.ResponseWriter, r *http.Request) {
+func getMeta(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	if len(hash) == 0 {
-		renderError(w, http.StatusBadRequest, "Failed to read token")
-		return
-	}
+	meta, err := db.FetchMeta(hash)
 
-	f, err := models.Files(con, qm.Where("Hash=?", hash)).One()
 	if err != nil {
-		renderError(w, http.StatusNotFound, "no file matched")
+		renderError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	us := StatusResponse{
-		Name:          f.Name,
-		ContentType:   f.ContentType,
-		Size:          f.Size,
-		BytesReceived: f.Size,
-		Hash:          f.Hash,
-		Token:         f.Token,
-	}
-
-	b, err := json.Marshal(us)
-	if err != nil {
-		renderError(w, http.StatusInternalServerError, "failed to created json")
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	renderJSON(w, meta)
 }
 
-var uploadedFiles map[string]bool
-
-func fileUploaded(hash string) bool {
-	if _, ok := uploadedFiles[hash]; ok {
-		return true
-	}
-
-	if f, _ := models.Files(con, qm.Where("hash=?", hash)).One(); f != nil {
-		uploadedFiles[hash] = true
-		return true
-	}
-
-	return false
-}
-
-// uploadData
-func data(w http.ResponseWriter, r *http.Request) {
+func postData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	if len(hash) == 0 {
-		renderError(w, http.StatusBadRequest, "no hash specified")
-		return
-	}
+	_, err := db.Write(hash, r.Body)
 
-	if fileUploaded(hash) {
-		renderError(w, http.StatusBadRequest, "file already uploaded")
-		return
-	}
-
-	u, ok := uploads[hash]
-	if !ok {
-		renderError(w, http.StatusBadRequest, "no file with hash")
-		return
-	}
-
-	if u.uploaded() {
-		fmt.Println("already uploaded")
-		return
-	}
-
-	if err := u.write(r.Body); err != nil {
-		fmt.Println("failed to write file", err)
-	}
-
-	fmt.Println("received total:", u.bytesReceived)
-
-	if !u.uploaded() {
-		return
-	}
-
-	fmt.Println("finished")
-	os.Rename(u.tmpPath(), u.finalPath())
-
-	f := models.File{
-		Name:        u.name,
-		Size:        u.bytesReceived,
-		Hash:        u.hash,
-		Token:       randStr(5),
-		ContentType: u.contentType,
-	}
-
-	err := f.Insert(con)
 	if err != nil {
-		fmt.Println("Failed to insert f", err)
+		renderError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	delete(uploads, u.hash)
+	meta, err := db.FetchMeta(hash)
 
-	b, err := json.Marshal(f)
 	if err != nil {
-		renderError(w, http.StatusInternalServerError, "Failed to build response")
+		renderError(w, http.StatusNotFound, err.Error())
+		return
 	}
 
-	fmt.Println(string(b))
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	renderJSON(w, meta)
 }
 
 func files(w http.ResponseWriter, r *http.Request) {
-	f := make([]File, 0)
+	// f := make([]File, 0)
 
-	dbfiles, err := models.Files(con).All()
-	if err != nil {
-		fmt.Println("failed to get all files")
-	}
+	// dbfiles, err := models.Files(con).All()
+	// if err != nil {
+	// 	fmt.Println("failed to get all files")
+	// }
 
-	for _, df := range dbfiles {
-		file := File{
-			Name:  df.Name,
-			Size:  df.Size,
-			Hash:  df.Hash,
-			Token: df.Token,
-		}
+	// for _, df := range dbfiles {
+	// 	file := File{
+	// 		Name:  df.Name,
+	// 		Size:  df.Size,
+	// 		Hash:  df.Hash,
+	// 		Token: df.Token,
+	// 	}
 
-		f = append(f, file)
-	}
+	// 	f = append(f, file)
+	// }
 
-	b, _ := json.Marshal(&f)
+	// b, _ := json.Marshal(&f)
 
-	w.Write(b)
+	// w.Write(b)
 }
 
-func fileDownload(w http.ResponseWriter, r *http.Request) {
-	token := chi.URLParam(r, "token")
-
-	if len(token) == 0 {
-		renderError(w, http.StatusBadRequest, "failed to read token")
-		return
-	}
-
-	f, err := models.Files(con, qm.Where("Token=?", token)).One()
-	if err != nil {
-		renderError(w, http.StatusNotFound, "no file exists")
-		return
-	}
-
-	etag := f.Hash
-	w.Header().Set("Content-Type", f.ContentType)
+func download(meta *filedb.Meta, w http.ResponseWriter, r *http.Request) {
+	etag := meta.Hash
+	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Etag", etag)
 	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Content-Disposition", "inline; filename="+f.Name)
+	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
 
 	if match := r.Header.Get("If-None-Match"); match != "" {
 		if strings.Contains(match, etag) {
@@ -415,16 +174,28 @@ func fileDownload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	read(finalPath+f.Hash, w)
+	_, err := db.Read(meta.Hash, w)
+	if err != nil {
+		renderError(w, http.StatusNotFound, err.Error())
+		return
+	}
+}
+
+func fileDownload(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "token")
+
+	meta, err := db.FetchMeta(hash)
+	if err != nil {
+		renderError(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	download(meta, w, r)
 }
 
 func main() {
-	if err := os.Mkdir(tmpPath, 0744); err == nil {
-		fmt.Println("creating tmp folder")
-	}
-	if err := os.Mkdir(finalPath, 0744); err == nil {
-		fmt.Println("creating final folder")
-	}
+	// os.Mkdir(tmpPath, 0744)
+	// os.Mkdir(finalPath, 0744)
 
 	var err error
 	con, err = connect("postgres://localhost:5432/zqz2-dev?sslmode=disable")
@@ -433,6 +204,16 @@ func main() {
 		fmt.Println("error connecting to db", err)
 		return
 	}
+
+	//mstore := NewDBFileManager(con)
+	//db = NewFileManager(mstore)
+
+	db = filedb.NewFileDB(
+		filedb.NewMemoryPersistence(),
+		filedb.NewMemoryMetaStorage(),
+	)
+	// var tmpPath string = "/tmp/zqz/"
+	// var finalPath string = "/tmp/final/"
 
 	r := chi.NewRouter()
 
@@ -447,9 +228,10 @@ func main() {
 
 	r.Get("/files", files)
 	r.Get("/file/{token}/download", fileDownload)
-	r.Get("/file/{hash}", fileStatus)
-	r.Post("/data/meta", dataMeta)
-	r.Post("/data/{hash}", data)
+	// r.Get("/file/{hash}", fileStatus)
+	r.Post("/meta", postMeta)
+	r.Post("/data/{hash}", postData)
+	r.Get("/meta/{hash}", getMeta)
 
 	http.ListenAndServe(":3001", r)
 }
