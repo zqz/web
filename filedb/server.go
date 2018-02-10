@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
+	"github.com/goware/cors"
 	"github.com/zqz/upl/render"
 )
 
@@ -144,4 +145,26 @@ func (s Server) FileDownload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.download(meta, w, r)
+}
+
+func (s Server) Router() http.Handler {
+	r := chi.NewRouter()
+
+	r.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}).Handler)
+
+	r.Get("/files", s.Files)
+	r.Get("/file/{token}/download", s.FileDownload)
+	// r.Get("/file/{hash}", fileStatus)
+	r.Post("/meta", s.PostMeta)
+	r.Post("/data/{hash}", s.PostData)
+	r.Get("/meta/{hash}", s.GetMeta)
+
+	return r
 }
