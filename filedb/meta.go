@@ -32,3 +32,7 @@ type Meta struct {
 	Date          time.Time `json:"date"`
 	BytesReceived int       `json:"bytes_received"`
 }
+
+func (m Meta) finished() bool {
+	return m.Size == m.BytesReceived
+}
