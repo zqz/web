@@ -4,8 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/go-chi/chi"
-	"github.com/goware/cors"
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
 	"github.com/zqz/upl/filedb"
@@ -40,43 +38,12 @@ func main() {
 	// os.Mkdir(tmpPath, 0744)
 	// os.Mkdir(finalPath, 0744)
 
-	s := filedb.Server{
-		db: filedb.NewFileDB(
+	s := filedb.NewServer(
+		filedb.NewFileDB(
 			filedb.NewMemoryPersistence(),
 			filedb.NewMemoryMetaStorage(),
 		),
-	}
+	)
 
-	// var err error
-	// con, err = connect("postgres://localhost:5432/zqz2-dev?sslmode=disable")
-
-	// if err != nil {
-	// 	fmt.Println("error connecting to db", err)
-	// 	return
-	// }
-
-	//mstore := NewDBFileManager(con)
-	//db = NewFileManager(mstore)
-	// var tmpPath string = "/tmp/zqz/"
-	// var finalPath string = "/tmp/final/"
-
-	r := chi.NewRouter()
-
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}).Handler)
-
-	r.Get("/files", s.Files)
-	r.Get("/file/{token}/download", s.FileDownload)
-	// r.Get("/file/{hash}", fileStatus)
-	r.Post("/meta", s.PostMeta)
-	r.Post("/data/{hash}", s.PostData)
-	r.Get("/meta/{hash}", s.GetMeta)
-
-	http.ListenAndServe(":3001", r)
+	http.ListenAndServe(":3001", s.Router())
 }

@@ -16,6 +16,12 @@ type Server struct {
 	db FileDB
 }
 
+func NewServer(db FileDB) Server {
+	return Server{
+		db: db,
+	}
+}
+
 func parseMeta(r io.ReadCloser) (*Meta, error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {

@@ -56,6 +56,10 @@ func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
 
 	m.BytesReceived += int(n)
 
+	if m.finished() {
+		m.Slug = randStr(5)
+	}
+
 	err = db.m.StoreMeta(*m)
 	if err != nil {
 		return nil, err
