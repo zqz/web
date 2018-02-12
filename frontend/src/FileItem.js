@@ -40,9 +40,11 @@ class FileItem extends Component {
     this.props.filedata.onError(() => {
       this.setState({uploadState: 'errored'});
     });
+
     this.props.filedata.onLoad(() => {
       this.setState({uploadState: 'loaded'});
     });
+
     this.props.filedata.onResponse((data) => {
       this.setState({
         uploadState: 'response',
