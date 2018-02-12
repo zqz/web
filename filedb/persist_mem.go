@@ -21,16 +21,6 @@ type MemoryPersistence struct {
 	entries map[string]*bytes.Buffer
 }
 
-type MemoryMetaStorage struct {
-	entries map[string]*Meta
-}
-
-func NewMemoryMetaStorage() MemoryMetaStorage {
-	return MemoryMetaStorage{
-		entries: make(map[string]*Meta),
-	}
-}
-
 func NewMemoryPersistence() MemoryPersistence {
 	e := make(map[string]*bytes.Buffer)
 
@@ -61,26 +51,4 @@ func (m MemoryPersistence) Get(hash string) (io.ReadCloser, error) {
 	}
 
 	return nopReadCloser{buf}, nil
-}
-
-func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
-	meta, ok := m.entries[hash]
-
-	if !ok {
-		return nil, errors.New("file not found")
-	}
-
-	return meta, nil
-}
-
-func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
-	// m.entries[meta.Hash]
-
-	// 	if ok {
-	// 		return errors.New("file already exists")
-	// 	}
-
-	m.entries[meta.Hash] = &meta
-
-	return nil
 }
