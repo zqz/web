@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/goware/cors"
 	"github.com/zqz/upl/render"
@@ -146,6 +147,22 @@ func (s Server) FileDownload(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
+		spew.Dump(err)
+		render.Error(w, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	s.download(meta, w, r)
+}
+
+func (s Server) GetData(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
+
+	meta, err := s.db.FetchMeta(hash)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
 		render.Error(w, err.Error())
 		return
 	}
@@ -166,10 +183,12 @@ func (s Server) Router() http.Handler {
 	}).Handler)
 
 	r.Get("/files", s.Files)
-	r.Get("/file/{token}/download", s.FileDownload)
-	// r.Get("/file/{hash}", fileStatus)
-	r.Post("/meta", s.PostMeta)
+	// r.Get("/file/{token}/download", s.FileDownload)
+
+	r.Get("/data/{hash}", s.GetData)
 	r.Post("/data/{hash}", s.PostData)
+
+	r.Post("/meta", s.PostMeta)
 	r.Get("/meta/{hash}", s.GetMeta)
 
 	return r

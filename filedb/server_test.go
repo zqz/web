@@ -163,3 +163,75 @@ func TestPostData(t *testing.T) {
 	assert.Equal(t, 5, m.BytesReceived)
 	assert.NotEmpty(t, m.Slug)
 }
+
+func TestGetDataNotFound(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	res := get(ts, "/data/"+hash)
+	assert.Equal(t, 404, res.StatusCode)
+	assert.Equal(t, "file not found", errorMessage(res))
+}
+
+func TestGetData(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Name:        "foo",
+		Size:        5,
+		Hash:        hash,
+		ContentType: "foo/bar",
+	}
+
+	post(ts, "/meta", m)
+	postData(ts, "/data/"+hash, "bytes")
+
+	res := get(ts, "/data/"+hash)
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, "foo/bar", res.Header.Get("Content-Type"))
+	assert.Equal(t, hash, res.Header.Get("Etag"))
+	assert.Equal(t, "no-cache", res.Header.Get("Cache-Control"))
+	assert.Equal(t, "inline; filename="+m.Name, res.Header.Get("Content-Disposition"))
+}
+
+func TestGetDataCachedInBrowser(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Name:        "foo",
+		Size:        5,
+		Hash:        hash,
+		ContentType: "foo/bar",
+	}
+
+	post(ts, "/meta", m)
+	postData(ts, "/data/"+hash, "bytes")
+
+	req, _ := http.NewRequest("GET", ts.URL+"/data/"+hash, nil)
+	req.Header.Add("If-None-Match", hash)
+	res, _ := http.DefaultClient.Do(req)
+
+	assert.Equal(t, 304, res.StatusCode)
+}
+
+func TestGetDataUnknwonCachedInBrowser(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	req, _ := http.NewRequest("GET", ts.URL+"/data/"+hash, nil)
+	req.Header.Add("If-None-Match", hash)
+	res, _ := http.DefaultClient.Do(req)
+
+	assert.Equal(t, 404, res.StatusCode)
+	assert.Equal(t, "file not found", errorMessage(res))
+}
