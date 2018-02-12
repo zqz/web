@@ -18,14 +18,18 @@ func TestWriteNoPersistence(t *testing.T) {
 }
 
 func TestReadNoPersistence(t *testing.T) {
-	db := FileDB{}
+	db := FileDB{
+		m: NewMemoryMetaStorage(),
+	}
 
 	err := db.Read("hash", nopWriteCloser{})
 	assert.Equal(t, "no persistence specified", err.Error())
 }
 
 func TestStoreMetaNoStorage(t *testing.T) {
-	db := FileDB{}
+	db := FileDB{
+		p: NewMemoryPersistence(),
+	}
 	m := Meta{}
 
 	err := db.StoreMeta(m)
@@ -35,6 +39,7 @@ func TestStoreMetaNoStorage(t *testing.T) {
 
 func TestStoreMetaNoHash(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 	m := Meta{}
@@ -45,6 +50,7 @@ func TestStoreMetaNoHash(t *testing.T) {
 
 func TestStoreMetaNoSize(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -58,6 +64,7 @@ func TestStoreMetaNoSize(t *testing.T) {
 
 func TestStoreMetaNoName(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -72,6 +79,7 @@ func TestStoreMetaNoName(t *testing.T) {
 
 func TestStoreMeta(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -91,6 +99,7 @@ func TestStoreMeta(t *testing.T) {
 
 func TestStoreMetaCantChangeSize(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -111,7 +120,9 @@ func TestStoreMetaCantChangeSize(t *testing.T) {
 }
 
 func TestFetchMetaNoStorage(t *testing.T) {
-	db := FileDB{}
+	db := FileDB{
+		p: NewMemoryPersistence(),
+	}
 
 	meta, err := db.FetchMeta("hash")
 
@@ -121,6 +132,7 @@ func TestFetchMetaNoStorage(t *testing.T) {
 
 func TestFetchMetaNoHash(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -132,6 +144,7 @@ func TestFetchMetaNoHash(t *testing.T) {
 
 func TestFetchMetaNoMeta(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -143,6 +156,7 @@ func TestFetchMetaNoMeta(t *testing.T) {
 
 func TestFetchMeta(t *testing.T) {
 	db := FileDB{
+		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 

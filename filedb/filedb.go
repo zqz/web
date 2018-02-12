@@ -30,11 +30,8 @@ func NewFileDB(p Persister, m MetaStorer) FileDB {
 }
 
 func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
-	if db.m == nil {
-		return nil, errors.New("no storage specified")
-	}
-	if db.p == nil {
-		return nil, errors.New("no persistence specified")
+	if err := db.validate(); err != nil {
+		return nil, err
 	}
 
 	m, err := db.FetchMeta(hash)
@@ -85,12 +82,8 @@ func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
 }
 
 func (db FileDB) Read(hash string, wc io.Writer) error {
-	if db.p == nil {
-		return errors.New("no persistence specified")
-	}
-
-	if db.m == nil {
-		return errors.New("no storage specified")
+	if err := db.validate(); err != nil {
+		return err
 	}
 
 	reader, err := db.p.Get(hash)
@@ -104,11 +97,19 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 	return err
 }
 
-func (db FileDB) StoreMeta(meta Meta) error {
+func (db FileDB) validate() error {
 	if db.m == nil {
 		return errors.New("no storage specified")
 	}
 
+	if db.p == nil {
+		return errors.New("no persistence specified")
+	}
+
+	return nil
+}
+
+func validateMeta(meta *Meta) error {
 	if meta.Hash == "" {
 		return errors.New("no hash specified")
 	}
@@ -119,6 +120,18 @@ func (db FileDB) StoreMeta(meta Meta) error {
 
 	if meta.Name == "" {
 		return errors.New("no name specified")
+	}
+
+	return nil
+}
+
+func (db FileDB) StoreMeta(meta Meta) error {
+	if err := db.validate(); err != nil {
+		return err
+	}
+
+	if err := validateMeta(&meta); err != nil {
+		return err
 	}
 
 	meta.BytesReceived = 0
@@ -136,8 +149,8 @@ func (db FileDB) StoreMeta(meta Meta) error {
 }
 
 func (db FileDB) FetchMeta(hash string) (*Meta, error) {
-	if db.m == nil {
-		return nil, errors.New("no storage specified")
+	if err := db.validate(); err != nil {
+		return nil, err
 	}
 
 	if hash == "" {
