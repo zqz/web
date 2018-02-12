@@ -7,26 +7,24 @@ import (
 	"io"
 )
 
-// Persister reads and writes data.
-type Persister interface {
+type persister interface {
 	Put(string) (io.WriteCloser, error)
 	Get(string) (io.ReadCloser, error)
 }
 
-// Metastorer reads and writes Meta data.
-type MetaStorer interface {
+type metaStorer interface {
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(Meta) error
 }
 
 // FileDB implements a upload server.
 type FileDB struct {
-	p Persister
-	m MetaStorer
+	p persister
+	m metaStorer
 }
 
 // NewFileDB returns an instance of a FileDB.
-func NewFileDB(p Persister, m MetaStorer) FileDB {
+func NewFileDB(p persister, m metaStorer) FileDB {
 	return FileDB{
 		m: m,
 		p: p,

@@ -13,33 +13,19 @@ import (
 	"github.com/zqz/upl/render"
 )
 
+// Server implements an HTTP File Uploading Server.
 type Server struct {
 	db FileDB
 }
 
+// NewServer returns a new Server.
 func NewServer(db FileDB) Server {
 	return Server{
 		db: db,
 	}
 }
 
-func parseMeta(r io.ReadCloser) (*Meta, error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-
-	defer r.Close()
-
-	m := Meta{}
-	if err = json.Unmarshal(b, &m); err != nil {
-		return nil, err
-	}
-
-	return &m, nil
-}
-
-func (s Server) PostMeta(w http.ResponseWriter, r *http.Request) {
+func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 	var m *Meta
 	var err error
 
@@ -57,7 +43,7 @@ func (s Server) PostMeta(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, m)
 }
 
-func (s Server) GetMeta(w http.ResponseWriter, r *http.Request) {
+func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
 	meta, err := s.db.FetchMeta(hash)
@@ -71,7 +57,7 @@ func (s Server) GetMeta(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, meta)
 }
 
-func (s Server) PostData(w http.ResponseWriter, r *http.Request) {
+func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
 	_, err := s.db.Write(hash, r.Body)
@@ -93,7 +79,7 @@ func (s Server) PostData(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, meta)
 }
 
-func (s Server) Files(w http.ResponseWriter, r *http.Request) {
+func (s Server) files(w http.ResponseWriter, r *http.Request) {
 	// f := make([]File, 0)
 
 	// dbfiles, err := models.Files(con).All()
@@ -140,7 +126,7 @@ func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) FileDownload(w http.ResponseWriter, r *http.Request) {
+func (s Server) fileDownload(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "token")
 
 	meta, err := s.db.FetchMeta(hash)
@@ -156,7 +142,7 @@ func (s Server) FileDownload(w http.ResponseWriter, r *http.Request) {
 	s.download(meta, w, r)
 }
 
-func (s Server) GetData(w http.ResponseWriter, r *http.Request) {
+func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
 	meta, err := s.db.FetchMeta(hash)
@@ -182,14 +168,30 @@ func (s Server) Router() http.Handler {
 		MaxAge:           300,
 	}).Handler)
 
-	r.Get("/files", s.Files)
+	r.Get("/files", s.files)
 	// r.Get("/file/{token}/download", s.FileDownload)
 
-	r.Get("/data/{hash}", s.GetData)
-	r.Post("/data/{hash}", s.PostData)
+	r.Get("/data/{hash}", s.getData)
+	r.Post("/data/{hash}", s.postData)
 
-	r.Post("/meta", s.PostMeta)
-	r.Get("/meta/{hash}", s.GetMeta)
+	r.Post("/meta", s.postMeta)
+	r.Get("/meta/{hash}", s.getMeta)
 
 	return r
+}
+
+func parseMeta(r io.ReadCloser) (*Meta, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+
+	defer r.Close()
+
+	m := Meta{}
+	if err = json.Unmarshal(b, &m); err != nil {
+		return nil, err
+	}
+
+	return &m, nil
 }
