@@ -262,6 +262,36 @@ func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
 	assert.Equal(t, 5, meta.BytesReceived)
 }
 
+func TestReadPartial(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "byt"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	_, err = db.Write(hash, rc)
+	assert.NotNil(t, err) // partial upload
+
+	var b bytes.Buffer
+	wc := nopWriteCloser{&b}
+	err = db.Read(hash, wc)
+
+	assert.Equal(t, "file incomplete", err.Error())
+	assert.Equal(t, "", b.String())
+}
+
 func TestFull(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),

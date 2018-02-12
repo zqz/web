@@ -59,6 +59,15 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 		return err
 	}
 
+	m, err := db.m.FetchMeta(hash)
+	if err != nil {
+		return err
+	}
+
+	if !m.finished() {
+		return errors.New("file incomplete")
+	}
+
 	reader, err := db.p.Get(hash)
 
 	if err != nil {
