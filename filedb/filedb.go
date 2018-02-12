@@ -29,6 +29,53 @@ func NewFileDB(p Persister, m MetaStorer) FileDB {
 	}
 }
 
+func (db FileDB) finish(m *Meta) error {
+	w, err := db.p.Get(m.Hash)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	h, err := calcHash(w)
+	if err != nil {
+		return err
+	}
+
+	if h != m.Hash {
+		return errors.New("hash does not match")
+	}
+
+	return nil
+}
+
+func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
+	if m.finished() {
+		return errors.New("file already uploaded")
+	}
+
+	writer, err := db.p.Put(m.Hash)
+	if err != nil {
+		return err
+	}
+
+	n, _ := io.Copy(writer, rc)
+	m.BytesReceived += int(n)
+
+	if m.finished() {
+		m.Slug = randStr(5)
+	}
+
+	if err := db.m.StoreMeta(*m); err != nil {
+		return err
+	}
+
+	if !m.finished() {
+		return errors.New("got partial data")
+	}
+
+	return nil
+}
+
 func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
@@ -39,43 +86,12 @@ func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
 		return nil, err
 	}
 
-	if m.Size == m.BytesReceived {
-		return m, errors.New("file already uploaded")
+	if err := db.store(m, rc); err != nil {
+		return m, err
 	}
 
-	writer, err := db.p.Put(hash)
-
-	if err != nil {
+	if err := db.finish(m); err != nil {
 		return nil, err
-	}
-
-	n, _ := io.Copy(writer, rc)
-
-	m.BytesReceived += int(n)
-
-	if m.finished() {
-		m.Slug = randStr(5)
-	}
-
-	err = db.m.StoreMeta(*m)
-	if err != nil {
-		return nil, err
-	}
-
-	if !m.finished() {
-		return m, errors.New("got partial data")
-	}
-
-	w, err := db.p.Get(m.Hash)
-	if err != nil {
-		return nil, err
-	}
-	defer w.Close()
-
-	h, err := calcHash(w)
-
-	if h != m.Hash {
-		return nil, errors.New("hash does not match")
 	}
 
 	return m, nil
