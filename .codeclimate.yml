@@ -2,3 +2,17 @@ version: "2"
 exclude_patterns:
   - "models/"
   - "**/*_test*"
+
+plugins:
+  golint:
+    enabled: true
+  csslint:
+    enabled: true
+  eslint:
+    enabled: true
+  gofmt:
+    enabled: true
+  govet:
+    enabled: true
+  markdownlint:
+    enabled: true
