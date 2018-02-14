@@ -22,7 +22,7 @@ class FileItem extends Component {
     });
 
     this.props.filedata.onHash((h) => {
-      this.setState({hash: h.hash});
+      this.setState({hash: h});
     })
 
     this.props.filedata.onProgress((e) => {
@@ -59,7 +59,7 @@ class FileItem extends Component {
 
   start = () => {
     // this.props.filedata.start();
-    this.props.filedata.prepare();
+    this.props.filedata.start();
     this.props.start();
   }
 
@@ -99,11 +99,12 @@ class FileItem extends Component {
       </span>
     )
 
-    if (this.fileDone()) {
+    // if (this.fileDone()) {
 
-    } else if (this.props.filedata.started()) {
+    // } else if (this.props.filedata.started()) {
+    if (this.state.uploadState === 'started') {
       buttons.push(btnStop);
-    } else if (this.props.filedata.isResumable()) {
+    } else if (this.state.uploadState === 'aborted') {
       buttons.push(btnResume);
     } else {
       buttons.push(btnStart);
@@ -131,12 +132,15 @@ class FileItem extends Component {
   }
 
   fileDone = () => {
-    return this.state.loaded === this.props.filedata.size();
+    var meta = this.props.filedata.meta();
+    return this.state.loaded === meta.size;
   }
 
   render() {
-    var name = this.props.filedata.name() + ' ('  + this.state.uploadState + ') ';
-    var perc = this.state.loaded / this.props.filedata.size();
+    var meta = this.props.filedata.meta();
+
+    var name = meta.name + ' ('  + this.state.uploadState + ') ';
+    var perc = this.state.loaded / meta.size;
     var basic = null;
 
     if (this.fileDone()) {
@@ -144,7 +148,7 @@ class FileItem extends Component {
     } else {
       basic =(
         <span className="Percent">
-          <Size bytes={this.state.loaded}/> / <Size bytes={this.props.filedata.size()}/> - <Percent value={perc}/>
+          <Size bytes={this.state.loaded}/> / <Size bytes={meta.size}/> - <Percent value={perc}/>
         </span>
       );
     };

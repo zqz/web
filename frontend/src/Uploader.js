@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import FileData from './File.js';
+import Data from './Data.js';
+import Meta from './Meta.js';
 import UploadQueue from './UploadQueue.js';
 import UploadMenu from './UploadMenu.js';
 import './Uploader.css';
@@ -50,6 +52,14 @@ class Uploader extends Component {
     var filedatas = [];
 
     for(var i = 0; i < files.length; i++) {
+      var b = files[i];
+
+      var file = {
+        data: new Data(b),
+        meta: new Meta(b),
+        hash: null
+      };
+
       var file = new FileData(files[i]);
       filedatas.push(file);
     }

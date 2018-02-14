@@ -13,7 +13,7 @@ class App extends Component {
       <BrowserRouter>
       <div className="App">
         <Header />
-          <div class="Container">
+          <div className="Container">
             <Uploader/>
             <Route exact path="/" component={FileList}/>
             <Route path="/file/:hash" component={FileView}/>

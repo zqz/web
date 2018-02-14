@@ -1,210 +1,99 @@
 // var shajs = require('sha.js')
-import Rusha from 'rusha';
+import Meta from './Meta.js';
+import FetchMeta from './FetchMeta.js';
+import PostMeta from './PostMeta.js';
+import HashData from './HashData.js';
+import PostData from './PostData.js';
 
 class FileData {
-  constructor(file) {
-    this.file = file;
-    this.state = null;
-    this.onProgressCallback = null;
-    this.onStartCallback = null;
-    this.onAbortCallback = null;
-    this.onErrorCallback = null;
-    this.onFinishCallback = null;
-    this.onResponseCallback = null;
-    this.onHashCallback = null;
-    this.onExistsCallback = null;
-    this.xhr = null;
-    // this.token = null;
-    this.bytesPreviouslySent = 0;
-    this.bytesSent = 0;
+  constructor(data) {
+    // this.state = null;
 
+    this._meta = new Meta(data);
+    this._data = data;
     this._key = Math.random().toString(36).substring(7);
+
+    this._fetchMeta = new FetchMeta();
+    this._postMeta = new PostMeta();
+    this._hashData = new HashData(this._key, data);
+    this._postData = new PostData(data);
+
+    this._postMeta.onResponse((r) => {
+      console.log('on post meta: ', r);
+      this._meta.bytesReceived = r.bytes_received;
+      this._postData.post(this._meta.hash, r.bytes_received);
+    });
+
+    this.onExistsCallback = null;
   }
 
-  previouslySent = () => {
-    return this.bytesPreviouslySent;
-  }
-
-  hash = () => {
-    var worker = Rusha.createWorker();
-    worker.onmessage = (e) => {
-      this.file.hash = e.data.hash;
-      this.check();
-      this.onHashCallback(e.data);
-    }
-
-    worker.postMessage({id: this.key(), data: this.file});
+  meta() {
+    return this._meta;
   }
 
   key() {
     return this._key;
   }
 
-  isResumable = () => {
-    return this.bytesPreviouslySent > 0
-  }
-
   onProgress(callback) {
-    this.onProgressCallback = callback;
+    this._postData.onProgress(callback);
   }
 
   onError(callback) {
-    this.onErrorCallback = callback;
+    this._postData.onError(callback);
   }
 
   onStart(callback) {
-    this.onStartCallback = callback;
+    this._postData.onStart(callback);
   }
 
   onAbort(callback) {
-    this.onAbortCallback = callback;
+    this._postData.onAbort(callback);
   }
 
   onLoad(callback) {
-    this.onLoadCallback = callback;
+    this._postData.onLoad(callback);
   }
 
+  onResponse(callback) {
+    this._postData.onResponse(callback);
+  }
+
+  onHash(callback) {
+    this._hashData.onHashComplete((hash) => {
+      this._meta.hash = hash;
+      // this.check();
+      callback(hash)
+    });
+  }
+
+  // not sure
   onExists(callback) {
     this.onExistsCallback = callback;
   }
 
-  onResponse(callback) {
-    this.onResponseCallback = callback;
-  }
-
-  onHash(callback) {
-    this.onHashCallback = callback;
-  }
-
-  blob() {
-    return this.file.blob;
-  }
-
-  started() {
-    return this.state === 'started';
-  }
-
   check() {
-    console.log('checking existing state');
-    var pxhr = new XMLHttpRequest();
-    pxhr.addEventListener('readystatechange', (e) => {
-      if (pxhr.readyState !== 4) {
-        return;
-      }
+    var fm = new FetchMeta(this.meta.hash);
+    fm.onFound((json) => {
 
-      if (pxhr.status !== 200) {
-        return;
-      }
-
-      var text = e.target.responseText;
-      if (text === undefined) {
-        return;
-      }
-
-      var response = JSON.parse(text);
-
-      this.bytesPreviouslySent = response.bytes_received;
-
-      if (this.bytesPreviouslySent === this.file.size) {
-        this.state = 'finished';
-      }
-      this.onExistsCallback(response);
     });
 
-    pxhr.open('GET', 'http://localhost:3001/file/' + this.file.hash, true);
-    pxhr.send();
-  }
-
-  prepare() {
-    var data = {
-      name: this.file.name,
-      hash: this.file.hash,
-      size: this.file.size,
-      type: this.file.type
-    };
-
-    var pxhr = new XMLHttpRequest();
-    pxhr.addEventListener('readystatechange', (e) => {
-      if (pxhr.readyState === 4) {
-        var text = e.target.responseText;
-
-        if (text === undefined) {
-          return;
-        }
-
-        var response = JSON.parse(text);
-        console.log(response);
-        // this.token = response.token;
-        this.bytesPreviouslySent = response.bytes_received;
-        this.start();
-      }
+    fm.onNotFound((json) => {
     });
 
-    pxhr.open('POST', 'http://localhost:3001/data/meta', true);
-    pxhr.send(JSON.stringify(data));
+    fm.fetch();
   }
 
   start() {
-    this.xhr = new XMLHttpRequest();
-    this.xhr.upload.addEventListener('progress', (e) => {
-      this.bytesSent = this.bytesPreviouslySent + e.loaded;
-      this.onProgressCallback({
-        loaded: this.bytesSent,
-        total: this.file.size
-      });
-    });
-
-    this.xhr.upload.addEventListener('load', () => {
-      this.state = 'finished';
-      this.onLoadCallback();
-    });
-
-    this.xhr.addEventListener('readystatechange', (e) => {
-      if (this.xhr.readyState === 4) {
-        var text = e.target.responseText;
-
-        if (text === undefined || text === null || text.length === 0) {
-          return;
-        }
-
-        var data = JSON.parse(text);
-        this.onResponseCallback(data);
-      }
-    });
-
-    this.xhr.upload.addEventListener('error', () => {
-      this.state = 'failed';
-      this.onErrorCallback();
-    });
-
-    this.xhr.upload.addEventListener('abort', () => {
-      this.state = 'stopped';
-      this.onAbortCallback();
-    });
-
-    this.xhr.open('POST', 'http://localhost:3001/data/' + this.file.hash, true);
-    this.xhr.send(this.file.slice(this.bytesPreviouslySent));
-
-    this.state = 'started';
-    this.onStartCallback();
-  }
-
-  currentState() {
-    return this.state;
+    this._postMeta.post(this._meta);
   }
 
   stop() {
-    if (this.state === 'started') {
-      this.xhr.abort();
-    }
+    this._postData.abort();
   }
 
-  size() {
-    return this.file.size;
-  }
-
-  name() {
-    return this.file.name;
+  hash() {
+    this._hashData.hash()
   }
 }
 

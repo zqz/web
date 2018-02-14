@@ -9,6 +9,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/goware/cors"
 	"github.com/zqz/upl/render"
 )
@@ -159,6 +160,7 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 func (s Server) Router() http.Handler {
 	r := chi.NewRouter()
 
+	r.Use(middleware.Logger)
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},

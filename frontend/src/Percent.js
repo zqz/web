@@ -6,7 +6,7 @@ class Percent extends Component {
     var n = '0';
     if (isNaN(v)) {
       n = '0';
-    } else if (v == 0) {
+    } else if (v === 0) {
       n = '0'
     } else if (v >= 1) {
       n = '100'

@@ -17,7 +17,8 @@ class FileList extends Component {
     })
     .then(data => {
       this.setState({ files: data });
-    });
+    })
+    .catch(e => { console.log('error', e); })
   }
 
   render() {
