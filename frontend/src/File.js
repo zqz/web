@@ -4,6 +4,7 @@ import FetchMeta from './FetchMeta.js';
 import PostMeta from './PostMeta.js';
 import HashData from './HashData.js';
 import PostData from './PostData.js';
+import FileSpeed from './FileSpeed.js';
 
 class FileData {
   constructor(data) {
@@ -17,6 +18,7 @@ class FileData {
     this._postMeta = new PostMeta();
     this._hashData = new HashData(this._key, data);
     this._postData = new PostData(data);
+    this._fileSpeed = new FileSpeed();
 
     this._postMeta.onResponse((r) => {
       console.log('on post meta: ', r);
@@ -27,6 +29,10 @@ class FileData {
     this.onExistsCallback = null;
   }
 
+  speed() {
+    return this._fileSpeed.speed();
+  }
+
   meta() {
     return this._meta;
   }
@@ -35,8 +41,22 @@ class FileData {
     return this._key;
   }
 
+  onFound(callback) {
+    this._fetchMeta.onFound((data) => {
+      this._meta.bytesReceived = data.bytes_received;
+      callback(data);
+    });
+  }
+
+  onNotFound(callback) {
+    this._fetchMeta.onNotFound(callback);
+  }
+
   onProgress(callback) {
-    this._postData.onProgress(callback);
+    this._postData.onProgress((data) => {
+      this._fileSpeed.add(data.loaded - this._meta.bytesReceived);
+      callback(data);
+    });
   }
 
   onError(callback) {
@@ -44,7 +64,9 @@ class FileData {
   }
 
   onStart(callback) {
-    this._postData.onStart(callback);
+    this._postData.onStart((d) => {
+      callback(d);
+    });
   }
 
   onAbort(callback) {
@@ -72,20 +94,26 @@ class FileData {
     this.onExistsCallback = callback;
   }
 
-  check() {
-    var fm = new FetchMeta(this.meta.hash);
-    fm.onFound((json) => {
+  check(hash) {
+    this._fetchMeta.fetch(hash);
+    // var fm = new FetchMeta(this.meta.hash);
+    // fm.onFound((json) => {
 
-    });
+    // });
 
-    fm.onNotFound((json) => {
-    });
+    // fm.onNotFound((json) => {
+    // });
 
-    fm.fetch();
+    // fm.fetch();
   }
 
   start() {
-    this._postMeta.post(this._meta);
+    this._filespeed = new FileSpeed();
+    if (this._meta.bytesReceived > 0) {
+      this._postData.post(this._meta.hash, this._meta.bytesReceived);
+    } else {
+      this._postMeta.post(this._meta);
+    }
   }
 
   stop() {

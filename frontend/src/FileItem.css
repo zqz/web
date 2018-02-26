@@ -1,10 +1,35 @@
 .FileItem {
   display: flex;
   justify-content: space-between;
-  flex-direction: column;
+  flex-direction: row;
   padding-bottom: 10px;
   margin-bottom: 10px;
-  border-bottom: solid 1px black;
+  left: -10px;
+  width: calc(100% + 3px);
+  position: relative;
+}
+
+.FileItem .Side {
+  width: 10px;
+  display: block;
+}
+
+.FileItem .Side
+
+.FileItem .Side::before {
+  content: ' ';
+  background-color: red;
+  width: 3px;
+  height: 100%;
+  display: inline-block;
+  border-bottom-left-radius: 3px;
+}
+
+.FileItem .Main {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
 .FileItem:nth-last-child(1) {
@@ -13,34 +38,34 @@
   border-bottom: none;
 }
 
-.FileItem .Top {
+.FileItem .Main .Top {
   display: flex;
   justify-content: space-between;
   flex-direction: row;
 }
 
-.FileItem .Top .Left {
+.FileItem .Main .Top .Left {
   text-align: left;
   flex-grow: 1;
 }
 
-.FileItem .Top .Name {
+.FileItem .Main .Top .Name {
   font-weight: bold;
 }
 
-.FileItem .Top .Percent {
+.FileItem .Main .Top .Percent {
   margin-left: 10px;
 }
 
-.FileItem .Top .Progress {
+.FileItem .Main .Top .Progress {
   font-family: monospace;
 }
 
-.FileItem .Bottom {
+.FileItem .Main .Bottom {
   display: flex;
   justify-content: space-between;
   font-family: monospace;
 }
 
-.FileItem .Bottom .Hash {
+.FileItem .Main .Bottom .Hash {
 }

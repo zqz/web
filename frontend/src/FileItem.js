@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom'
+
 import Size from './Size.js';
 import Percent from './Percent.js';
 import ProgressBar from './ProgressBar.js';
@@ -14,8 +16,21 @@ class FileItem extends Component {
       loaded: 0,
       total: 0,
       response: null,
-      hash: null,
+      hash: null
     };
+
+    this.props.filedata.onFound((data) => {
+      console.log('found');
+      this.setState({
+        loaded: data.bytes_received,
+        total: data.size,
+        response: data
+      });
+    });
+
+    this.props.filedata.onNotFound((data) => {
+      console.log('not found');
+    });
 
     this.props.filedata.onExists((data) => {
       this.setState({loaded: data.bytes_received, total: data.size});
@@ -23,7 +38,8 @@ class FileItem extends Component {
 
     this.props.filedata.onHash((h) => {
       this.setState({hash: h});
-    })
+      this.props.filedata.check(h);
+    });
 
     this.props.filedata.onProgress((e) => {
       this.setState({loaded: e.loaded, total: e.total});
@@ -74,6 +90,17 @@ class FileItem extends Component {
 
   buttons() {
     var buttons = [];
+    var slug = '';
+    var r = this.state.response;
+    if (r !== undefined && r != null) {
+      slug = r.slug;
+    }
+
+    var btnOpen = (
+      <Link to={"/files/" + slug} key='button_open' className="Button">
+      Open
+      </Link>
+    );
 
     var btnStart = (
       <span key='button_start' className="Button" onClick={this.start}>
@@ -106,6 +133,8 @@ class FileItem extends Component {
       buttons.push(btnStop);
     } else if (this.state.uploadState === 'aborted') {
       buttons.push(btnResume);
+    } else if (this.fileDone()) {
+      buttons.push(btnOpen);
     } else {
       buttons.push(btnStart);
     }
@@ -161,25 +190,32 @@ class FileItem extends Component {
 
     var buttons = this.buttons();
     var hash = this.state.hash;
-    var speed = 'unknown MB/s';
+    var speed = '';
 
-    var progressBar = <ProgressBar value={perc}/>;
+    if (!this.fileDone()) {
+      var progressBar = <ProgressBar value={perc}/>;
+      speed = this.props.filedata.speed();
+    }
 
     return (
       <div className="FileItem">
-        <div className="Top">
-          <span className="Left">
-            <span className="Name" onClick={this.onClickName}>{name}</span>
-            <span className="Progress">{progress}</span>
-          </span>
-          <span className="Buttons">
-            {buttons}
-          </span>
+        <div className="Side">
         </div>
-        {progressBar}
-        <div className="Bottom">
-          <span>{hash}</span>
-          <span>{speed}</span>
+        <div className="Main">
+          <div className="Top">
+            <span className="Left">
+              <span className="Name" onClick={this.onClickName}>{name}</span>
+              <span className="Progress">{progress}</span>
+            </span>
+            <span className="Buttons">
+              {buttons}
+            </span>
+          </div>
+          {progressBar}
+          <div className="Bottom">
+            <span>{hash}</span>
+            <span>{speed}</span>
+          </div>
         </div>
       </div>
     );
