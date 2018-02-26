@@ -198,14 +198,13 @@ class FileItem extends Component {
     }
 
     return (
-      <div className="FileItem">
+      <div className={"FileItem " + this.state.uploadState}>
         <div className="Side">
         </div>
         <div className="Main">
           <div className="Top">
             <span className="Left">
               <span className="Name" onClick={this.onClickName}>{name}</span>
-              <span className="Progress">{progress}</span>
             </span>
             <span className="Buttons">
               {buttons}
@@ -214,7 +213,7 @@ class FileItem extends Component {
           {progressBar}
           <div className="Bottom">
             <span>{hash}</span>
-            <span>{speed}</span>
+            <span className="Progress">{speed} {progress}</span>
           </div>
         </div>
       </div>

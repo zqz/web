@@ -1,5 +1,21 @@
 .Header {
-  background-color: grey;
+  background-color: #5B2C6F;
+  line-height: 30px;
+  vertical-align: middle;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05),
+  inset 5px 5px 20px rgba(0, 0, 0, 0.1),
+  inset 0px -1px 1px rgba(0, 0, 0, 0.05),
+  inset 0px 0px 1px rgba(0, 0, 0, 0.2);
+}
+
+.Header .Logo {
+  font-weight: bold;
+  color: white;
+}
+
+.Header a {
+  text-decoration: none;
+  color: white;
 }
 
 .Header .Container {

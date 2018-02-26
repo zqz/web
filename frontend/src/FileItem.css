@@ -2,27 +2,24 @@
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
   left: -10px;
-  width: calc(100% + 3px);
+  width: calc(100% + 20px);
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-right: 10px;
+  padding-left: 10px;
+  margin-bottom: 10px;
   position: relative;
-}
 
-.FileItem .Side {
-  width: 10px;
-  display: block;
-}
+  background-color: rgba(255, 255, 255, 0.3);
+  overflow: hidden;
 
-.FileItem .Side
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1),
+  inset 5px 5px 20px rgba(0, 0, 0, 0.1),
+  inset 0px 0px 1px rgba(0, 0, 0, 0.2);
 
-.FileItem .Side::before {
-  content: ' ';
-  background-color: red;
-  width: 3px;
-  height: 100%;
-  display: inline-block;
-  border-bottom-left-radius: 3px;
+  transition-property: all;
+  transition-duration: 220ms;
 }
 
 .FileItem .Main {
@@ -33,7 +30,6 @@
 }
 
 .FileItem:nth-last-child(1) {
-  padding-bottom: 0;
   margin-bottom: 0;
   border-bottom: none;
 }
@@ -50,22 +46,19 @@
 }
 
 .FileItem .Main .Top .Name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-weight: bold;
+  display: inline-block;
+  vertical-align: top;
 }
 
 .FileItem .Main .Top .Percent {
   margin-left: 10px;
 }
 
-.FileItem .Main .Top .Progress {
-  font-family: monospace;
-}
-
 .FileItem .Main .Bottom {
   display: flex;
   justify-content: space-between;
-  font-family: monospace;
-}
-
-.FileItem .Main .Bottom .Hash {
 }

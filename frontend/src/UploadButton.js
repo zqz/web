@@ -14,9 +14,9 @@ class UploadButton extends Component {
 
   render() {
     return(
-      <div className="UploadButton">
+      <div className="Button UploadButton">
       <div className="Fake" onClick={this.onClick}>
-        BROWSE
+        Browse or drag file onto page
       </div>
       <input
         ref="uploader"

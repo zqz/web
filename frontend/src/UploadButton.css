@@ -1,5 +1,7 @@
 .UploadButton {
-  background-color: red;
+  text-transform: uppercase;
+  left: -10px;
+  position: relative;
 }
 
 .UploadButton .Fake {

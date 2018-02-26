@@ -7,6 +7,7 @@
   text-decoration: none;
   cursor: pointer;
   margin-left: 10px;
+  box-sizing: border-box;
 }
 
 .Buttons .Button:hover {

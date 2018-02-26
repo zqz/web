@@ -1,11 +1,18 @@
 .ProgressBar {
-  background-color: red;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05),
+  inset 5px 5px 20px rgba(0, 0, 0, 0.1),
+  inset 0px -1px 1px rgba(0, 0, 0, 0.05),
+  inset 0px 0px 1px rgba(0, 0, 0, 0.2);
   height: 10px;
   margin: 5px 0;
 }
 
 .ProgressBar .Bar {
-  background-color: blue;
+  transition-property: all;
+  transition-duration: 220ms;
+  box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.1),
+  inset 0px 0px 1px rgba(0, 0, 0, 0.7);
+  background-color: #BB8FCE;
   height: 10px;
   transition: width 200ms;
 }

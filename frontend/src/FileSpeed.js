@@ -16,12 +16,9 @@ class FileSpeed {
 
     if (this.startTime === null) {
       this.startTime = time;
-      console.log("start time:" + this.startTime);
     }
 
     this.entries.push([time, bytes]);
-
-    console.log(this.entries);
   }
 
   speed() {
@@ -46,8 +43,6 @@ class FileSpeed {
       total = b;
       duration = st;
     }
-
-    console.log(total, duration);
 
     return FileSize.ToSize((total * 1024) / duration) + '/s';
   }
