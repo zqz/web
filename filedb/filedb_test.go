@@ -326,3 +326,55 @@ func TestFull(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "bytes", b.String())
 }
+
+func TestListPartial(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "byt"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	db.Write(hash, rc)
+
+	metas, err := db.List(0)
+
+	assert.Equal(t, 0, len(metas))
+}
+
+func TestList(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	str := "bytes"
+	rc := nopReadCloser{bytes.NewBufferString(str)}
+	db.Write(hash, rc)
+
+	metas, err := db.List(0)
+
+	assert.Equal(t, 1, len(metas))
+}

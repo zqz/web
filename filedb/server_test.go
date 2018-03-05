@@ -235,3 +235,47 @@ func TestGetDataUnknwonCachedInBrowser(t *testing.T) {
 	assert.Equal(t, 404, res.StatusCode)
 	assert.Equal(t, "file not found", errorMessage(res))
 }
+
+func TestGetFilesNoFiles(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	req, _ := http.NewRequest("GET", ts.URL+"/files", nil)
+	res, _ := http.DefaultClient.Do(req)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, "[]", string(b))
+}
+
+func TestGetFilesWithFiles(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Name:        "foo",
+		Size:        5,
+		Hash:        hash,
+		ContentType: "foo/bar",
+	}
+
+	post(ts, "/meta", m)
+	postData(ts, "/data/"+hash, "bytes")
+
+	req, _ := http.NewRequest("GET", ts.URL+"/files", nil)
+	res, _ := http.DefaultClient.Do(req)
+
+	b, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	var metas []Meta
+	json.Unmarshal(b, &metas)
+
+	assert.Equal(t, 1, len(metas))
+	assert.Equal(t, "foo", metas[0].Name)
+	assert.NotEmpty(t, "foo", metas[0].Slug)
+}

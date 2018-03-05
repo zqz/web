@@ -16,13 +16,15 @@ import (
 
 // Server implements an HTTP File Uploading Server.
 type Server struct {
-	db FileDB
+	db            FileDB
+	EnableLogging bool
 }
 
 // NewServer returns a new Server.
 func NewServer(db FileDB) Server {
 	return Server{
-		db: db,
+		db:            db,
+		EnableLogging: false,
 	}
 }
 
@@ -81,27 +83,17 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) files(w http.ResponseWriter, r *http.Request) {
-	// f := make([]File, 0)
+	m, err := s.db.List(0)
 
-	// dbfiles, err := models.Files(con).All()
-	// if err != nil {
-	// 	fmt.Println("failed to get all files")
-	// }
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		render.Error(w, "error loading file list")
+		return
+	}
 
-	// for _, df := range dbfiles {
-	// 	file := File{
-	// 		Name:  df.Name,
-	// 		Size:  df.Size,
-	// 		Hash:  df.Hash,
-	// 		Token: df.Token,
-	// 	}
+	b, _ := json.Marshal(&m)
 
-	// 	f = append(f, file)
-	// }
-
-	// b, _ := json.Marshal(&f)
-
-	// w.Write(b)
+	w.Write(b)
 }
 
 func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
@@ -160,7 +152,9 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 func (s Server) Router() http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.Logger)
+	if s.EnableLogging {
+		r.Use(middleware.Logger)
+	}
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},

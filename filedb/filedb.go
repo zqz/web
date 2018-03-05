@@ -15,6 +15,7 @@ type persister interface {
 type metaStorer interface {
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(Meta) error
+	ListPage(int) ([]*Meta, error)
 }
 
 // FileDB implements a upload server.
@@ -29,6 +30,15 @@ func NewFileDB(p persister, m metaStorer) FileDB {
 		m: m,
 		p: p,
 	}
+}
+
+func (db FileDB) List(page int) ([]*Meta, error) {
+	metas, err := db.m.ListPage(page)
+	if err != nil {
+		return nil, err
+	}
+
+	return metas, nil
 }
 
 func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
