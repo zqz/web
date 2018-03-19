@@ -8,9 +8,16 @@
   cursor: pointer;
   margin-left: 10px;
   box-sizing: border-box;
+  padding: 0px 5px;
 }
 
-.Buttons .Button:hover {
+.Button:hover {
   text-decoration: underline;
 }
 
+.Button {
+  background-color: black;
+
+  color: white;
+  font-weight: bold;
+}

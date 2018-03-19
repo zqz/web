@@ -29,14 +29,15 @@ class FetchMeta {
 
       console.log('hi');
       var text = e.target.responseText;
-      if (text === undefined) {
+      if (text === undefined || text === "") {
         return;
       }
+
+      console.log(text)
 
       var response = JSON.parse(text);
 
       if (pxhr.status === 200) {
-
         console.log('found');
         this.onFoundCallback(response);
       }

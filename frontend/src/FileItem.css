@@ -2,21 +2,12 @@
   display: flex;
   justify-content: space-between;
   flex-direction: row;
-  left: -10px;
-  width: calc(100% + 20px);
-  padding-top: 10px;
-  padding-bottom: 10px;
-  padding-right: 10px;
-  padding-left: 10px;
   margin-bottom: 10px;
-  position: relative;
 
-  background-color: rgba(255, 255, 255, 0.3);
-  overflow: hidden;
+  color: #012229;
 
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1),
-  inset 5px 5px 20px rgba(0, 0, 0, 0.1),
-  inset 0px 0px 1px rgba(0, 0, 0, 0.2);
+  border-left: solid 3px black;
+  padding-left: 7px;
 
   transition-property: all;
   transition-duration: 220ms;

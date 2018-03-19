@@ -11,6 +11,7 @@ class Header extends Component {
             zqz.ca
           </Link>
           <div className="Navigation">
+            <Link to="/settings">Settings</Link>
             <Link to="/">Files</Link>
           </div>
         </div>

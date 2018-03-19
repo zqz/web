@@ -1,8 +1,6 @@
 .ProgressBar {
-  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.05),
-  inset 5px 5px 20px rgba(0, 0, 0, 0.1),
-  inset 0px -1px 1px rgba(0, 0, 0, 0.05),
-  inset 0px 0px 1px rgba(0, 0, 0, 0.2);
+border: solid 1px black;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAF0lEQVQImWNggID/DGgAQwAbIKwLLgAA/moE/FwLUTgAAAAASUVORK5CYII=);
   height: 10px;
   margin: 5px 0;
 }
@@ -10,9 +8,7 @@
 .ProgressBar .Bar {
   transition-property: all;
   transition-duration: 220ms;
-  box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.1),
-  inset 0px 0px 1px rgba(0, 0, 0, 0.7);
-  background-color: #BB8FCE;
-  height: 10px;
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAK0lEQVQYV1WMQQoAAAjC5v8fbUgU5XFOBdg2kpgo5IIUqb1Kzz6cmzXvbwFCAhP+QJDg2gAAAABJRU5ErkJggg==);
+  height: 8px;
   transition: width 200ms;
 }

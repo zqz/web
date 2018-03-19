@@ -1,6 +1,4 @@
 .UploadQueue {
-  /* background-color: white; */
-  /* color: black; */
-  /* padding: 10px; */
-  /* border: solid 1px black; */
+  border-top: solid 5px black;
+  padding-top: 10px;
 }

@@ -1,5 +1,9 @@
 .Footer {
-  background-color: grey;
+  background-color: black;
+  color: white;
+  font-weight: bold;
+  padding-top: 30px;
+  padding-bottom: 30px;
 }
 
 .Footer .Container {

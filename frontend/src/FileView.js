@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import FileMissing from './FileMissing';
+import Size from './Size';
+import './FileView.css';
 
 class FileView extends Component {
   constructor(props) {
@@ -11,10 +14,14 @@ class FileView extends Component {
 
   componentDidMount() {
     var fileid = this.props.match.params.hash;
-    console.log(fileid);
-    fetch('http://localhost:3001/file/' + fileid)
+
+    fetch('http://localhost:3001/meta/' + fileid)
     .then(r => {
-      return r.json();
+      if (r.status === 404) {
+        return null;
+      } else {
+        return r.json();
+      }
     })
     .then(data => {
       this.setState({ file: data });
@@ -24,18 +31,20 @@ class FileView extends Component {
   render() {
     var file = this.state.file;
 
-    if (file === null) {
-      return (<div>no file</div>);
+    if (file === null || file === undefined) {
+      return <FileMissing/>;
     }
 
     return(
       <div className="FileView">
-        <div>
-          <strong>{file.name}</strong>
+        <div className="Section">
+          {file.name}
         </div>
-        <div>Size: {file.size}</div>
+        <div>Size: <Size bytes={file.size}/></div>
         <div>Date: {file.date}</div>
-        <a href={"http://localhost:3001/file/" + file.token + '/download'}>download</a>
+        <div>Slug: {file.slug}</div>
+        <div>Hash: {file.hash}</div>
+        <a className="Download Button" href={"http://localhost:3001/d/" + file.slug}>download</a>
       </div>
     );
   }

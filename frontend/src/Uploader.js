@@ -78,7 +78,7 @@ class Uploader extends Component {
     var files = this.state.files;
     for(var i = 0; i < files.length; i++) {
       var file = files[i];
-      file.prepare();
+      file.start();
     }
   }
 
