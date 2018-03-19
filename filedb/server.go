@@ -135,6 +135,20 @@ func (s Server) fileDownload(w http.ResponseWriter, r *http.Request) {
 	s.download(meta, w, r)
 }
 
+func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+
+	meta, err := s.db.FetchMetaWithSlug(slug)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		render.Error(w, err.Error())
+		return
+	}
+
+	s.download(meta, w, r)
+}
+
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
@@ -168,6 +182,7 @@ func (s Server) Router() http.Handler {
 	// r.Get("/file/{token}/download", s.FileDownload)
 
 	r.Get("/data/{hash}", s.getData)
+	r.Get("/d/{slug}", s.getDataWithSlug)
 	r.Post("/data/{hash}", s.postData)
 
 	r.Post("/meta", s.postMeta)

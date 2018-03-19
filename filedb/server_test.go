@@ -175,6 +175,35 @@ func TestGetDataNotFound(t *testing.T) {
 	assert.Equal(t, "file not found", errorMessage(res))
 }
 
+func TestGetDataWithSlug(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Name:        "foo",
+		Size:        5,
+		Hash:        hash,
+		ContentType: "foo/bar",
+	}
+
+	post(ts, "/meta", m)
+	postData(ts, "/data/"+hash, "bytes")
+
+	res := get(ts, "/meta/"+hash)
+	b, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	json.Unmarshal(b, &m)
+
+	res = get(ts, "/d/"+m.Slug)
+	assert.Equal(t, 200, res.StatusCode)
+	assert.Equal(t, "foo/bar", res.Header.Get("Content-Type"))
+	assert.Equal(t, hash, res.Header.Get("Etag"))
+	assert.Equal(t, "no-cache", res.Header.Get("Cache-Control"))
+	assert.Equal(t, "inline; filename="+m.Name, res.Header.Get("Content-Disposition"))
+}
+
 func TestGetData(t *testing.T) {
 	ts := testServer()
 	defer ts.Close()
