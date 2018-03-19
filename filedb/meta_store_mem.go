@@ -1,9 +1,13 @@
 package filedb
 
-import "errors"
+import (
+	"errors"
+	"sync"
+)
 
 type MemoryMetaStorage struct {
-	entries map[string]*Meta
+	entries      map[string]*Meta
+	entriesMutex sync.Mutex
 }
 
 func (m MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
@@ -43,7 +47,10 @@ func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
 	// 	if ok {
 	// 		return errors.New("file already exists")
 	// 	}
+
+	m.entriesMutex.Lock()
 	m.entries[meta.Hash] = &meta
+	m.entriesMutex.Unlock()
 
 	return nil
 }
