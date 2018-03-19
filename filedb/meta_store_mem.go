@@ -41,6 +41,16 @@ func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
 	return meta, nil
 }
 
+func (m MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
+	for _, e := range m.entries {
+		if e.Slug == slug {
+			return e, nil
+		}
+	}
+
+	return nil, errors.New("file not found")
+}
+
 func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
 	// m.entries[meta.Hash]
 

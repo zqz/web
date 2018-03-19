@@ -206,6 +206,32 @@ func TestWriteSuccess(t *testing.T) {
 	assert.Equal(t, hash, meta.Hash)
 }
 
+func TestFetchMetaWithSlug(t *testing.T) {
+	db := FileDB{
+		p: NewMemoryPersistence(),
+		m: NewMemoryMetaStorage(),
+	}
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Hash: hash,
+		Size: 5,
+		Name: "foobar",
+		Slug: "doo",
+	}
+
+	err := db.StoreMeta(m)
+	assert.Nil(t, err)
+
+	meta, err := db.FetchMetaWithSlug("doo")
+
+	assert.Nil(t, err)
+	assert.Equal(t, 5, meta.Size)
+	assert.Equal(t, "foobar", meta.Name)
+	assert.Equal(t, hash, meta.Hash)
+}
+
 func TestReturnErrorOnBadHash(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),

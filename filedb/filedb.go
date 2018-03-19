@@ -13,6 +13,7 @@ type persister interface {
 }
 
 type metaStorer interface {
+	FetchMetaWithSlug(string) (*Meta, error)
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(Meta) error
 	ListPage(int) ([]*Meta, error)
@@ -120,6 +121,18 @@ func (db FileDB) FetchMeta(hash string) (*Meta, error) {
 	}
 
 	return db.m.FetchMeta(hash)
+}
+
+func (db FileDB) FetchMetaWithSlug(slug string) (*Meta, error) {
+	if err := db.validate(); err != nil {
+		return nil, err
+	}
+
+	if slug == "" {
+		return nil, errors.New("no slug specified")
+	}
+
+	return db.m.FetchMetaWithSlug(slug)
 }
 
 func (db FileDB) validate() error {
