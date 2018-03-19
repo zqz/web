@@ -1,0 +1,50 @@
+input[type=checkbox] {
+  appearance: none;
+}
+
+.Checkbox-Container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.Checkbox-Container .Label {
+  width: 150px;
+  border-right: solid 3px black;
+  margin-right: 10px;
+}
+
+.Checkbox-Container .Help {
+  text-align: right;
+  flex-grow: 1;
+}
+
+.Checkbox {
+  background-color: white;
+  border: solid 1px black;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.Checkbox .Inside {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAF0lEQVQImWNggID/DGgAQwAbIKwLLgAA/moE/FwLUTgAAAAASUVORK5CYII=);
+  width: 10px;
+  height: 10px;
+}
+
+.Checkbox:hover .Inside {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAK0lEQVQYV1WMQQoAAAjC5v8fbUgU5XFOBdg2kpgo5IIUqb1Kzz6cmzXvbwFCAhP+QJDg2gAAAABJRU5ErkJggg==);
+}
+
+.Checkbox.Active:hover .Inside {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAF0lEQVQImWNggID/DGgAQwAbIKwLLgAA/moE/FwLUTgAAAAASUVORK5CYII=);
+}
+
+.Checkbox.Active .Inside {
+  background-color: black;
+}

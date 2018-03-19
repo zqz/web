@@ -45,5 +45,7 @@ func main() {
 		),
 	)
 
+	s.EnableLogging = true
+
 	http.ListenAndServe(":3001", s.Router())
 }
