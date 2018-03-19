@@ -3,6 +3,11 @@
   position: relative;
 }
 
+.UploadButton.Full {
+  width: 100%;
+  text-align: center;
+}
+
 .UploadButton .Fake {
   cursor: pointer;
 }

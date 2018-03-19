@@ -13,18 +13,22 @@ class UploadButton extends Component {
   }
 
   render() {
+    var classes="Button UploadButton";
+    if (this.props.full) {
+      classes += " Full"
+    }
     return(
-      <div className="Button UploadButton">
-      <div className="Fake" onClick={this.onClick}>
-        Browse or drag file onto page
-      </div>
-      <input
-        ref="uploader"
-        className="Real"
-        type="file"
-        onChange={this.props.onChange}
-        multiple
-      />
+      <div className={classes}>
+        <div className="Fake" onClick={this.onClick}>
+          {this.props.label}
+        </div>
+        <input
+          ref="uploader"
+          className="Real"
+          type="file"
+          onChange={this.props.onChange}
+          multiple
+        />
       </div>
     )
   }

@@ -34,9 +34,9 @@ class Uploader extends Component {
     var tstFile = new Blob(['Foobar'], {type: 'text/plain'});
     tstFile.name = 'Example File';
 
-    this.addFiles([
-      tstFile
-    ]);
+    // this.addFiles([
+    //   tstFile
+    // ]);
   }
 
   componentDidMount() {
@@ -151,6 +151,7 @@ class Uploader extends Component {
     return (
       <div className="Uploader">
         <UploadMenu
+          files={this.state.files.length}
           onChange={this.onChange}
           startAll={this.startAll}
           stopAll={this.stopAll}

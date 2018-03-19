@@ -42,11 +42,7 @@ class UploadQueue extends Component {
     var files = this.props.files;
 
     if (files.length === 0) {
-      return(
-        <div className="UploadQueue">
-          <div>no file selected</div>
-        </div>
-      );
+      return <div/>;
     }
 
     var fileItems = [];
