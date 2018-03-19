@@ -4,6 +4,24 @@
   padding: 5px 10px;
   text-decoration: none;
   text-transform: uppercase;
-  font-size: 2em;
 }
 
+.FileView .Content {
+  display: flex;
+  flex-direction: row;
+}
+
+.FileView .Content .Left {
+  width: 50%;
+}
+
+.FileView .Content .Right {
+  text-align: right;
+  flex-grow:1;
+  width: 50%;
+}
+
+.FileView .Content .Right .Link {
+  padding-left: 5px;
+  border-left: solid 3px black;
+}

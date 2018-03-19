@@ -40,11 +40,18 @@ class FileView extends Component {
         <div className="Section">
           {file.name}
         </div>
-        <div>Size: <Size bytes={file.size}/></div>
-        <div>Date: {file.date}</div>
-        <div>Slug: {file.slug}</div>
-        <div>Hash: {file.hash}</div>
-        <a className="Download Button" href={"http://localhost:3001/d/" + file.slug}>download</a>
+        <div className="Content">
+          <div className="Left">
+            <div>Size: <Size bytes={file.size}/></div>
+            <div>Date: {file.date}</div>
+            <div>Slug: {file.slug}</div>
+            <div>Hash: {file.hash}</div>
+            <a className="Download Button" href={"http://localhost:3001/d/" + file.slug}>download</a>
+          </div>
+          <div className="Right">
+            <span className="Link">https://zqz.ca/d/{file.slug}</span>
+          </div>
+        </div>
       </div>
     );
   }
