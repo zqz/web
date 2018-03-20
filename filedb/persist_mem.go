@@ -43,12 +43,12 @@ func (m MemoryPersistence) Put(hash string) (io.WriteCloser, error) {
 func (m MemoryPersistence) Get(hash string) (io.ReadCloser, error) {
 	b, ok := m.entries[hash]
 
-	data := b.Bytes()
-	buf := bytes.NewBuffer(data)
-
 	if !ok {
 		return nil, errors.New("no file with hash: " + hash)
 	}
+
+	data := b.Bytes()
+	buf := bytes.NewBuffer(data)
 
 	return nopReadCloser{buf}, nil
 }

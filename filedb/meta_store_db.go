@@ -18,19 +18,24 @@ type DBMetaStorage struct {
 
 func file2meta(f *models.File) *Meta {
 	return &Meta{
-		Name: f.Name,
-		Size: f.Size,
-		Slug: f.Slug,
-		Hash: f.Hash,
+		Name:          f.Name,
+		Size:          f.Size,
+		BytesReceived: f.Size,
+		Slug:          f.Slug,
+		Hash:          f.Hash,
+		ContentType:   f.ContentType,
+		Date:          f.CreatedAt.Time,
 	}
 }
 
 func meta2file(m *Meta) *models.File {
 	return &models.File{
-		Name: m.Name,
-		Size: m.Size,
-		Slug: m.Slug,
-		Hash: m.Hash,
+		Name:        m.Name,
+		Alias:       m.Name,
+		Size:        m.Size,
+		Slug:        m.Slug,
+		Hash:        m.Hash,
+		ContentType: m.ContentType,
 	}
 }
 
