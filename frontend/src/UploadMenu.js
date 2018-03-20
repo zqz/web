@@ -5,7 +5,7 @@ import './Buttons.css';
 
 class UploadMenu extends Component {
   render() {
-    if (this.props.files == 0) {
+    if (this.props.files === 0) {
       return(
         <div className="UploadMenu">
           <UploadButton full={true} label="Click here to upload a file or drag a file onto the page" onChange={this.props.onChange}/>

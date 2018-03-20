@@ -5,7 +5,7 @@ class Checkbox extends Component {
   render() {
     var classes = ['Checkbox'];
 
-    if (this.props.checked == true) {
+    if (this.props.checked === true) {
       classes.push('Active');
     }
 
