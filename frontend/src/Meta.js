@@ -26,33 +26,6 @@ class Meta {
       bytesReceived: this.bytesReceived
     }
   }
-
-  data() {
-    return JSON.stringify(this.meta.obj());
-  }
-
-  post() {
-    var pxhr = new XMLHttpRequest();
-
-    pxhr.addEventListener('readystatechange', (e) => {
-      if (pxhr.readyState !== 4) {
-        return
-      }
-
-      var text = e.target.responseText;
-
-      if (text === undefined) {
-        return;
-      }
-
-      var response = JSON.parse(text);
-
-      this._callback(response);
-    });
-
-    pxhr.open('POST', Config.root() + '/data/meta', true);
-    pxhr.send(this.data());
-  }
 }
 
 export default Meta;

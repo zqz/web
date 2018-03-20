@@ -8,8 +8,6 @@ import FileSpeed from './FileSpeed.js';
 
 class FileData {
   constructor(data) {
-    // this.state = null;
-
     this._meta = new Meta(data);
     this._data = data;
     this._key = Math.random().toString(36).substring(7);
@@ -96,15 +94,6 @@ class FileData {
 
   check(hash) {
     this._fetchMeta.fetch(hash);
-    // var fm = new FetchMeta(this.meta.hash);
-    // fm.onFound((json) => {
-
-    // });
-
-    // fm.onNotFound((json) => {
-    // });
-
-    // fm.fetch();
   }
 
   start() {
