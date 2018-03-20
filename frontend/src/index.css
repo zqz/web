@@ -49,18 +49,18 @@ body {
   height: 16px;
   display: inline;
   font-weight: bold;
-font-family: monospace;
-font-size: 10px;
+  font-family: monospace;
+  font-size: 10px;
 }
 
 input:focus,
 select:focus,
 textarea:focus,
 button:focus {
-    outline: none;
+  outline: none;
 }
 
 [contenteditable="true"]:focus {
-    outline: none;
+  outline: none;
 }
 

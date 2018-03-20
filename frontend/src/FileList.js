@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
 
 import Size from './Size';
+import Config from './Config';
 import './FileList2.css';
 
 class Search extends Component {
@@ -18,7 +19,7 @@ class FileList extends Component {
   };
 
   componentWillMount() {
-    fetch('http://localhost:3001/files')
+    fetch(Config.root() + '/files')
     .then(r => {
       return r.json();
     })

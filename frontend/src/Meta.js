@@ -1,3 +1,5 @@
+import Config from './Config';
+
 class Meta {
   constructor(meta) {
     this.alias = meta.alias;
@@ -48,7 +50,7 @@ class Meta {
       this._callback(response);
     });
 
-    pxhr.open('POST', 'http://localhost:3001/data/meta', true);
+    pxhr.open('POST', Config.root() + '/data/meta', true);
     pxhr.send(this.data());
   }
 }

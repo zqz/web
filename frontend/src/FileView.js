@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import FileMissing from './FileMissing';
 import Size from './Size';
+import Config from './Config';
 import './FileView.css';
 
 class FileView extends Component {
@@ -13,9 +14,9 @@ class FileView extends Component {
   }
 
   componentDidMount() {
-    var fileid = this.props.match.params.hash;
+    var hash = this.props.match.params.hash;
 
-    fetch('http://localhost:3001/meta/' + fileid)
+    fetch(Config.root() + '/meta/' + hash)
     .then(r => {
       if (r.status === 404) {
         return null;
@@ -35,6 +36,8 @@ class FileView extends Component {
       return <FileMissing/>;
     }
 
+    var dlurl = Config.root() + "/d/" + file.slug;
+
     return(
       <div className="FileView">
         <div className="Section">
@@ -46,10 +49,10 @@ class FileView extends Component {
             <div>Date: {file.date}</div>
             <div>Slug: {file.slug}</div>
             <div>Hash: {file.hash}</div>
-            <a className="Download Button" href={"http://localhost:3001/d/" + file.slug}>download</a>
+            <a className="Download Button" href={dlurl}>download</a>
           </div>
           <div className="Right">
-            <span className="Link">https://zqz.ca/d/{file.slug}</span>
+            <span className="Link">{dlurl}</span>
           </div>
         </div>
       </div>

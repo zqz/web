@@ -1,3 +1,5 @@
+import Config from './Config';
+
 class PostData {
   constructor(data) {
     this.onProgressCallback = null;
@@ -81,7 +83,7 @@ class PostData {
       this.onAbortCallback();
     });
 
-    this.xhr.open('POST', 'http://localhost:3001/data/' + hash, true);
+    this.xhr.open('POST', Config.root() + '/data/' + hash, true);
     this.xhr.send(this.data.slice(offset));
     this.onStartCallback();
   }

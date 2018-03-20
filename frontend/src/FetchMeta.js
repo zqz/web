@@ -1,3 +1,5 @@
+import Config from './Config';
+
 class FetchMeta {
   constructor() {
     this.onFoundCallback = null;
@@ -48,7 +50,7 @@ class FetchMeta {
       }
     });
 
-    pxhr.open('GET', 'http://localhost:3001/meta/' + hash, true);
+    pxhr.open('GET', Config.root() + '/meta/' + hash, true);
     pxhr.send();
   }
 }

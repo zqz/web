@@ -1,3 +1,5 @@
+import Config from './Config';
+
 class PostMeta {
   constructor() {
     this.onResponseCallback = null;
@@ -42,7 +44,7 @@ class PostMeta {
     });
 
     var data = JSON.stringify(meta.obj());
-    pxhr.open('POST', 'http://localhost:3001/meta', true);
+    pxhr.open('POST', Config.root() + '/meta', true);
     pxhr.send(data);
   }
 }
