@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom'
 
 import Size from './Size';
-import './FileList.css';
+import './FileList2.css';
 
 class Search extends Component {
   render() {
@@ -52,12 +52,10 @@ class FileList extends Component {
 
       files.push(
         <Link className="File" to={"/file/" + file.hash} alt={file.name}>
-          <div>
-            <div className="Name">
-            {file.name}
-            </div>
-            <span><Size bytes={file.size}/></span>
+          <div className="Name">
+          {file.name}
           </div>
+          <span><Size bytes={file.size}/></span>
         </Link>
       );
     }

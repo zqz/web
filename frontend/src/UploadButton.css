@@ -3,8 +3,9 @@
   position: relative;
 }
 
-.UploadButton.Full {
+.UploadButton.Full.Button {
   width: 100%;
+  padding: 10px 10px;
   text-align: center;
 }
 

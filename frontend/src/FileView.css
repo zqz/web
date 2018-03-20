@@ -12,13 +12,13 @@
 }
 
 .FileView .Content .Left {
-  width: 50%;
+  width: 70%;
 }
 
 .FileView .Content .Right {
   text-align: right;
   flex-grow:1;
-  width: 50%;
+  width: 30%;
 }
 
 .FileView .Content .Right .Link {
