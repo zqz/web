@@ -532,7 +532,7 @@ func testFilesSelect(t *testing.T) {
 }
 
 var (
-	fileDBTypes = map[string]string{`Alias`: `text`, `ContentType`: `text`, `CreatedAt`: `timestamp without time zone`, `Hash`: `text`, `ID`: `uuid`, `Name`: `text`, `Size`: `integer`, `Token`: `text`, `UpdatedAt`: `timestamp without time zone`}
+	fileDBTypes = map[string]string{`Alias`: `text`, `ContentType`: `text`, `CreatedAt`: `timestamp without time zone`, `Hash`: `text`, `ID`: `integer`, `Name`: `text`, `Size`: `integer`, `Slug`: `text`, `UpdatedAt`: `timestamp without time zone`}
 	_           = bytes.MinRead
 )
 

@@ -22,12 +22,12 @@ import (
 
 // File is an object representing the database table.
 type File struct {
-	ID          string    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Token       string    `boil:"token" json:"token" toml:"token" yaml:"token"`
+	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Size        int       `boil:"size" json:"size" toml:"size" yaml:"size"`
 	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Alias       string    `boil:"alias" json:"alias" toml:"alias" yaml:"alias"`
 	Hash        string    `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
+	Slug        string    `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
 	ContentType string    `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	CreatedAt   null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
 	UpdatedAt   null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
@@ -38,21 +38,21 @@ type File struct {
 
 var FileColumns = struct {
 	ID          string
-	Token       string
 	Size        string
 	Name        string
 	Alias       string
 	Hash        string
+	Slug        string
 	ContentType string
 	CreatedAt   string
 	UpdatedAt   string
 }{
 	ID:          "id",
-	Token:       "token",
 	Size:        "size",
 	Name:        "name",
 	Alias:       "alias",
 	Hash:        "hash",
+	Slug:        "slug",
 	ContentType: "content_type",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
@@ -66,8 +66,8 @@ type fileR struct {
 type fileL struct{}
 
 var (
-	fileColumns               = []string{"id", "token", "size", "name", "alias", "hash", "content_type", "created_at", "updated_at"}
-	fileColumnsWithoutDefault = []string{"token", "size", "name", "alias", "hash", "content_type", "created_at", "updated_at"}
+	fileColumns               = []string{"id", "size", "name", "alias", "hash", "slug", "content_type", "created_at", "updated_at"}
+	fileColumnsWithoutDefault = []string{"size", "name", "alias", "hash", "slug", "content_type", "created_at", "updated_at"}
 	fileColumnsWithDefault    = []string{"id"}
 	filePrimaryKeyColumns     = []string{"id"}
 )
@@ -360,12 +360,12 @@ func Files(exec boil.Executor, mods ...qm.QueryMod) fileQuery {
 }
 
 // FindFileG retrieves a single record by ID.
-func FindFileG(id string, selectCols ...string) (*File, error) {
+func FindFileG(id int, selectCols ...string) (*File, error) {
 	return FindFile(boil.GetDB(), id, selectCols...)
 }
 
 // FindFileGP retrieves a single record by ID, and panics on error.
-func FindFileGP(id string, selectCols ...string) *File {
+func FindFileGP(id int, selectCols ...string) *File {
 	retobj, err := FindFile(boil.GetDB(), id, selectCols...)
 	if err != nil {
 		panic(boil.WrapErr(err))
@@ -376,7 +376,7 @@ func FindFileGP(id string, selectCols ...string) *File {
 
 // FindFile retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindFile(exec boil.Executor, id string, selectCols ...string) (*File, error) {
+func FindFile(exec boil.Executor, id int, selectCols ...string) (*File, error) {
 	fileObj := &File{}
 
 	sel := "*"
@@ -401,7 +401,7 @@ func FindFile(exec boil.Executor, id string, selectCols ...string) (*File, error
 }
 
 // FindFileP retrieves a single record by ID with an executor, and panics on error.
-func FindFileP(exec boil.Executor, id string, selectCols ...string) *File {
+func FindFileP(exec boil.Executor, id int, selectCols ...string) *File {
 	retobj, err := FindFile(exec, id, selectCols...)
 	if err != nil {
 		panic(boil.WrapErr(err))
@@ -1086,7 +1086,7 @@ func (o *FileSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // FileExists checks if the File row exists.
-func FileExists(exec boil.Executor, id string) (bool, error) {
+func FileExists(exec boil.Executor, id int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from \"files\" where \"id\"=$1 limit 1)"
 
@@ -1106,12 +1106,12 @@ func FileExists(exec boil.Executor, id string) (bool, error) {
 }
 
 // FileExistsG checks if the File row exists.
-func FileExistsG(id string) (bool, error) {
+func FileExistsG(id int) (bool, error) {
 	return FileExists(boil.GetDB(), id)
 }
 
 // FileExistsGP checks if the File row exists. Panics on error.
-func FileExistsGP(id string) bool {
+func FileExistsGP(id int) bool {
 	e, err := FileExists(boil.GetDB(), id)
 	if err != nil {
 		panic(boil.WrapErr(err))
@@ -1121,7 +1121,7 @@ func FileExistsGP(id string) bool {
 }
 
 // FileExistsP checks if the File row exists. Panics on error.
-func FileExistsP(exec boil.Executor, id string) bool {
+func FileExistsP(exec boil.Executor, id int) bool {
 	e, err := FileExists(exec, id)
 	if err != nil {
 		panic(boil.WrapErr(err))
