@@ -50,7 +50,7 @@ func main() {
 
 	s := filedb.NewServer(
 		filedb.NewFileDB(
-			filedb.NewMemoryPersistence(),
+			filedb.NewDiskPersistence(),
 			filedb.NewDBMetaStorage(db),
 		),
 	)
