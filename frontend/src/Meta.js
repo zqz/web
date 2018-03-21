@@ -1,5 +1,3 @@
-import Config from './Config';
-
 class Meta {
   constructor(meta) {
     this.alias = meta.alias;
