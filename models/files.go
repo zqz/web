@@ -60,6 +60,7 @@ var FileColumns = struct {
 
 // fileR is where relationships are stored.
 type fileR struct {
+	Thumbnails ThumbnailSlice
 }
 
 // fileL is where Load methods for each relationship are stored.
@@ -346,6 +347,325 @@ func (q fileQuery) Exists() (bool, error) {
 	}
 
 	return count > 0, nil
+}
+
+// ThumbnailsG retrieves all the thumbnail's thumbnails.
+func (o *File) ThumbnailsG(mods ...qm.QueryMod) thumbnailQuery {
+	return o.Thumbnails(boil.GetDB(), mods...)
+}
+
+// Thumbnails retrieves all the thumbnail's thumbnails with an executor.
+func (o *File) Thumbnails(exec boil.Executor, mods ...qm.QueryMod) thumbnailQuery {
+	var queryMods []qm.QueryMod
+	if len(mods) != 0 {
+		queryMods = append(queryMods, mods...)
+	}
+
+	queryMods = append(queryMods,
+		qm.Where("\"thumbnails\".\"file_id\"=?", o.ID),
+	)
+
+	query := Thumbnails(exec, queryMods...)
+	queries.SetFrom(query.Query, "\"thumbnails\"")
+
+	if len(queries.GetSelect(query.Query)) == 0 {
+		queries.SetSelect(query.Query, []string{"\"thumbnails\".*"})
+	}
+
+	return query
+}
+
+// LoadThumbnails allows an eager lookup of values, cached into the
+// loaded structs of the objects.
+func (fileL) LoadThumbnails(e boil.Executor, singular bool, maybeFile interface{}) error {
+	var slice []*File
+	var object *File
+
+	count := 1
+	if singular {
+		object = maybeFile.(*File)
+	} else {
+		slice = *maybeFile.(*[]*File)
+		count = len(slice)
+	}
+
+	args := make([]interface{}, count)
+	if singular {
+		if object.R == nil {
+			object.R = &fileR{}
+		}
+		args[0] = object.ID
+	} else {
+		for i, obj := range slice {
+			if obj.R == nil {
+				obj.R = &fileR{}
+			}
+			args[i] = obj.ID
+		}
+	}
+
+	query := fmt.Sprintf(
+		"select * from \"thumbnails\" where \"file_id\" in (%s)",
+		strmangle.Placeholders(dialect.IndexPlaceholders, count, 1, 1),
+	)
+	if boil.DebugMode {
+		fmt.Fprintf(boil.DebugWriter, "%s\n%v\n", query, args)
+	}
+
+	results, err := e.Query(query, args...)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load thumbnails")
+	}
+	defer results.Close()
+
+	var resultSlice []*Thumbnail
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice thumbnails")
+	}
+
+	if len(thumbnailAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(e); err != nil {
+				return err
+			}
+		}
+	}
+	if singular {
+		object.R.Thumbnails = resultSlice
+		return nil
+	}
+
+	for _, foreign := range resultSlice {
+		for _, local := range slice {
+			if local.ID == foreign.FileID.Int {
+				local.R.Thumbnails = append(local.R.Thumbnails, foreign)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddThumbnailsG adds the given related objects to the existing relationships
+// of the file, optionally inserting them as new records.
+// Appends related to o.R.Thumbnails.
+// Sets related.R.File appropriately.
+// Uses the global database handle.
+func (o *File) AddThumbnailsG(insert bool, related ...*Thumbnail) error {
+	return o.AddThumbnails(boil.GetDB(), insert, related...)
+}
+
+// AddThumbnailsP adds the given related objects to the existing relationships
+// of the file, optionally inserting them as new records.
+// Appends related to o.R.Thumbnails.
+// Sets related.R.File appropriately.
+// Panics on error.
+func (o *File) AddThumbnailsP(exec boil.Executor, insert bool, related ...*Thumbnail) {
+	if err := o.AddThumbnails(exec, insert, related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// AddThumbnailsGP adds the given related objects to the existing relationships
+// of the file, optionally inserting them as new records.
+// Appends related to o.R.Thumbnails.
+// Sets related.R.File appropriately.
+// Uses the global database handle and panics on error.
+func (o *File) AddThumbnailsGP(insert bool, related ...*Thumbnail) {
+	if err := o.AddThumbnails(boil.GetDB(), insert, related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// AddThumbnails adds the given related objects to the existing relationships
+// of the file, optionally inserting them as new records.
+// Appends related to o.R.Thumbnails.
+// Sets related.R.File appropriately.
+func (o *File) AddThumbnails(exec boil.Executor, insert bool, related ...*Thumbnail) error {
+	var err error
+	for _, rel := range related {
+		if insert {
+			rel.FileID.Int = o.ID
+			rel.FileID.Valid = true
+			if err = rel.Insert(exec); err != nil {
+				return errors.Wrap(err, "failed to insert into foreign table")
+			}
+		} else {
+			updateQuery := fmt.Sprintf(
+				"UPDATE \"thumbnails\" SET %s WHERE %s",
+				strmangle.SetParamNames("\"", "\"", 1, []string{"file_id"}),
+				strmangle.WhereClause("\"", "\"", 2, thumbnailPrimaryKeyColumns),
+			)
+			values := []interface{}{o.ID, rel.ID}
+
+			if boil.DebugMode {
+				fmt.Fprintln(boil.DebugWriter, updateQuery)
+				fmt.Fprintln(boil.DebugWriter, values)
+			}
+
+			if _, err = exec.Exec(updateQuery, values...); err != nil {
+				return errors.Wrap(err, "failed to update foreign table")
+			}
+
+			rel.FileID.Int = o.ID
+			rel.FileID.Valid = true
+		}
+	}
+
+	if o.R == nil {
+		o.R = &fileR{
+			Thumbnails: related,
+		}
+	} else {
+		o.R.Thumbnails = append(o.R.Thumbnails, related...)
+	}
+
+	for _, rel := range related {
+		if rel.R == nil {
+			rel.R = &thumbnailR{
+				File: o,
+			}
+		} else {
+			rel.R.File = o
+		}
+	}
+	return nil
+}
+
+// SetThumbnailsG removes all previously related items of the
+// file replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.File's Thumbnails accordingly.
+// Replaces o.R.Thumbnails with related.
+// Sets related.R.File's Thumbnails accordingly.
+// Uses the global database handle.
+func (o *File) SetThumbnailsG(insert bool, related ...*Thumbnail) error {
+	return o.SetThumbnails(boil.GetDB(), insert, related...)
+}
+
+// SetThumbnailsP removes all previously related items of the
+// file replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.File's Thumbnails accordingly.
+// Replaces o.R.Thumbnails with related.
+// Sets related.R.File's Thumbnails accordingly.
+// Panics on error.
+func (o *File) SetThumbnailsP(exec boil.Executor, insert bool, related ...*Thumbnail) {
+	if err := o.SetThumbnails(exec, insert, related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// SetThumbnailsGP removes all previously related items of the
+// file replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.File's Thumbnails accordingly.
+// Replaces o.R.Thumbnails with related.
+// Sets related.R.File's Thumbnails accordingly.
+// Uses the global database handle and panics on error.
+func (o *File) SetThumbnailsGP(insert bool, related ...*Thumbnail) {
+	if err := o.SetThumbnails(boil.GetDB(), insert, related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// SetThumbnails removes all previously related items of the
+// file replacing them completely with the passed
+// in related items, optionally inserting them as new records.
+// Sets o.R.File's Thumbnails accordingly.
+// Replaces o.R.Thumbnails with related.
+// Sets related.R.File's Thumbnails accordingly.
+func (o *File) SetThumbnails(exec boil.Executor, insert bool, related ...*Thumbnail) error {
+	query := "update \"thumbnails\" set \"file_id\" = null where \"file_id\" = $1"
+	values := []interface{}{o.ID}
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, query)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+
+	_, err := exec.Exec(query, values...)
+	if err != nil {
+		return errors.Wrap(err, "failed to remove relationships before set")
+	}
+
+	if o.R != nil {
+		for _, rel := range o.R.Thumbnails {
+			rel.FileID.Valid = false
+			if rel.R == nil {
+				continue
+			}
+
+			rel.R.File = nil
+		}
+
+		o.R.Thumbnails = nil
+	}
+	return o.AddThumbnails(exec, insert, related...)
+}
+
+// RemoveThumbnailsG relationships from objects passed in.
+// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
+// Sets related.R.File.
+// Uses the global database handle.
+func (o *File) RemoveThumbnailsG(related ...*Thumbnail) error {
+	return o.RemoveThumbnails(boil.GetDB(), related...)
+}
+
+// RemoveThumbnailsP relationships from objects passed in.
+// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
+// Sets related.R.File.
+// Panics on error.
+func (o *File) RemoveThumbnailsP(exec boil.Executor, related ...*Thumbnail) {
+	if err := o.RemoveThumbnails(exec, related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// RemoveThumbnailsGP relationships from objects passed in.
+// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
+// Sets related.R.File.
+// Uses the global database handle and panics on error.
+func (o *File) RemoveThumbnailsGP(related ...*Thumbnail) {
+	if err := o.RemoveThumbnails(boil.GetDB(), related...); err != nil {
+		panic(boil.WrapErr(err))
+	}
+}
+
+// RemoveThumbnails relationships from objects passed in.
+// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
+// Sets related.R.File.
+func (o *File) RemoveThumbnails(exec boil.Executor, related ...*Thumbnail) error {
+	var err error
+	for _, rel := range related {
+		rel.FileID.Valid = false
+		if rel.R != nil {
+			rel.R.File = nil
+		}
+		if err = rel.Update(exec, "file_id"); err != nil {
+			return err
+		}
+	}
+	if o.R == nil {
+		return nil
+	}
+
+	for _, rel := range related {
+		for i, ri := range o.R.Thumbnails {
+			if rel != ri {
+				continue
+			}
+
+			ln := len(o.R.Thumbnails)
+			if ln > 1 && i < ln-1 {
+				o.R.Thumbnails[i] = o.R.Thumbnails[ln-1]
+			}
+			o.R.Thumbnails = o.R.Thumbnails[:ln-1]
+			break
+		}
+	}
+
+	return nil
 }
 
 // FilesG retrieves all records.

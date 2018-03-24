@@ -4,7 +4,9 @@
 package models
 
 var TableNames = struct {
-	Files string
+	Files      string
+	Thumbnails string
 }{
-	Files: "files",
+	Files:      "files",
+	Thumbnails: "thumbnails",
 }

@@ -13,56 +13,71 @@ import "testing"
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
 	t.Run("Files", testFiles)
+	t.Run("Thumbnails", testThumbnails)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Files", testFilesDelete)
+	t.Run("Thumbnails", testThumbnailsDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Files", testFilesQueryDeleteAll)
+	t.Run("Thumbnails", testThumbnailsQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Files", testFilesSliceDeleteAll)
+	t.Run("Thumbnails", testThumbnailsSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Files", testFilesExists)
+	t.Run("Thumbnails", testThumbnailsExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Files", testFilesFind)
+	t.Run("Thumbnails", testThumbnailsFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Files", testFilesBind)
+	t.Run("Thumbnails", testThumbnailsBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Files", testFilesOne)
+	t.Run("Thumbnails", testThumbnailsOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Files", testFilesAll)
+	t.Run("Thumbnails", testThumbnailsAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Files", testFilesCount)
+	t.Run("Thumbnails", testThumbnailsCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Files", testFilesHooks)
+	t.Run("Thumbnails", testThumbnailsHooks)
 }
 
 func TestInsert(t *testing.T) {
 	t.Run("Files", testFilesInsert)
 	t.Run("Files", testFilesInsertWhitelist)
+	t.Run("Thumbnails", testThumbnailsInsert)
+	t.Run("Thumbnails", testThumbnailsInsertWhitelist)
 }
 
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOne(t *testing.T) {}
+func TestToOne(t *testing.T) {
+	t.Run("ThumbnailToFileUsingFile", testThumbnailToOneFileUsingFile)
+}
 
 // TestOneToOne tests cannot be run in parallel
 // or deadlocks can occur.
@@ -70,15 +85,21 @@ func TestOneToOne(t *testing.T) {}
 
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToMany(t *testing.T) {}
+func TestToMany(t *testing.T) {
+	t.Run("FileToThumbnails", testFileToManyThumbnails)
+}
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneSet(t *testing.T) {}
+func TestToOneSet(t *testing.T) {
+	t.Run("ThumbnailToFileUsingFile", testThumbnailToOneSetOpFileUsingFile)
+}
 
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneRemove(t *testing.T) {}
+func TestToOneRemove(t *testing.T) {
+	t.Run("ThumbnailToFileUsingFile", testThumbnailToOneRemoveOpFileUsingFile)
+}
 
 // TestOneToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
@@ -90,36 +111,48 @@ func TestOneToOneRemove(t *testing.T) {}
 
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyAdd(t *testing.T) {}
+func TestToManyAdd(t *testing.T) {
+	t.Run("FileToThumbnails", testFileToManyAddOpThumbnails)
+}
 
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManySet(t *testing.T) {}
+func TestToManySet(t *testing.T) {
+	t.Run("FileToThumbnails", testFileToManySetOpThumbnails)
+}
 
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyRemove(t *testing.T) {}
+func TestToManyRemove(t *testing.T) {
+	t.Run("FileToThumbnails", testFileToManyRemoveOpThumbnails)
+}
 
 func TestReload(t *testing.T) {
 	t.Run("Files", testFilesReload)
+	t.Run("Thumbnails", testThumbnailsReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Files", testFilesReloadAll)
+	t.Run("Thumbnails", testThumbnailsReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Files", testFilesSelect)
+	t.Run("Thumbnails", testThumbnailsSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Files", testFilesUpdate)
+	t.Run("Thumbnails", testThumbnailsUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Files", testFilesSliceUpdateAll)
+	t.Run("Thumbnails", testThumbnailsSliceUpdateAll)
 }
 
 func TestUpsert(t *testing.T) {
 	t.Run("Files", testFilesUpsert)
+	t.Run("Thumbnails", testThumbnailsUpsert)
 }
