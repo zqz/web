@@ -1,6 +1,7 @@
 package filedb
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"errors"
 	"fmt"
@@ -16,6 +17,7 @@ type metaStorer interface {
 	FetchMetaWithSlug(string) (*Meta, error)
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(Meta) error
+	StoreThumbnail(Thumbnail) error
 	ListPage(int) ([]*Meta, error)
 }
 
@@ -86,6 +88,27 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 	_, err = io.Copy(wc, reader)
 
 	return err
+}
+
+func (db FileDB) StoreThumbnail(t Thumbnail) error {
+	if err := db.validate(); err != nil {
+		return err
+	}
+
+	err := db.m.StoreThumbnail(t)
+	if err != nil {
+		fmt.Println("failed to upload thumb", err.Error())
+		return err
+	}
+
+	w, err := db.p.Put(t.Hash)
+
+	_, err = io.Copy(w, t.Data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (db FileDB) StoreMeta(meta Meta) error {
@@ -179,7 +202,41 @@ func (db FileDB) finish(m *Meta) error {
 		return errors.New("hash does not match")
 	}
 
+	err = db.process(m)
+	if err != nil {
+		fmt.Println("error processing:", err)
+	}
+
 	return nil
+}
+
+type bufSeeker struct {
+	*bytes.Buffer
+}
+
+func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
+	return 0, nil
+}
+
+func (db FileDB) genThumbnail(h string) error {
+	b := new(bytes.Buffer)
+	err := db.Read(h, b)
+	if err != nil {
+		return err
+	}
+
+	t, err := GenThumbnail(b, h)
+	if err != nil {
+		return err
+	}
+
+	db.StoreThumbnail(t)
+
+	return nil
+}
+
+func (db FileDB) process(m *Meta) error {
+	return db.genThumbnail(m.Hash)
 }
 
 func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
@@ -213,7 +270,8 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 func calcHash(src io.Reader) (string, error) {
 	h := sha1.New()
 
-	if _, err := io.Copy(h, src); err != nil {
+	if n, err := io.Copy(h, src); err != nil {
+		fmt.Println("read", n, "bytes when hashing")
 		return "", err
 	}
 

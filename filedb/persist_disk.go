@@ -11,6 +11,10 @@ type DiskPersistence struct {
 var fileFlags int = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 var fileMode os.FileMode = 0600
 
+func init() {
+	os.MkdirAll(path(""), 0744)
+}
+
 func path(hash string) string {
 	return "/tmp/zqz/" + hash
 }

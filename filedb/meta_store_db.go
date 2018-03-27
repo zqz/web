@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/zqz/upl/models"
+	"gopkg.in/volatiletech/null.v6"
 )
 
 type DBMetaStorage struct {
@@ -16,8 +18,8 @@ type DBMetaStorage struct {
 	db           *sql.DB
 }
 
-func file2meta(f *models.File) *Meta {
-	return &Meta{
+func file2meta(f *models.File) Meta {
+	m := Meta{
 		Name:          f.Name,
 		Size:          f.Size,
 		BytesReceived: f.Size,
@@ -26,6 +28,8 @@ func file2meta(f *models.File) *Meta {
 		ContentType:   f.ContentType,
 		Date:          f.CreatedAt.Time,
 	}
+
+	return m
 }
 
 func meta2file(m *Meta) *models.File {
@@ -39,20 +43,76 @@ func meta2file(m *Meta) *models.File {
 	}
 }
 
+const paginationSQL = `
+	SELECT
+	t.hash, f.hash, f.name, f.slug, f.created_at, f.size
+	FROM files AS f
+	LEFT JOIN thumbnails as t
+	ON t.file_id = f.id
+	ORDER BY f.created_at DESC
+	OFFSET $1
+	LIMIT $2
+`
+
 func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
-	metas := make([]*Meta, 0)
+	entries := make([]*Meta, 0)
+	var rows *sql.Rows
+	var err error
 
-	files, err := models.Files(m.db, qm.Limit(10)).All()
+	var perPage int = 10
+	offset := perPage * page
 
-	if err != nil {
-		return nil, err
+	if rows, err = m.db.Query(paginationSQL, offset, perPage); err != nil {
+		return entries, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+
+		var e struct {
+			Thumbnail null.String
+			Name      null.String
+			Hash      null.String
+			Slug      null.String
+			Date      null.Time
+			Size      int
+		}
+
+		err = rows.Scan(
+			&e.Thumbnail, &e.Hash, &e.Name, &e.Slug, &e.Date, &e.Size,
+		)
+
+		if err != nil {
+			fmt.Println("err", err.Error())
+		}
+
+		x := Meta{}
+		if e.Thumbnail.Valid {
+			x.Thumbnail = e.Thumbnail.String
+		}
+
+		if e.Hash.Valid {
+			x.Hash = e.Hash.String
+		}
+
+		if e.Name.Valid {
+			x.Name = e.Name.String
+		}
+
+		if e.Slug.Valid {
+			x.Slug = e.Slug.String
+		}
+
+		x.Size = e.Size
+
+		entries = append(entries, &x)
 	}
 
-	for _, f := range files {
-		metas = append(metas, file2meta(f))
+	if err = rows.Err(); err != nil {
+		log.Fatal(err)
 	}
 
-	return metas, nil
+	return entries, err
 }
 
 func NewDBMetaStorage(db *sql.DB) DBMetaStorage {
@@ -62,38 +122,45 @@ func NewDBMetaStorage(db *sql.DB) DBMetaStorage {
 	}
 }
 
-func (m DBMetaStorage) fetchMetaFromDBWithHash(hash string) (*Meta, error) {
+func (m DBMetaStorage) fetchMetaFromDBWithHash(hash string) (Meta, error) {
 	f, err := models.Files(m.db, qm.Where("hash=?", hash)).One()
+
 	if err != nil {
-		return nil, err
+		return Meta{}, err
 	}
 
 	return file2meta(f), nil
 }
 
-func (m DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (*Meta, error) {
+func (m DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 	f, err := models.Files(m.db, qm.Where("slug=?", slug)).One()
 	if err != nil {
-		return nil, err
+		return Meta{}, err
 	}
 
 	return file2meta(f), nil
 }
 
 func (m DBMetaStorage) FetchMeta(hash string) (*Meta, error) {
+	m.entriesMutex.Lock()
 	meta, ok := m.entries[hash]
+	m.entriesMutex.Unlock()
 
 	if ok {
 		return meta, nil
 	}
 
-	meta, err := m.fetchMetaFromDBWithHash(hash)
+	meta2, err := m.fetchMetaFromDBWithHash(hash)
 	if err != nil {
 		return nil, errors.New("file not found")
 	}
 
+	if len(meta2.Hash) == 0 {
+		panic("what")
+	}
+
 	m.entriesMutex.Lock()
-	m.entries[meta.Hash] = meta
+	m.entries[meta2.Hash] = &meta2
 	m.entriesMutex.Unlock()
 
 	return meta, nil
@@ -106,10 +173,33 @@ func (m DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	}
 
 	m.entriesMutex.Lock()
-	m.entries[meta.Hash] = meta
+	m.entries[meta.Hash] = &meta
 	m.entriesMutex.Unlock()
 
-	return meta, nil
+	return &meta, nil
+}
+
+func (m DBMetaStorage) StoreThumbnail(t Thumbnail) error {
+	fmt.Println("looking for", t.MetaHash)
+	f, err := models.Files(m.db, qm.Where("hash=?", t.MetaHash)).One()
+
+	if err != nil {
+		fmt.Println("error fetching file", err.Error())
+		return err
+	}
+
+	tn := models.Thumbnail{
+		FileID: null.IntFrom(f.ID),
+		Hash:   t.Hash,
+	}
+
+	err = tn.Insert(m.db)
+	if err != nil {
+		fmt.Println("error", err.Error())
+		return err
+	}
+
+	return nil
 }
 
 func (m DBMetaStorage) StoreMeta(meta Meta) error {

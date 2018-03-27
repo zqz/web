@@ -6,6 +6,9 @@ import (
 )
 
 type MemoryMetaStorage struct {
+	thumbnails      map[string]*Thumbnail
+	thumbnailsMutex sync.Mutex
+
 	entries      map[string]*Meta
 	entriesMutex sync.Mutex
 }
@@ -27,7 +30,8 @@ func (m MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 
 func NewMemoryMetaStorage() MemoryMetaStorage {
 	return MemoryMetaStorage{
-		entries: make(map[string]*Meta, 0),
+		thumbnails: make(map[string]*Thumbnail, 0),
+		entries:    make(map[string]*Meta, 0),
 	}
 }
 
@@ -49,6 +53,14 @@ func (m MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	}
 
 	return nil, errors.New("file not found")
+}
+
+func (m MemoryMetaStorage) StoreThumbnail(t Thumbnail) error {
+	m.thumbnailsMutex.Lock()
+	m.thumbnails[t.MetaHash] = &t
+	m.thumbnailsMutex.Unlock()
+
+	return nil
 }
 
 func (m MemoryMetaStorage) StoreMeta(meta Meta) error {

@@ -2,6 +2,7 @@ package filedb
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -87,6 +88,7 @@ func (s Server) files(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("err", err.Error())
 		render.Error(w, "error loading file list")
 		return
 	}
