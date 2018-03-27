@@ -63,6 +63,14 @@ func (m MemoryMetaStorage) StoreThumbnail(t Thumbnail) error {
 	return nil
 }
 
+func (m MemoryMetaStorage) ThumbnailExists(h string) (bool, error) {
+	m.thumbnailsMutex.Lock()
+	_, exists := m.thumbnails[h]
+	m.thumbnailsMutex.Unlock()
+
+	return exists, nil
+}
+
 func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
 	// m.entries[meta.Hash]
 

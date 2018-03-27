@@ -151,6 +151,35 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 	s.download(meta, w, r)
 }
 
+func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
+	hash := chi.URLParam(r, "hash")
+
+	ok, err := s.db.m.ThumbnailExists(hash)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err.Error())
+		return
+	}
+
+	if !ok {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	rr, err := s.db.p.Get(hash)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err.Error())
+		return
+	}
+
+	io.Copy(w, rr)
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
@@ -171,6 +200,7 @@ func (s Server) Router() http.Handler {
 	if s.EnableLogging {
 		r.Use(middleware.Logger)
 	}
+
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
@@ -187,7 +217,10 @@ func (s Server) Router() http.Handler {
 	r.Get("/d/{slug}", s.getDataWithSlug)
 	r.Post("/data/{hash}", s.postData)
 
+	r.Get("/thumbnail/{hash}", s.getThumbnail)
+
 	r.Post("/meta", s.postMeta)
+	r.Get("/meta/{hash}", s.getMeta)
 	r.Get("/meta/{hash}", s.getMeta)
 
 	return r

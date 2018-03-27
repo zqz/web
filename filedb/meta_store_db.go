@@ -59,7 +59,7 @@ func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 	var rows *sql.Rows
 	var err error
 
-	var perPage int = 10
+	var perPage int = 50
 	offset := perPage * page
 
 	if rows, err = m.db.Query(paginationSQL, offset, perPage); err != nil {
@@ -142,9 +142,7 @@ func (m DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 }
 
 func (m DBMetaStorage) FetchMeta(hash string) (*Meta, error) {
-	m.entriesMutex.Lock()
 	meta, ok := m.entries[hash]
-	m.entriesMutex.Unlock()
 
 	if ok {
 		return meta, nil
@@ -155,15 +153,11 @@ func (m DBMetaStorage) FetchMeta(hash string) (*Meta, error) {
 		return nil, errors.New("file not found")
 	}
 
-	if len(meta2.Hash) == 0 {
-		panic("what")
-	}
-
 	m.entriesMutex.Lock()
 	m.entries[meta2.Hash] = &meta2
 	m.entriesMutex.Unlock()
 
-	return meta, nil
+	return &meta2, nil
 }
 
 func (m DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
@@ -200,6 +194,16 @@ func (m DBMetaStorage) StoreThumbnail(t Thumbnail) error {
 	}
 
 	return nil
+}
+
+func (m DBMetaStorage) ThumbnailExists(h string) (bool, error) {
+	_, err := models.Thumbnails(m.db, qm.Where("hash=?", h)).One()
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (m DBMetaStorage) StoreMeta(meta Meta) error {

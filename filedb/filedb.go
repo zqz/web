@@ -18,6 +18,7 @@ type metaStorer interface {
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(Meta) error
 	StoreThumbnail(Thumbnail) error
+	ThumbnailExists(string) (bool, error)
 	ListPage(int) ([]*Meta, error)
 }
 
@@ -103,12 +104,7 @@ func (db FileDB) StoreThumbnail(t Thumbnail) error {
 
 	w, err := db.p.Put(t.Hash)
 
-	_, err = io.Copy(w, t.Data)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return io.Copy(w, t.Data)
 }
 
 func (db FileDB) StoreMeta(meta Meta) error {
