@@ -52,6 +52,7 @@ func main() {
 		filedb.NewFileDB(
 			filedb.NewDiskPersistence(),
 			filedb.NewDBMetaStorage(db),
+			filedb.NewDBThumbnailStorage(db),
 		),
 	)
 

@@ -29,6 +29,13 @@ func NewMemoryPersistence() MemoryPersistence {
 	}
 }
 
+func (m MemoryPersistence) Del(hash string) error {
+	if _, ok := m.entries[hash]; ok {
+		return m.Del(hash)
+	}
+	return nil
+}
+
 func (m MemoryPersistence) Put(hash string) (io.WriteCloser, error) {
 	b, ok := m.entries[hash]
 

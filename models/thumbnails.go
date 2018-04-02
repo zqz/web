@@ -23,7 +23,7 @@ import (
 // Thumbnail is an object representing the database table.
 type Thumbnail struct {
 	ID        int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	FileID    null.Int  `boil:"file_id" json:"file_id,omitempty" toml:"file_id" yaml:"file_id,omitempty"`
+	FileID    int       `boil:"file_id" json:"file_id" toml:"file_id" yaml:"file_id"`
 	Width     int       `boil:"width" json:"width" toml:"width" yaml:"width"`
 	Height    int       `boil:"height" json:"height" toml:"height" yaml:"height"`
 	Hash      string    `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
@@ -425,7 +425,7 @@ func (thumbnailL) LoadFile(e boil.Executor, singular bool, maybeThumbnail interf
 
 	for _, local := range slice {
 		for _, foreign := range resultSlice {
-			if local.FileID.Int == foreign.ID {
+			if local.FileID == foreign.ID {
 				local.R.File = foreign
 				break
 			}
@@ -490,8 +490,7 @@ func (o *Thumbnail) SetFile(exec boil.Executor, insert bool, related *File) erro
 		return errors.Wrap(err, "failed to update local table")
 	}
 
-	o.FileID.Int = related.ID
-	o.FileID.Valid = true
+	o.FileID = related.ID
 
 	if o.R == nil {
 		o.R = &thumbnailR{
@@ -509,66 +508,6 @@ func (o *Thumbnail) SetFile(exec boil.Executor, insert bool, related *File) erro
 		related.R.Thumbnails = append(related.R.Thumbnails, o)
 	}
 
-	return nil
-}
-
-// RemoveFileG relationship.
-// Sets o.R.File to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-// Uses the global database handle.
-func (o *Thumbnail) RemoveFileG(related *File) error {
-	return o.RemoveFile(boil.GetDB(), related)
-}
-
-// RemoveFileP relationship.
-// Sets o.R.File to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-// Panics on error.
-func (o *Thumbnail) RemoveFileP(exec boil.Executor, related *File) {
-	if err := o.RemoveFile(exec, related); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// RemoveFileGP relationship.
-// Sets o.R.File to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-// Uses the global database handle and panics on error.
-func (o *Thumbnail) RemoveFileGP(related *File) {
-	if err := o.RemoveFile(boil.GetDB(), related); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// RemoveFile relationship.
-// Sets o.R.File to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Thumbnail) RemoveFile(exec boil.Executor, related *File) error {
-	var err error
-
-	o.FileID.Valid = false
-	if err = o.Update(exec, "file_id"); err != nil {
-		o.FileID.Valid = true
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.File = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Thumbnails {
-		if o.FileID.Int != ri.FileID.Int {
-			continue
-		}
-
-		ln := len(related.R.Thumbnails)
-		if ln > 1 && i < ln-1 {
-			related.R.Thumbnails[i] = related.R.Thumbnails[ln-1]
-		}
-		related.R.Thumbnails = related.R.Thumbnails[:ln-1]
-		break
-	}
 	return nil
 }
 

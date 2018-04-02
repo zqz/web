@@ -15,6 +15,7 @@ func testServer() *httptest.Server {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
+		t: NewMemoryThumbnailStorage(),
 	}
 
 	s := Server{

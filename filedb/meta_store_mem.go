@@ -6,9 +6,6 @@ import (
 )
 
 type MemoryMetaStorage struct {
-	thumbnails      map[string]*Thumbnail
-	thumbnailsMutex sync.Mutex
-
 	entries      map[string]*Meta
 	entriesMutex sync.Mutex
 }
@@ -30,8 +27,7 @@ func (m MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 
 func NewMemoryMetaStorage() MemoryMetaStorage {
 	return MemoryMetaStorage{
-		thumbnails: make(map[string]*Thumbnail, 0),
-		entries:    make(map[string]*Meta, 0),
+		entries: make(map[string]*Meta, 0),
 	}
 }
 
@@ -55,32 +51,24 @@ func (m MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	return nil, errors.New("file not found")
 }
 
-func (m MemoryMetaStorage) StoreThumbnail(t Thumbnail) error {
-	m.thumbnailsMutex.Lock()
-	m.thumbnails[t.MetaHash] = &t
-	m.thumbnailsMutex.Unlock()
+func (s MemoryMetaStorage) StoreMeta(m *Meta) error {
+	s.entriesMutex.Lock()
+	s.entries[m.Hash] = m
+	s.entriesMutex.Unlock()
+
+	if m.ID == 0 {
+		m.ID = nextId()
+	}
 
 	return nil
 }
 
-func (m MemoryMetaStorage) ThumbnailExists(h string) (bool, error) {
-	m.thumbnailsMutex.Lock()
-	_, exists := m.thumbnails[h]
-	m.thumbnailsMutex.Unlock()
+var idMutex sync.Mutex
+var currentId int
 
-	return exists, nil
-}
-
-func (m MemoryMetaStorage) StoreMeta(meta Meta) error {
-	// m.entries[meta.Hash]
-
-	// 	if ok {
-	// 		return errors.New("file already exists")
-	// 	}
-
-	m.entriesMutex.Lock()
-	m.entries[meta.Hash] = &meta
-	m.entriesMutex.Unlock()
-
-	return nil
+func nextId() int {
+	idMutex.Lock()
+	currentId++
+	idMutex.Unlock()
+	return currentId
 }

@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import FileMissing from './FileMissing';
 import Size from './Size';
 import Config from './Config';
+import Preview from './Preview';
 import './FileView.css';
 
 class FileView extends Component {
@@ -43,6 +44,9 @@ class FileView extends Component {
         <div className="Section">
           {file.name}
         </div>
+          <div className="Preview">
+            <Preview file={file}/>
+          </div>
         <div className="Content">
           <div className="Left">
             <div>Size: <Size bytes={file.size}/></div>

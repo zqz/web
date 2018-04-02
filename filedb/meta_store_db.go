@@ -45,10 +45,8 @@ func meta2file(m *Meta) *models.File {
 
 const paginationSQL = `
 	SELECT
-	t.hash, f.hash, f.name, f.slug, f.created_at, f.size
+	f.id, f.hash, f.name, f.slug, f.created_at, f.size
 	FROM files AS f
-	LEFT JOIN thumbnails as t
-	ON t.file_id = f.id
 	ORDER BY f.created_at DESC
 	OFFSET $1
 	LIMIT $2
@@ -68,18 +66,17 @@ func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-
 		var e struct {
-			Thumbnail null.String
-			Name      null.String
-			Hash      null.String
-			Slug      null.String
-			Date      null.Time
-			Size      int
+			ID   int
+			Name null.String
+			Hash null.String
+			Slug null.String
+			Date null.Time
+			Size int
 		}
 
 		err = rows.Scan(
-			&e.Thumbnail, &e.Hash, &e.Name, &e.Slug, &e.Date, &e.Size,
+			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.Date, &e.Size,
 		)
 
 		if err != nil {
@@ -87,9 +84,8 @@ func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 		}
 
 		x := Meta{}
-		if e.Thumbnail.Valid {
-			x.Thumbnail = e.Thumbnail.String
-		}
+
+		x.ID = e.ID
 
 		if e.Hash.Valid {
 			x.Hash = e.Hash.String
@@ -173,51 +169,19 @@ func (m DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	return &meta, nil
 }
 
-func (m DBMetaStorage) StoreThumbnail(t Thumbnail) error {
-	fmt.Println("looking for", t.MetaHash)
-	f, err := models.Files(m.db, qm.Where("hash=?", t.MetaHash)).One()
+func (s DBMetaStorage) StoreMeta(m *Meta) error {
+	s.entriesMutex.Lock()
+	s.entries[m.Hash] = m
+	s.entriesMutex.Unlock()
 
-	if err != nil {
-		fmt.Println("error fetching file", err.Error())
-		return err
-	}
-
-	tn := models.Thumbnail{
-		FileID: null.IntFrom(f.ID),
-		Hash:   t.Hash,
-	}
-
-	err = tn.Insert(m.db)
-	if err != nil {
-		fmt.Println("error", err.Error())
-		return err
-	}
-
-	return nil
-}
-
-func (m DBMetaStorage) ThumbnailExists(h string) (bool, error) {
-	_, err := models.Thumbnails(m.db, qm.Where("hash=?", h)).One()
-
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (m DBMetaStorage) StoreMeta(meta Meta) error {
-	m.entriesMutex.Lock()
-	m.entries[meta.Hash] = &meta
-	m.entriesMutex.Unlock()
-
-	if meta.finished() {
-		f := meta2file(&meta)
-		err := f.Insert(m.db)
-		if err != nil {
+	if m.finished() {
+		f := meta2file(m)
+		if err := f.Insert(s.db); err != nil {
 			fmt.Println("error", err.Error())
 			return err
 		}
+
+		m.ID = f.ID
 	}
 
 	return nil

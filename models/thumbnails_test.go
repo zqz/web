@@ -470,20 +470,18 @@ func testThumbnailToOneFileUsingFile(t *testing.T) {
 	var foreign File
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, thumbnailDBTypes, true, thumbnailColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, thumbnailDBTypes, false, thumbnailColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Thumbnail struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, fileDBTypes, false, fileColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize File struct: %s", err)
 	}
 
-	local.FileID.Valid = true
-
 	if err := foreign.Insert(tx); err != nil {
 		t.Fatal(err)
 	}
 
-	local.FileID.Int = foreign.ID
+	local.FileID = foreign.ID
 	if err := local.Insert(tx); err != nil {
 		t.Fatal(err)
 	}
@@ -554,73 +552,22 @@ func testThumbnailToOneSetOpFileUsingFile(t *testing.T) {
 		if x.R.Thumbnails[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.FileID.Int != x.ID {
-			t.Error("foreign key was wrong value", a.FileID.Int)
+		if a.FileID != x.ID {
+			t.Error("foreign key was wrong value", a.FileID)
 		}
 
-		zero := reflect.Zero(reflect.TypeOf(a.FileID.Int))
-		reflect.Indirect(reflect.ValueOf(&a.FileID.Int)).Set(zero)
+		zero := reflect.Zero(reflect.TypeOf(a.FileID))
+		reflect.Indirect(reflect.ValueOf(&a.FileID)).Set(zero)
 
 		if err = a.Reload(tx); err != nil {
 			t.Fatal("failed to reload", err)
 		}
 
-		if a.FileID.Int != x.ID {
-			t.Error("foreign key was wrong value", a.FileID.Int, x.ID)
+		if a.FileID != x.ID {
+			t.Error("foreign key was wrong value", a.FileID, x.ID)
 		}
 	}
 }
-
-func testThumbnailToOneRemoveOpFileUsingFile(t *testing.T) {
-	var err error
-
-	tx := MustTx(boil.Begin())
-	defer tx.Rollback()
-
-	var a Thumbnail
-	var b File
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, thumbnailDBTypes, false, strmangle.SetComplement(thumbnailPrimaryKeyColumns, thumbnailColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, fileDBTypes, false, strmangle.SetComplement(filePrimaryKeyColumns, fileColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(tx); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetFile(tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveFile(tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.File(tx).Count()
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.File != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if a.FileID.Valid {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Thumbnails) != 0 {
-		t.Error("failed to remove a from b's relationships")
-	}
-}
-
 func testThumbnailsReload(t *testing.T) {
 	t.Parallel()
 

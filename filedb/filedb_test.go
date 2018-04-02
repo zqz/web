@@ -93,6 +93,7 @@ func TestStoreMeta(t *testing.T) {
 	assert.Nil(t, err)
 
 	testMeta, err := db.FetchMeta("foo")
+	m.ID = testMeta.ID // not sure what id would be in the test
 
 	assert.Equal(t, &m, testMeta)
 }
@@ -357,6 +358,7 @@ func TestListPartial(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
+		t: NewMemoryThumbnailStorage(),
 	}
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
@@ -383,6 +385,7 @@ func TestList(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
+		t: NewMemoryThumbnailStorage(),
 	}
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"

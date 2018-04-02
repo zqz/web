@@ -152,32 +152,32 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
-	hash := chi.URLParam(r, "hash")
+	// hash := chi.URLParam(r, "hash")
 
-	ok, err := s.db.m.ThumbnailExists(hash)
+	// ok, err := s.db.m.ThumbnailExists(hash)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
 
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
+	// if !ok {
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	return
+	// }
 
-	rr, err := s.db.p.Get(hash)
+	// rr, err := s.db.p.Get(hash)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
 
-	io.Copy(w, rr)
+	// io.Copy(w, rr)
 
-	w.WriteHeader(http.StatusOK)
+	// w.WriteHeader(http.StatusOK)
 }
 
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {

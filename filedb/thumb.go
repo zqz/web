@@ -2,6 +2,7 @@ package filedb
 
 import (
 	"bytes"
+	"image"
 	"io"
 
 	"github.com/bakape/thumbnailer"
@@ -10,23 +11,22 @@ import (
 )
 
 type Thumbnail struct {
-	MetaHash string
-	Hash     string
-	Width    int
-	Height   int
-	Size     int
+	MetaID int
+	Hash   string
+	Width  int
+	Height int
+	Size   int
 
 	Data io.Reader
 }
 
-func GenThumbnail(r io.Reader, h string) (Thumbnail, error) {
-
+func generateThumbnail(r io.Reader) (Thumbnail, error) {
 	b := new(bytes.Buffer)
-	b.ReadFrom(r)
+	_, err := b.ReadFrom(r)
+	if err != nil {
+		return Thumbnail{}, err
+	}
 
-	// disabled because it panics with weird cgo issues.
-	// uncomment at later date, it handles thumbnailing
-	// of videos, pdfs and more text formats.
 	_, thumb, err := thumbnailer.ProcessBuffer(
 		b.Bytes(),
 		thumbnailer.Options{
@@ -44,10 +44,11 @@ func GenThumbnail(r io.Reader, h string) (Thumbnail, error) {
 
 	dat, err := imageproxy.Transform(
 		thumb.Data,
+		// b.Bytes(),
 		imageproxy.Options{
 			Width:     150,
 			Height:    150,
-			Quality:   70,
+			Quality:   76,
 			SmartCrop: true,
 		},
 	)
@@ -56,19 +57,27 @@ func GenThumbnail(r io.Reader, h string) (Thumbnail, error) {
 		return Thumbnail{}, err
 	}
 
-	b = bytes.NewBuffer(dat)
-	hash, err := calcHash(b)
-	b = bytes.NewBuffer(dat)
+	b2 := bytes.NewBuffer(dat)
+	hash, err := calcHash(b2)
+	if err != nil {
+		return Thumbnail{}, err
+	}
+
+	b2 = bytes.NewBuffer(dat)
+	img, _, err := image.DecodeConfig(b2)
+
+	b2 = bytes.NewBuffer(dat)
 
 	if err != nil {
 		return Thumbnail{}, err
 	}
 
 	t := Thumbnail{
-		MetaHash: h,
-		Hash:     hash,
-		Size:     len(dat),
-		Data:     b,
+		Hash:   hash,
+		Size:   len(dat),
+		Data:   b2,
+		Width:  img.Width,
+		Height: img.Height,
 	}
 
 	return t, nil

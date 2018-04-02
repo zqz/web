@@ -437,7 +437,7 @@ func (fileL) LoadThumbnails(e boil.Executor, singular bool, maybeFile interface{
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if local.ID == foreign.FileID.Int {
+			if local.ID == foreign.FileID {
 				local.R.Thumbnails = append(local.R.Thumbnails, foreign)
 				break
 			}
@@ -486,8 +486,7 @@ func (o *File) AddThumbnails(exec boil.Executor, insert bool, related ...*Thumbn
 	var err error
 	for _, rel := range related {
 		if insert {
-			rel.FileID.Int = o.ID
-			rel.FileID.Valid = true
+			rel.FileID = o.ID
 			if err = rel.Insert(exec); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
@@ -508,8 +507,7 @@ func (o *File) AddThumbnails(exec boil.Executor, insert bool, related ...*Thumbn
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			rel.FileID.Int = o.ID
-			rel.FileID.Valid = true
+			rel.FileID = o.ID
 		}
 	}
 
@@ -530,141 +528,6 @@ func (o *File) AddThumbnails(exec boil.Executor, insert bool, related ...*Thumbn
 			rel.R.File = o
 		}
 	}
-	return nil
-}
-
-// SetThumbnailsG removes all previously related items of the
-// file replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.File's Thumbnails accordingly.
-// Replaces o.R.Thumbnails with related.
-// Sets related.R.File's Thumbnails accordingly.
-// Uses the global database handle.
-func (o *File) SetThumbnailsG(insert bool, related ...*Thumbnail) error {
-	return o.SetThumbnails(boil.GetDB(), insert, related...)
-}
-
-// SetThumbnailsP removes all previously related items of the
-// file replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.File's Thumbnails accordingly.
-// Replaces o.R.Thumbnails with related.
-// Sets related.R.File's Thumbnails accordingly.
-// Panics on error.
-func (o *File) SetThumbnailsP(exec boil.Executor, insert bool, related ...*Thumbnail) {
-	if err := o.SetThumbnails(exec, insert, related...); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// SetThumbnailsGP removes all previously related items of the
-// file replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.File's Thumbnails accordingly.
-// Replaces o.R.Thumbnails with related.
-// Sets related.R.File's Thumbnails accordingly.
-// Uses the global database handle and panics on error.
-func (o *File) SetThumbnailsGP(insert bool, related ...*Thumbnail) {
-	if err := o.SetThumbnails(boil.GetDB(), insert, related...); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// SetThumbnails removes all previously related items of the
-// file replacing them completely with the passed
-// in related items, optionally inserting them as new records.
-// Sets o.R.File's Thumbnails accordingly.
-// Replaces o.R.Thumbnails with related.
-// Sets related.R.File's Thumbnails accordingly.
-func (o *File) SetThumbnails(exec boil.Executor, insert bool, related ...*Thumbnail) error {
-	query := "update \"thumbnails\" set \"file_id\" = null where \"file_id\" = $1"
-	values := []interface{}{o.ID}
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	_, err := exec.Exec(query, values...)
-	if err != nil {
-		return errors.Wrap(err, "failed to remove relationships before set")
-	}
-
-	if o.R != nil {
-		for _, rel := range o.R.Thumbnails {
-			rel.FileID.Valid = false
-			if rel.R == nil {
-				continue
-			}
-
-			rel.R.File = nil
-		}
-
-		o.R.Thumbnails = nil
-	}
-	return o.AddThumbnails(exec, insert, related...)
-}
-
-// RemoveThumbnailsG relationships from objects passed in.
-// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
-// Sets related.R.File.
-// Uses the global database handle.
-func (o *File) RemoveThumbnailsG(related ...*Thumbnail) error {
-	return o.RemoveThumbnails(boil.GetDB(), related...)
-}
-
-// RemoveThumbnailsP relationships from objects passed in.
-// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
-// Sets related.R.File.
-// Panics on error.
-func (o *File) RemoveThumbnailsP(exec boil.Executor, related ...*Thumbnail) {
-	if err := o.RemoveThumbnails(exec, related...); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// RemoveThumbnailsGP relationships from objects passed in.
-// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
-// Sets related.R.File.
-// Uses the global database handle and panics on error.
-func (o *File) RemoveThumbnailsGP(related ...*Thumbnail) {
-	if err := o.RemoveThumbnails(boil.GetDB(), related...); err != nil {
-		panic(boil.WrapErr(err))
-	}
-}
-
-// RemoveThumbnails relationships from objects passed in.
-// Removes related items from R.Thumbnails (uses pointer comparison, removal does not keep order)
-// Sets related.R.File.
-func (o *File) RemoveThumbnails(exec boil.Executor, related ...*Thumbnail) error {
-	var err error
-	for _, rel := range related {
-		rel.FileID.Valid = false
-		if rel.R != nil {
-			rel.R.File = nil
-		}
-		if err = rel.Update(exec, "file_id"); err != nil {
-			return err
-		}
-	}
-	if o.R == nil {
-		return nil
-	}
-
-	for _, rel := range related {
-		for i, ri := range o.R.Thumbnails {
-			if rel != ri {
-				continue
-			}
-
-			ln := len(o.R.Thumbnails)
-			if ln > 1 && i < ln-1 {
-				o.R.Thumbnails[i] = o.R.Thumbnails[ln-1]
-			}
-			o.R.Thumbnails = o.R.Thumbnails[:ln-1]
-			break
-		}
-	}
-
 	return nil
 }
 

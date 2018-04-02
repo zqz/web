@@ -8,7 +8,13 @@ import (
 	"io"
 )
 
+type thumbnailStorer interface {
+	StoreThumbnail(Thumbnail) error
+	FetchThumbnails([]int) (map[int]Thumbnail, error)
+}
+
 type persister interface {
+	Del(string) error
 	Put(string) (io.WriteCloser, error)
 	Get(string) (io.ReadCloser, error)
 }
@@ -16,9 +22,7 @@ type persister interface {
 type metaStorer interface {
 	FetchMetaWithSlug(string) (*Meta, error)
 	FetchMeta(string) (*Meta, error)
-	StoreMeta(Meta) error
-	StoreThumbnail(Thumbnail) error
-	ThumbnailExists(string) (bool, error)
+	StoreMeta(*Meta) error
 	ListPage(int) ([]*Meta, error)
 }
 
@@ -26,13 +30,15 @@ type metaStorer interface {
 type FileDB struct {
 	p persister
 	m metaStorer
+	t thumbnailStorer
 }
 
 // NewFileDB returns an instance of a FileDB.
-func NewFileDB(p persister, m metaStorer) FileDB {
+func NewFileDB(p persister, m metaStorer, t thumbnailStorer) FileDB {
 	return FileDB{
 		m: m,
 		p: p,
+		t: t,
 	}
 }
 
@@ -40,6 +46,26 @@ func (db FileDB) List(page int) ([]*Meta, error) {
 	metas, err := db.m.ListPage(page)
 	if err != nil {
 		return nil, err
+	}
+
+	metaIds := make([]int, len(metas))
+	for i, m := range metas {
+		metaIds[i] = m.ID
+	}
+
+	thumbnails, err := db.t.FetchThumbnails(metaIds)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, m := range metas {
+		t, ok := thumbnails[m.ID]
+		if !ok {
+			continue
+		}
+
+		m.Thumbnail = t.Hash
 	}
 
 	return metas, nil
@@ -50,7 +76,7 @@ func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
 		return nil, err
 	}
 
-	m, err := db.FetchMeta(hash)
+	m, err := db.fetch(hash)
 	if err != nil {
 		return nil, err
 	}
@@ -91,22 +117,6 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 	return err
 }
 
-func (db FileDB) StoreThumbnail(t Thumbnail) error {
-	if err := db.validate(); err != nil {
-		return err
-	}
-
-	err := db.m.StoreThumbnail(t)
-	if err != nil {
-		fmt.Println("failed to upload thumb", err.Error())
-		return err
-	}
-
-	w, err := db.p.Put(t.Hash)
-
-	return io.Copy(w, t.Data)
-}
-
 func (db FileDB) StoreMeta(meta Meta) error {
 	if err := db.validate(); err != nil {
 		return err
@@ -127,10 +137,19 @@ func (db FileDB) StoreMeta(meta Meta) error {
 		meta.BytesReceived = m.BytesReceived
 	}
 
-	return db.m.StoreMeta(meta)
+	if meta.BytesReceived == 0 {
+		// if for some reason there is /already/ some data under this hash and we
+		// have not saved any bytes. Delete the file.
+		db.p.Del(meta.Hash)
+	}
+	return db.m.StoreMeta(&meta)
 }
 
-func (db FileDB) FetchMeta(hash string) (*Meta, error) {
+func (db FileDB) FetchMeta(h string) (*Meta, error) {
+	return db.fetch(h)
+}
+
+func (db FileDB) fetch(hash string) (*Meta, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -200,7 +219,8 @@ func (db FileDB) finish(m *Meta) error {
 
 	err = db.process(m)
 	if err != nil {
-		fmt.Println("error processing:", err)
+		// fmt.Println("error processing:", err.Error())
+		return nil
 	}
 
 	return nil
@@ -214,25 +234,33 @@ func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
 	return 0, nil
 }
 
-func (db FileDB) genThumbnail(h string) error {
+func (db FileDB) generateThumbnailFromMeta(m *Meta) error {
 	b := new(bytes.Buffer)
-	err := db.Read(h, b)
+	err := db.Read(m.Hash, b)
 	if err != nil {
 		return err
 	}
 
-	t, err := GenThumbnail(b, h)
+	t, err := generateThumbnail(b)
 	if err != nil {
 		return err
 	}
 
-	db.StoreThumbnail(t)
+	t.MetaID = m.ID
 
-	return nil
+	err = db.t.StoreThumbnail(t)
+	if err != nil {
+		return err
+	}
+
+	w, err := db.p.Put(t.Hash)
+	_, err = io.Copy(w, t.Data)
+
+	return err
 }
 
 func (db FileDB) process(m *Meta) error {
-	return db.genThumbnail(m.Hash)
+	return db.generateThumbnailFromMeta(m)
 }
 
 func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
@@ -252,7 +280,7 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 		m.Slug = randStr(5)
 	}
 
-	if err := db.m.StoreMeta(*m); err != nil {
+	if err := db.m.StoreMeta(m); err != nil {
 		return err
 	}
 
@@ -266,8 +294,8 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 func calcHash(src io.Reader) (string, error) {
 	h := sha1.New()
 
-	if n, err := io.Copy(h, src); err != nil {
-		fmt.Println("read", n, "bytes when hashing")
+	_, err := io.Copy(h, src)
+	if err != nil {
 		return "", err
 	}
 

@@ -2,7 +2,7 @@
 -- +goose Up
 CREATE TABLE thumbnails (
   id serial not null primary key,
-  file_id integer references files(id),
+  file_id integer references files(id) not null,
   width integer not null,
   height integer not null,
   hash text not null,

@@ -3,6 +3,7 @@ package filedb
 import "time"
 
 type Meta struct {
+	ID            int       `json:"-"`
 	Alias         string    `json:"alias"`
 	Name          string    `json:"name"`
 	Hash          string    `json:"hash"`

@@ -23,6 +23,11 @@ func NewDiskPersistence() DiskPersistence {
 	return DiskPersistence{}
 }
 
+func (DiskPersistence) Del(hash string) error {
+	p := path(hash)
+	return os.Remove(p)
+}
+
 func (DiskPersistence) Put(hash string) (io.WriteCloser, error) {
 	p := path(hash)
 	return os.OpenFile(p, fileFlags, fileMode)

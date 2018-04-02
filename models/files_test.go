@@ -482,10 +482,8 @@ func testFileToManyThumbnails(t *testing.T) {
 	randomize.Struct(seed, &b, thumbnailDBTypes, false, thumbnailColumnsWithDefault...)
 	randomize.Struct(seed, &c, thumbnailDBTypes, false, thumbnailColumnsWithDefault...)
 
-	b.FileID.Valid = true
-	c.FileID.Valid = true
-	b.FileID.Int = a.ID
-	c.FileID.Int = a.ID
+	b.FileID = a.ID
+	c.FileID = a.ID
 	if err = b.Insert(tx); err != nil {
 		t.Fatal(err)
 	}
@@ -500,10 +498,10 @@ func testFileToManyThumbnails(t *testing.T) {
 
 	bFound, cFound := false, false
 	for _, v := range thumbnail {
-		if v.FileID.Int == b.FileID.Int {
+		if v.FileID == b.FileID {
 			bFound = true
 		}
-		if v.FileID.Int == c.FileID.Int {
+		if v.FileID == c.FileID {
 			cFound = true
 		}
 	}
@@ -580,11 +578,11 @@ func testFileToManyAddOpThumbnails(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if a.ID != first.FileID.Int {
-			t.Error("foreign key was wrong value", a.ID, first.FileID.Int)
+		if a.ID != first.FileID {
+			t.Error("foreign key was wrong value", a.ID, first.FileID)
 		}
-		if a.ID != second.FileID.Int {
-			t.Error("foreign key was wrong value", a.ID, second.FileID.Int)
+		if a.ID != second.FileID {
+			t.Error("foreign key was wrong value", a.ID, second.FileID)
 		}
 
 		if first.R.File != &a {
@@ -608,179 +606,6 @@ func testFileToManyAddOpThumbnails(t *testing.T) {
 		if want := int64((i + 1) * 2); count != want {
 			t.Error("want", want, "got", count)
 		}
-	}
-}
-
-func testFileToManySetOpThumbnails(t *testing.T) {
-	var err error
-
-	tx := MustTx(boil.Begin())
-	defer tx.Rollback()
-
-	var a File
-	var b, c, d, e Thumbnail
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, fileDBTypes, false, strmangle.SetComplement(filePrimaryKeyColumns, fileColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Thumbnail{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, thumbnailDBTypes, false, strmangle.SetComplement(thumbnailPrimaryKeyColumns, thumbnailColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err = a.Insert(tx); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(tx); err != nil {
-		t.Fatal(err)
-	}
-	if err = c.Insert(tx); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.SetThumbnails(tx, false, &b, &c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Thumbnails(tx).Count()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetThumbnails(tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Thumbnails(tx).Count()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if b.FileID.Valid {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if c.FileID.Valid {
-		t.Error("want c's foreign key value to be nil")
-	}
-	if a.ID != d.FileID.Int {
-		t.Error("foreign key was wrong value", a.ID, d.FileID.Int)
-	}
-	if a.ID != e.FileID.Int {
-		t.Error("foreign key was wrong value", a.ID, e.FileID.Int)
-	}
-
-	if b.R.File != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.File != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.File != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.File != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-
-	if a.R.Thumbnails[0] != &d {
-		t.Error("relationship struct slice not set to correct value")
-	}
-	if a.R.Thumbnails[1] != &e {
-		t.Error("relationship struct slice not set to correct value")
-	}
-}
-
-func testFileToManyRemoveOpThumbnails(t *testing.T) {
-	var err error
-
-	tx := MustTx(boil.Begin())
-	defer tx.Rollback()
-
-	var a File
-	var b, c, d, e Thumbnail
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, fileDBTypes, false, strmangle.SetComplement(filePrimaryKeyColumns, fileColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	foreigners := []*Thumbnail{&b, &c, &d, &e}
-	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, thumbnailDBTypes, false, strmangle.SetComplement(thumbnailPrimaryKeyColumns, thumbnailColumnsWithoutDefault)...); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := a.Insert(tx); err != nil {
-		t.Fatal(err)
-	}
-
-	err = a.AddThumbnails(tx, true, foreigners...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err := a.Thumbnails(tx).Count()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 4 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.RemoveThumbnails(tx, foreigners[:2]...)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Thumbnails(tx).Count()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	if b.FileID.Valid {
-		t.Error("want b's foreign key value to be nil")
-	}
-	if c.FileID.Valid {
-		t.Error("want c's foreign key value to be nil")
-	}
-
-	if b.R.File != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.File != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.File != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-	if e.R.File != &a {
-		t.Error("relationship to a should have been preserved")
-	}
-
-	if len(a.R.Thumbnails) != 2 {
-		t.Error("should have preserved two relationships")
-	}
-
-	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Thumbnails[1] != &d {
-		t.Error("relationship to d should have been preserved")
-	}
-	if a.R.Thumbnails[0] != &e {
-		t.Error("relationship to e should have been preserved")
 	}
 }
 
