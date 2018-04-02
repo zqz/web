@@ -177,7 +177,6 @@ func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
 
 	if len(tns) == 0 {
 		w.WriteHeader(http.StatusNotFound)
-		fmt.Println(err.Error())
 		return
 	}
 
