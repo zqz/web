@@ -1,17 +1,17 @@
-.FileList {
+.FileList.Rows {
 }
 
-.FileList .Container {
+.FileList.Rows .Container {
 }
 
-.FileList .List {
+.FileList.Rows .List {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   flex-wrap: wrap;
 }
 
-.FileList .List .File {
+.FileList.Rows .List .File {
   justify-content: space-between;
   display: flex;
   flex-direction: row;
@@ -23,11 +23,11 @@
 	border-left: solid 5px black;
 }
 
-.FileList .List a.File:hover {
+.FileList.Rows .List a.File:hover {
 	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAEklEQVQImWM4dOjQfwZ0QJogALuNDRUNPqAgAAAAAElFTkSuQmCC);
 }
 
-.FileList .List a.File {
+.FileList.Rows .List a.File {
 	text-decoration: none;
 	color: black;
 	white-space: nowrap;
@@ -35,6 +35,6 @@
 	text-overflow: ellipsis;
 }
 
-.FileList .List a.File .Name {
+.FileList.Rows .List a.File .Name {
 	font-weight: bold;
 }

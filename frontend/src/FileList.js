@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import Config from './Config';
 import FileListEntry from './FileListEntry';
 import './FileList2.css';
+import './FileList.css';
 
 class Search extends Component {
   render() {
@@ -14,7 +15,7 @@ class FileList extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { filter: null, files: [] };
+    this.state = { rows: true, filter: null, files: [] };
   };
 
   componentWillMount() {
@@ -37,6 +38,10 @@ class FileList extends Component {
     this.setState({filter: f});
   }
 
+  onToggleView = () => {
+    this.setState({rows: !this.state.rows});
+  }
+
   render() {
     var files = []
 
@@ -55,11 +60,19 @@ class FileList extends Component {
       );
     }
 
+    var className = 'FileList';
+    if (this.state.rows) {
+      className += ' Rows';
+    } else {
+      className += ' Grid';
+    }
+
     return(
-      <div className="FileList">
+      <div className={className}>
         <div className="Section">
         Files {files.length}
         <div className="Extra">
+          <div onClick={this.onToggleView} className="foo">SUP</div>
           <Search onChange={this.onSearch}/>
         </div>
         </div>
