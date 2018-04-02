@@ -152,32 +152,48 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
-	// hash := chi.URLParam(r, "hash")
+	hash := chi.URLParam(r, "hash")
 
-	// ok, err := s.db.m.ThumbnailExists(hash)
+	m, err := s.db.m.FetchMeta(hash)
 
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err.Error())
+		return
+	}
 
-	// if !ok {
-	// 	w.WriteHeader(http.StatusNotFound)
-	// 	return
-	// }
+	if m.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 
-	// rr, err := s.db.p.Get(hash)
+	tns, err := s.db.t.FetchThumbnails([]int{m.ID})
 
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusInternalServerError)
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err.Error())
+		return
+	}
 
-	// io.Copy(w, rr)
+	if len(tns) == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		fmt.Println(err.Error())
+		return
+	}
 
-	// w.WriteHeader(http.StatusOK)
+	t := tns[m.ID]
+
+	rr, err := s.db.p.Get(t.Hash)
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println(err.Error())
+		return
+	}
+
+	io.Copy(w, rr)
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
@@ -217,10 +233,9 @@ func (s Server) Router() http.Handler {
 	r.Get("/d/{slug}", s.getDataWithSlug)
 	r.Post("/data/{hash}", s.postData)
 
-	r.Get("/thumbnail/{hash}", s.getThumbnail)
+	r.Get("/meta/{hash}/thumbnail", s.getThumbnail)
 
 	r.Post("/meta", s.postMeta)
-	r.Get("/meta/{hash}", s.getMeta)
 	r.Get("/meta/{hash}", s.getMeta)
 
 	return r

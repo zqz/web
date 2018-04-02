@@ -24,7 +24,7 @@ class FileListEntry extends Component {
 
     var t = (<div></div>);
     if (f.thumbnail !== "" && this.state.showThumb) {
-      t = <img src={Config.root() + "/thumbnail/" + f.thumbnail}/>;
+      t = <img src={Config.root() + "/meta/" + f.hash + "/thumbnail"}/>;
     }
 
     return (

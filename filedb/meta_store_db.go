@@ -20,6 +20,7 @@ type DBMetaStorage struct {
 
 func file2meta(f *models.File) Meta {
 	m := Meta{
+		ID:            f.ID,
 		Name:          f.Name,
 		Size:          f.Size,
 		BytesReceived: f.Size,
