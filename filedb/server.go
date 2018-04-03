@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/goware/cors"
@@ -98,43 +97,39 @@ func (s Server) files(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
-	etag := meta.Hash
-	w.Header().Set("Content-Type", meta.ContentType)
-	w.Header().Set("Etag", etag)
+func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Etag", hash)
 	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
-
 	if match := r.Header.Get("If-None-Match"); match != "" {
-		if strings.Contains(match, etag) {
+		if strings.Contains(match, hash) {
 			// go lib.TrackDownload(f.DB, file.ID, r, true)
 			w.WriteHeader(http.StatusNotModified)
 			return
 		}
 	}
 
-	err := s.db.Read(meta.Hash, w)
+	rr, err := s.db.p.Get(hash)
+
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		fmt.Println("err:", err.Error())
 		return
 	}
+
+	io.Copy(w, rr)
+
+	// err := s.p.Get(hash, w)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusNotFound)
+	// 	render.Error(w, err.Error())
+	// 	return
+	// }
 }
 
-func (s Server) fileDownload(w http.ResponseWriter, r *http.Request) {
-	hash := chi.URLParam(r, "token")
-
-	meta, err := s.db.FetchMeta(hash)
-
-	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		spew.Dump(err)
-		render.Error(w, err.Error())
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	s.download(meta, w, r)
+func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", meta.ContentType)
+	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
+	s.sendfile(meta.Hash, w, r)
 }
 
 func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
@@ -182,17 +177,8 @@ func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
 
 	t := tns[m.ID]
 
-	rr, err := s.db.p.Get(t.Hash)
+	s.sendfile(t.Hash, w, r)
 
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
-
-	io.Copy(w, rr)
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
