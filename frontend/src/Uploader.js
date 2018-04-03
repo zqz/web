@@ -30,15 +30,6 @@ class Uploader extends Component {
     this.removeAll = this.removeAll.bind(this);
   }
 
-  componentWillMount() {
-    var tstFile = new Blob(['Foobar'], {type: 'text/plain'});
-    tstFile.name = 'Example File';
-
-    // this.addFiles([
-    //   tstFile
-    // ]);
-  }
-
   componentDidMount() {
     document.addEventListener('paste', this.onPaste);
     document.body.addEventListener('dragover', this.onDragOver);

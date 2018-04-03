@@ -4,6 +4,7 @@ import FetchMeta from './FetchMeta.js';
 import PostMeta from './PostMeta.js';
 import HashData from './HashData.js';
 import PostData from './PostData.js';
+import Config from './Config.js';
 import FileSpeed from './FileSpeed.js';
 
 class FileData {
@@ -83,7 +84,10 @@ class FileData {
     this._hashData.onHashComplete((hash) => {
       this._meta.hash = hash;
       // this.check();
-      callback(hash)
+      callback(hash);
+      if (Config.get('instant') === 'true') {
+        this.start();
+      }
     });
   }
 
