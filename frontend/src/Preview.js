@@ -12,7 +12,8 @@ class Preview extends Component {
 
     if (f.type.startsWith('image')) {
       var imgpath = Config.root() + "/d/" + f.slug;
-      return (<img src={imgpath}/>);
+      var alt = "preview of " + f.name;
+      return (<img alt={alt} src={imgpath}/>);
     }
   }
 
