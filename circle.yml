@@ -10,6 +10,7 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/zqz/upl
     steps:
+      - run: apt-get install libavcodec libavutil libavformat GraphicsMagick libavcodec libavutil libavformat libswscale
       - checkout
 
       - run: go get -v -t -d ./...
