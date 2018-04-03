@@ -24,7 +24,6 @@ class FileListEntry extends Component {
     var style = {};
 
     if (f.thumbnail !== "" && !this.props.rows) {
-      var alt = "thumbnail of " + f.name;
       var thumbnailUrl = Config.root() + "/meta/" + f.hash + "/thumbnail";
 
       style.backgroundImage = "url('" + thumbnailUrl + "')";

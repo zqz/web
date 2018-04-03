@@ -3,7 +3,6 @@ package filedb
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/zqz/upl/models"
@@ -50,8 +49,6 @@ func (s DBThumbnailStorage) StoreThumbnail(t Thumbnail) error {
 func (s DBThumbnailStorage) FetchThumbnails(ids []int) (map[int]Thumbnail, error) {
 	ts := make(map[int]Thumbnail, 0)
 
-	fmt.Println("looking for:", ids)
-
 	dbIds := make([]interface{}, len(ids))
 	for i, v := range ids {
 		dbIds[i] = v
@@ -60,8 +57,6 @@ func (s DBThumbnailStorage) FetchThumbnails(ids []int) (map[int]Thumbnail, error
 		s.db,
 		qm.WhereIn("file_id in ?", dbIds...),
 	).All()
-
-	fmt.Println(dbts)
 
 	if err != nil {
 		return ts, err
