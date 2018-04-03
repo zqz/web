@@ -44,9 +44,9 @@ class FileView extends Component {
         <div className="Section">
           {file.name}
         </div>
-          <div className="Preview">
-            <Preview file={file}/>
-          </div>
+        <div className="Preview">
+          <Preview file={file}/>
+        </div>
         <div className="Content">
           <div className="Left">
             <div>Size: <Size bytes={file.size}/></div>

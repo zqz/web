@@ -11,11 +11,30 @@ class Search extends Component {
   };
 }
 
+class Toggle extends Component {
+  render() {
+    var text = 'grid';
+    if (this.props.rows) {
+      text = 'rows';
+    }
+
+    return (
+      <div className="pointer" onClick={this.props.onClick}>{text}</div>
+    );
+  }
+}
+
+const FILELIST_CFG = 'filelist-rows';
+
 class FileList extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { rows: true, filter: null, files: [] };
+    this.state = {
+      rows: Config.get(FILELIST_CFG) === 'true',
+      filter: null,
+      files: []
+    };
   };
 
   componentWillMount() {
@@ -39,7 +58,10 @@ class FileList extends Component {
   }
 
   onToggleView = () => {
-    this.setState({rows: !this.state.rows});
+    var v = !this.state.rows;
+    console.log('v is now', v);
+    Config.set(FILELIST_CFG, v.toString());
+    this.setState({rows: v});
   }
 
   render() {
@@ -56,7 +78,7 @@ class FileList extends Component {
       }
 
       files.push(
-        <FileListEntry key={"fe" + file.slug} file={file}/>
+        <FileListEntry rows={this.state.rows} key={"fe" + file.slug} file={file}/>
       );
     }
 
@@ -72,8 +94,8 @@ class FileList extends Component {
         <div className="Section">
         Files {files.length}
         <div className="Extra">
-          <div onClick={this.onToggleView} className="foo">SUP</div>
           <Search onChange={this.onSearch}/>
+          <Toggle rows={this.state.rows} onClick={this.onToggleView}/>
         </div>
         </div>
         <div className="List">

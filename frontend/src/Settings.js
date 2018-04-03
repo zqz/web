@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Checkbox from './Checkbox';
+import Config from './Config';
 import './Settings.css';
 
 class Settings extends Component {
@@ -13,11 +14,11 @@ class Settings extends Component {
   }
 
   set(k, v) {
-    localStorage.setItem(k, v);
+    Config.set(k, v);
   }
 
   get(k) {
-    return localStorage.getItem(k);
+    return Config.get(k);
   }
 
   change(option) {

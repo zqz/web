@@ -8,7 +8,7 @@ class FileListEntry extends Component {
     super(props);
 
     this.state = {
-      showThumb: false
+      showThumb: false,
     };
   }
   mouseIn = () => {
@@ -21,17 +21,21 @@ class FileListEntry extends Component {
 
   render() {
     var f = this.props.file;
+    var style = {};
 
-    var t = (<div></div>);
-    if (f.thumbnail !== "" && this.state.showThumb) {
+    if (f.thumbnail !== "" && !this.props.rows) {
       var alt = "thumbnail of " + f.name;
-      t = <img alt={alt} src={Config.root() + "/meta/" + f.hash + "/thumbnail"}/>;
+      var thumbnailUrl = Config.root() + "/meta/" + f.hash + "/thumbnail";
+
+      style.backgroundImage = "url('" + thumbnailUrl + "')";
+
     }
 
+
     return (
-      <Link onMouseEnter={this.mouseIn} onMouseLeave={this.mouseOut} className="File" to={"/file/" + f.hash} alt={f.name}>
+      <Link style={style} onMouseEnter={this.mouseIn} onMouseLeave={this.mouseOut} className="File" to={"/file/" + f.hash} alt={f.name}>
         <div className="Name">
-      {t}{f.name}
+          {f.name}
         </div>
         <span><Size bytes={f.size}/></span>
       </Link>
