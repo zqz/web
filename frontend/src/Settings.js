@@ -9,7 +9,8 @@ class Settings extends Component {
 
     this.state = {
       instant: this.get('instant') === 'true',
-      other: this.get('other') === 'true'
+      other: this.get('other') === 'true',
+      'filelist-rows': this.get('filelist-rows') !== 'true'
     };
   }
 
@@ -50,6 +51,11 @@ class Settings extends Component {
             label="Another Checkbox"
             checked={this.state.other}
             onClick={this.change('other')}/>
+          <Checkbox
+            label="Grid View"
+            desc="Show files as a grid of thumbnails on the homepage"
+            checked={this.state['filelist-rows']}
+            onClick={this.change('filelist-rows')}/>
         </div>
       </div>
     );

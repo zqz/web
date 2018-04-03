@@ -37,7 +37,7 @@ class FileListEntry extends Component {
         <div className="Name">
           {f.name}
         </div>
-        <span><Size bytes={f.size}/></span>
+        <span className="Size"><Size bytes={f.size}/></span>
       </Link>
     )
   }

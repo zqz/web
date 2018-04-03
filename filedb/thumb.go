@@ -32,8 +32,8 @@ func generateThumbnail(r io.Reader) (Thumbnail, error) {
 		thumbnailer.Options{
 			JPEGQuality: 100,
 			ThumbDims: thumbnailer.Dims{
-				Width:  150,
-				Height: 150,
+				Width:  350,
+				Height: 350,
 			},
 		},
 	)
@@ -46,8 +46,8 @@ func generateThumbnail(r io.Reader) (Thumbnail, error) {
 		thumb.Data,
 		// b.Bytes(),
 		imageproxy.Options{
-			Width:     150,
-			Height:    150,
+			Width:     200,
+			Height:    200,
 			Quality:   76,
 			SmartCrop: true,
 		},

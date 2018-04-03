@@ -13,31 +13,63 @@
 
 .FileList.Grid .List .File {
   justify-content: space-between;
-  width: 33%;
+  width: calc((100%/4) - (8px));
   height: 150px;
-	margin-bottom: 5px;
+	margin-bottom: 10px;
 	padding: 5px;
   overflow: hidden;
+
+  filter: grayscale(100%);
 
   border: solid 1px black;
 	border-bottom: solid 5px black;
 }
 
+.FileList.Grid .List .File:hover {
+  filter: none;
+}
+
+.FileList.Grid .List .File:hover .Name {
+  display: none;
+}
+.FileList.Grid .List .File:hover .Size {
+  display: block;
+}
+
 .FileList.Grid .List a.File:hover {
-	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAEklEQVQImWM4dOjQfwZ0QJogALuNDRUNPqAgAAAAAElFTkSuQmCC);
 }
 
 .FileList.Grid .List a.File {
 	text-decoration: none;
-	color: black;
 	display: block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	width: parent;
+  background-repeat: no-repeat;
+  background-position: center center;
+
+  display: flex;
+  align-items: flex-end;
+  flex-direction: row;
+}
+
+.FileList.Grid .List a.File .Size {
+  padding: 3px;
+  text-align: center;
+	color: white;
+  background-color: black;
+  padding-bottom: 5px;
+	font-weight: bold;
+  display: none;
 }
 
 .FileList.Grid .List a.File .Name {
-padding-bottom: 5px;
+  padding: 3px 3px;
+  text-align: center;
+	color: white;
+  background-color: black;
+  padding-bottom: 5px;
 	font-weight: bold;
+  max-width: 100%;
+  margin-right: 5px;
 }
