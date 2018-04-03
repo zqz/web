@@ -10,7 +10,7 @@ type MemoryMetaStorage struct {
 	entriesMutex sync.Mutex
 }
 
-func (m MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
+func (m *MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 	var metas []*Meta
 
 	metas = make([]*Meta, 0, len(m.entries))
@@ -25,13 +25,13 @@ func (m MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 	return metas, nil
 }
 
-func NewMemoryMetaStorage() MemoryMetaStorage {
-	return MemoryMetaStorage{
+func NewMemoryMetaStorage() *MemoryMetaStorage {
+	return &MemoryMetaStorage{
 		entries: make(map[string]*Meta, 0),
 	}
 }
 
-func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
+func (m *MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
 	meta, ok := m.entries[hash]
 
 	if !ok {
@@ -41,7 +41,7 @@ func (m MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
 	return meta, nil
 }
 
-func (m MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
+func (m *MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	for _, e := range m.entries {
 		if e.Slug == slug {
 			return e, nil
@@ -51,7 +51,7 @@ func (m MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	return nil, errors.New("file not found")
 }
 
-func (s MemoryMetaStorage) StoreMeta(m *Meta) error {
+func (s *MemoryMetaStorage) StoreMeta(m *Meta) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()

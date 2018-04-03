@@ -14,7 +14,7 @@ type Meta struct {
 	Date          time.Time `json:"date"`
 	BytesReceived int       `json:"bytes_received"`
 
-	Thumbnail string `json:"thumbnail, omitempty"`
+	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
 func (m Meta) finished() bool {

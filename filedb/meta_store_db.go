@@ -119,7 +119,7 @@ func NewDBMetaStorage(db *sql.DB) *DBMetaStorage {
 	}
 }
 
-func (s DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
+func (s *DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
 	f, err := models.Files(s.db, qm.Where("hash=?", h)).One()
 
 	if err != nil {
@@ -129,7 +129,7 @@ func (s DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
 	return file2meta(f), nil
 }
 
-func (s DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
+func (s *DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 	f, err := models.Files(s.db, qm.Where("slug=?", slug)).One()
 
 	if err != nil {

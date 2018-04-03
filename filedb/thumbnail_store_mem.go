@@ -10,13 +10,13 @@ type MemoryThumbnailStorage struct {
 	entriesMutex sync.Mutex
 }
 
-func NewMemoryThumbnailStorage() MemoryThumbnailStorage {
-	return MemoryThumbnailStorage{
+func NewMemoryThumbnailStorage() *MemoryThumbnailStorage {
+	return &MemoryThumbnailStorage{
 		entries: make(map[int]Thumbnail, 0),
 	}
 }
 
-func (s MemoryThumbnailStorage) StoreThumbnail(t Thumbnail) error {
+func (s *MemoryThumbnailStorage) StoreThumbnail(t Thumbnail) error {
 	if t.MetaID == 0 {
 		return errors.New("thumbnail missing required meta id")
 	}
@@ -38,7 +38,7 @@ func contains(n int, hs []int) bool {
 	return false
 }
 
-func (s MemoryThumbnailStorage) FetchThumbnails(ids []int) (map[int]Thumbnail, error) {
+func (s *MemoryThumbnailStorage) FetchThumbnails(ids []int) (map[int]Thumbnail, error) {
 	ts := make(map[int]Thumbnail, 0)
 
 	for _, t := range s.entries {
