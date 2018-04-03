@@ -53,7 +53,7 @@ const paginationSQL = `
 	LIMIT $2
 `
 
-func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
+func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 	entries := make([]*Meta, 0)
 	var rows *sql.Rows
 	var err error
@@ -112,15 +112,15 @@ func (m DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 	return entries, err
 }
 
-func NewDBMetaStorage(db *sql.DB) DBMetaStorage {
-	return DBMetaStorage{
+func NewDBMetaStorage(db *sql.DB) *DBMetaStorage {
+	return &DBMetaStorage{
 		entries: make(map[string]*Meta, 0),
 		db:      db,
 	}
 }
 
-func (m DBMetaStorage) fetchMetaFromDBWithHash(hash string) (Meta, error) {
-	f, err := models.Files(m.db, qm.Where("hash=?", hash)).One()
+func (s DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
+	f, err := models.Files(s.db, qm.Where("hash=?", h)).One()
 
 	if err != nil {
 		return Meta{}, err
@@ -129,8 +129,9 @@ func (m DBMetaStorage) fetchMetaFromDBWithHash(hash string) (Meta, error) {
 	return file2meta(f), nil
 }
 
-func (m DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
-	f, err := models.Files(m.db, qm.Where("slug=?", slug)).One()
+func (s DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
+	f, err := models.Files(s.db, qm.Where("slug=?", slug)).One()
+
 	if err != nil {
 		return Meta{}, err
 	}
@@ -138,39 +139,39 @@ func (m DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 	return file2meta(f), nil
 }
 
-func (m DBMetaStorage) FetchMeta(hash string) (*Meta, error) {
-	meta, ok := m.entries[hash]
+func (s *DBMetaStorage) FetchMeta(h string) (*Meta, error) {
+	m, ok := s.entries[h]
 
 	if ok {
-		return meta, nil
+		return m, nil
 	}
 
-	meta2, err := m.fetchMetaFromDBWithHash(hash)
+	m2, err := s.fetchMetaFromDBWithHash(h)
 	if err != nil {
 		return nil, errors.New("file not found")
 	}
 
-	m.entriesMutex.Lock()
-	m.entries[meta2.Hash] = &meta2
-	m.entriesMutex.Unlock()
+	s.entriesMutex.Lock()
+	s.entries[m2.Hash] = &m2
+	s.entriesMutex.Unlock()
 
-	return &meta2, nil
+	return &m2, nil
 }
 
-func (m DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
-	meta, err := m.fetchMetaFromDBWithSlug(slug)
+func (s *DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
+	m, err := s.fetchMetaFromDBWithSlug(slug)
 	if err != nil {
 		return nil, errors.New("file not found")
 	}
 
-	m.entriesMutex.Lock()
-	m.entries[meta.Hash] = &meta
-	m.entriesMutex.Unlock()
+	s.entriesMutex.Lock()
+	s.entries[m.Hash] = &m
+	s.entriesMutex.Unlock()
 
-	return &meta, nil
+	return &m, nil
 }
 
-func (s DBMetaStorage) StoreMeta(m *Meta) error {
+func (s *DBMetaStorage) StoreMeta(m *Meta) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
