@@ -20,6 +20,10 @@ type Thumbnail struct {
 	Data io.Reader
 }
 
+const thumbIntermediateSize = 350
+const thumbSize = 200
+const thumbQuality = 76
+
 func generateThumbnail(r io.Reader) (Thumbnail, error) {
 	b := new(bytes.Buffer)
 	_, err := b.ReadFrom(r)
@@ -32,8 +36,8 @@ func generateThumbnail(r io.Reader) (Thumbnail, error) {
 		thumbnailer.Options{
 			JPEGQuality: 100,
 			ThumbDims: thumbnailer.Dims{
-				Width:  350,
-				Height: 350,
+				Width:  thumbIntermediateSize,
+				Height: thumbIntermediateSize,
 			},
 		},
 	)
@@ -44,11 +48,10 @@ func generateThumbnail(r io.Reader) (Thumbnail, error) {
 
 	dat, err := imageproxy.Transform(
 		thumb.Data,
-		// b.Bytes(),
 		imageproxy.Options{
-			Width:     200,
-			Height:    200,
-			Quality:   76,
+			Width:     thumbSize,
+			Height:    thumbSize,
+			Quality:   thumbQuality,
 			SmartCrop: true,
 		},
 	)
@@ -57,28 +60,28 @@ func generateThumbnail(r io.Reader) (Thumbnail, error) {
 		return Thumbnail{}, err
 	}
 
-	b2 := bytes.NewBuffer(dat)
-	hash, err := calcHash(b2)
+	return buildThumbnail(dat)
+}
+
+func buildThumbnail(dat []byte) (Thumbnail, error) {
+	b := bytes.NewReader(dat)
+	hash, err := calcHash(b)
 	if err != nil {
 		return Thumbnail{}, err
 	}
 
-	b2 = bytes.NewBuffer(dat)
-	img, _, err := image.DecodeConfig(b2)
-
-	b2 = bytes.NewBuffer(dat)
-
+	b.Seek(0, 0)
+	img, _, err := image.DecodeConfig(b)
 	if err != nil {
 		return Thumbnail{}, err
 	}
+	b.Seek(0, 0)
 
-	t := Thumbnail{
+	return Thumbnail{
 		Hash:   hash,
-		Size:   len(dat),
-		Data:   b2,
+		Size:   b.Len(),
+		Data:   b,
 		Width:  img.Width,
 		Height: img.Height,
-	}
-
-	return t, nil
+	}, nil
 }
