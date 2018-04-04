@@ -2,14 +2,12 @@ version: 2
 jobs:
   build:
     docker:
-      - image: dylanj/circleci-go:latest
+      - image: circleci/golang:1.9
 
-    #### TEMPLATE_NOTE: go expects specific checkout path representing url
-    #### expecting it in the form of
-    ####   /go/src/github.com/circleci/go-tool
-    ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/zqz/upl
     steps:
+      - run: sudo apt-get update && sudo apt-get install -y libavcodec-dev libavutil-dev libavformat-dev libswscale-dev libmagick++-dev
+
       - checkout
 
       - run: go get -v -t -d ./...
