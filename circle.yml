@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.9
+      - image: dylanj/circleci-go:latest
 
     #### TEMPLATE_NOTE: go expects specific checkout path representing url
     #### expecting it in the form of
@@ -10,7 +10,6 @@ jobs:
     ####   /go/src/bitbucket.org/circleci/go-tool
     working_directory: /go/src/github.com/zqz/upl
     steps:
-      - run: apt-get install libavcodec libavutil libavformat GraphicsMagick libavcodec libavutil libavformat libswscale
       - checkout
 
       - run: go get -v -t -d ./...
