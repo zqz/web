@@ -39,13 +39,37 @@ class Uploader extends Component {
 
   addFiles = (files) => {
     var filedatas = [];
+    var i = null;
 
-    for(var i = 0; i < files.length; i++) {
-      var file = new FileData(files[i]);
+    for(i = 0; i < files.length; i++) {
+      var raw = files[i];
+
+      // empty files can be ignored.
+      if (raw.size === 0) {
+        continue;
+      }
+
+      var file = new FileData(raw);
       filedatas.push(file);
     }
 
-    var newFiles = this.state.files.concat(filedatas);
+    var newFiles = this.state.files;
+
+    for(i = 0; i < filedatas.length; i++) {
+      var fd = filedatas[i];
+      var canAdd = true;
+      for(var j = 0; j < newFiles.length; j++) {
+        var f = newFiles[j];
+        if (fd._data.name === f._data.name && fd._data.size === f._data.size) {
+          canAdd = false;
+          break;
+        }
+      }
+
+      if (canAdd) {
+        newFiles.push(fd);
+      }
+    }
 
     this.setState({files: newFiles});
   }
