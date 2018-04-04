@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import { Link } from "react-router-dom"
 
 import Size from "./Size.js";
 import Percent from "./Percent.js";
 import ProgressBar from "./ProgressBar.js";
+import FileItemButtons from "./FileItemButtons.js";
 import "./FileItem.css";
-import "./Buttons.css";
 
 class FileItem extends Component {
   constructor(props) {
@@ -15,22 +14,21 @@ class FileItem extends Component {
       uploadState: "queue",
       loaded: 0,
       total: 0,
+      slug: null,
       response: null,
       hash: null
     };
 
     this.props.filedata.onFound((data) => {
-      console.log("found");
       this.setState({
         loaded: data.bytes_received,
         total: data.size,
-        response: data
+        slug: data.slug,
+        response: data,
       });
     });
 
-    this.props.filedata.onNotFound((data) => {
-      console.log("not found");
-    });
+    this.props.filedata.onNotFound((data) => {});
 
     this.props.filedata.onExists((data) => {
       this.setState({loaded: data.bytes_received, total: data.size});
@@ -64,7 +62,8 @@ class FileItem extends Component {
     this.props.filedata.onResponse((data) => {
       this.setState({
         uploadState: "response",
-        response: data
+        response: data,
+        slug: data.slug
       });
     });
   }
@@ -88,64 +87,16 @@ class FileItem extends Component {
     this.props.remove();
   }
 
-  buttons() {
-    var buttons = [];
-    var slug = "";
-    var r = this.state.response;
-    if (r !== undefined && r != null) {
-      slug = r.slug;
-    }
-
-    var btnOpen = (
-      <Link to={"/files/" + slug} key="button_open" className="Button">
-      Open
-      </Link>
-    );
-
-    var btnStart = (
-      <span key="button_start" className="Button" onClick={this.start}>
-      Start
-      </span>
-    );
-
-    var btnStop = (
-        <span key = "button_stop" className="Button" onClick={this.stop}>
-          Stop
-        </span>
-    );
-
-    var btnResume = (
-      <span key="button_resume" className="Button" onClick={this.start}>
-      Resume
-      </span>
-    );
-
-    var btnRemove = (
-      <span key="button_remove" className="Button" onClick={this.remove}>
-        Remove
-      </span>
-    )
-
-    // if (this.fileDone()) {
-
-    // } else if (this.props.filedata.started()) {
-    if (this.state.uploadState === "started") {
-      buttons.push(btnStop);
-    } else if (this.state.uploadState === "aborted") {
-      buttons.push(btnResume);
-    } else if (this.fileDone()) {
-      buttons.push(btnOpen);
-    } else {
-      buttons.push(btnStart);
-    }
-
-    buttons.push(btnRemove);
-
-    return(
-      <div className="Buttons">
-        {buttons}
-      </div>
-    )
+  buttons = () => {
+    return <FileItemButtons
+      slug={this.state.slug}
+      done={this.fileDone}
+      onStart={this.start}
+      onStop={this.stop}
+      onResume={this.start}
+      onRemove={this.remove}
+      uploadState={this.state.uploadState}
+    />;
   }
 
   onClickName = (e) => {
@@ -162,6 +113,9 @@ class FileItem extends Component {
 
   fileDone = () => {
     var meta = this.props.filedata.meta();
+    if (this.state.loaded === 0) {
+      return false;
+    }
     return this.state.loaded === meta.size;
   }
 
