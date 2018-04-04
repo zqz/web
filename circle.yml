@@ -2,12 +2,10 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.9
+      - image: dylanj/circleci-go:latest 
 
     working_directory: /go/src/github.com/zqz/upl
     steps:
-      - run: sudo apt-get update && sudo apt-get install -y libavcodec-dev libavutil-dev libavformat-dev libswscale-dev libmagick++-dev
-
       - checkout
 
       - run: go get -v -t -d ./...
