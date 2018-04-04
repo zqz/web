@@ -1,18 +1,18 @@
-import React, { Component } from 'react';
-import { Link } from 'react-router-dom'
+import React, { Component } from "react";
+import { Link } from "react-router-dom"
 
-import Size from './Size.js';
-import Percent from './Percent.js';
-import ProgressBar from './ProgressBar.js';
-import './FileItem.css';
-import './Buttons.css';
+import Size from "./Size.js";
+import Percent from "./Percent.js";
+import ProgressBar from "./ProgressBar.js";
+import "./FileItem.css";
+import "./Buttons.css";
 
 class FileItem extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      uploadState: 'queue',
+      uploadState: "queue",
       loaded: 0,
       total: 0,
       response: null,
@@ -20,7 +20,7 @@ class FileItem extends Component {
     };
 
     this.props.filedata.onFound((data) => {
-      console.log('found');
+      console.log("found");
       this.setState({
         loaded: data.bytes_received,
         total: data.size,
@@ -29,7 +29,7 @@ class FileItem extends Component {
     });
 
     this.props.filedata.onNotFound((data) => {
-      console.log('not found');
+      console.log("not found");
     });
 
     this.props.filedata.onExists((data) => {
@@ -46,24 +46,24 @@ class FileItem extends Component {
     });
 
     this.props.filedata.onStart(() => {
-      this.setState({uploadState: 'started'});
+      this.setState({uploadState: "started"});
     });
 
     this.props.filedata.onAbort(() => {
-      this.setState({uploadState: 'aborted'});
+      this.setState({uploadState: "aborted"});
     });
 
     this.props.filedata.onError(() => {
-      this.setState({uploadState: 'errored'});
+      this.setState({uploadState: "errored"});
     });
 
     this.props.filedata.onLoad(() => {
-      this.setState({uploadState: 'loaded'});
+      this.setState({uploadState: "loaded"});
     });
 
     this.props.filedata.onResponse((data) => {
       this.setState({
-        uploadState: 'response',
+        uploadState: "response",
         response: data
       });
     });
@@ -90,38 +90,38 @@ class FileItem extends Component {
 
   buttons() {
     var buttons = [];
-    var slug = '';
+    var slug = "";
     var r = this.state.response;
     if (r !== undefined && r != null) {
       slug = r.slug;
     }
 
     var btnOpen = (
-      <Link to={"/files/" + slug} key='button_open' className="Button">
+      <Link to={"/files/" + slug} key="button_open" className="Button">
       Open
       </Link>
     );
 
     var btnStart = (
-      <span key='button_start' className="Button" onClick={this.start}>
+      <span key="button_start" className="Button" onClick={this.start}>
       Start
       </span>
     );
 
     var btnStop = (
-        <span key = 'button_stop' className="Button" onClick={this.stop}>
+        <span key = "button_stop" className="Button" onClick={this.stop}>
           Stop
         </span>
     );
 
     var btnResume = (
-      <span key='button_resume' className="Button" onClick={this.start}>
+      <span key="button_resume" className="Button" onClick={this.start}>
       Resume
       </span>
     );
 
     var btnRemove = (
-      <span key='button_remove' className="Button" onClick={this.remove}>
+      <span key="button_remove" className="Button" onClick={this.remove}>
         Remove
       </span>
     )
@@ -129,9 +129,9 @@ class FileItem extends Component {
     // if (this.fileDone()) {
 
     // } else if (this.props.filedata.started()) {
-    if (this.state.uploadState === 'started') {
+    if (this.state.uploadState === "started") {
       buttons.push(btnStop);
-    } else if (this.state.uploadState === 'aborted') {
+    } else if (this.state.uploadState === "aborted") {
       buttons.push(btnResume);
     } else if (this.fileDone()) {
       buttons.push(btnOpen);
@@ -168,7 +168,7 @@ class FileItem extends Component {
   render() {
     var meta = this.props.filedata.meta();
 
-    var name = meta.name + ' ('  + this.state.uploadState + ') ';
+    var name = meta.name + " ("  + this.state.uploadState + ") ";
     var perc = this.state.loaded / meta.size;
     var basic = null;
 
@@ -190,7 +190,7 @@ class FileItem extends Component {
 
     var buttons = this.buttons();
     var hash = this.state.hash;
-    var speed = '';
+    var speed = "";
 
     if (!this.fileDone()) {
       var progressBar = <ProgressBar value={perc}/>;

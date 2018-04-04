@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
-import FileMissing from './FileMissing';
-import Size from './Size';
-import Config from './Config';
-import Preview from './Preview';
-import './FileView.css';
+import React, { Component } from "react";
+import FileMissing from "./FileMissing";
+import Size from "./Size";
+import Config from "./Config";
+import Preview from "./Preview";
+import "./FileView.css";
 
 class FileView extends Component {
   constructor(props) {
@@ -17,7 +17,7 @@ class FileView extends Component {
   componentDidMount() {
     var hash = this.props.match.params.hash;
 
-    fetch(Config.root() + '/meta/' + hash)
+    fetch(Config.root() + "/meta/" + hash)
     .then(r => {
       if (r.status === 404) {
         return null;
@@ -33,7 +33,7 @@ class FileView extends Component {
   render() {
     var file = this.state.file;
 
-    if (file === null || file === undefined) {
+    if (file === null) {
       return <FileMissing/>;
     }
 

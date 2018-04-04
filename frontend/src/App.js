@@ -1,13 +1,12 @@
-import React, { Component } from 'react';
-import { Route, BrowserRouter } from 'react-router-dom'
-import Uploader from './Uploader.js';
-import FileList from './FileList.js';
-import FileView from './FileView.js';
-import Settings from './Settings.js';
-import Header from './Header.js';
-import Footer from './Footer.js';
-// import Chart from './Chart.js';
-import './App.css';
+import React, { Component } from "react";
+import { Route, BrowserRouter } from "react-router-dom"
+import Uploader from "./Uploader.js";
+import FileList from "./FileList.js";
+import FileView from "./FileView.js";
+import Settings from "./Settings.js";
+import Header from "./Header.js";
+import Footer from "./Footer.js";
+import "./App.css";
 
 class App extends Component {
   render() {
