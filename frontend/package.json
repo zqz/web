@@ -3,12 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@data-ui/sparkline": "^0.0.50",
-    "@vx/axis": "^0.0.158",
-    "@vx/gradient": "^0.0.153",
-    "@vx/mock-data": "^0.0.153",
-    "@vx/scale": "^0.0.153",
-    "axios": "^0.17.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "react": "^16.2.0",
