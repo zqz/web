@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: dylanj/circleci-go:latest 
+      - image: dylanj/circleci-go:latest
 
     working_directory: /go/src/github.com/zqz/upl
     steps:
@@ -10,3 +10,25 @@ jobs:
 
       - run: go get -v -t -d ./...
       - run: go test -v ./filedb
+
+  frontend:
+    docker:
+      - image: circleci/node:8
+
+    steps:
+      - checkout
+      - restore_cache:
+          key: 'node-{{ checksum "frontend/yarn.lock" }}-{{ arch }}'
+      - run: cd frontend && yarn install
+      - save_cache:
+          key: 'note-{{ checksum "frontend/yarn.lock" }}-{{ arch }}'
+          paths:
+            - node_modules
+      - run: cd frontend && yarn build
+
+workflows:
+  version: 2
+  gogo:
+    jobs:
+      - build
+      - frontend
