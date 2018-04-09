@@ -1,6 +1,22 @@
 version: 2
 jobs:
-  build:
+  deploy:
+    docker:
+      - image: dylanj/circleci-go:latest
+    steps:
+      - add_ssh_keys:  # add key from CircleCI account based on fingerprint
+          fingerprints:
+            - "49:0b:d7:35:63:2d:96:73:bf:03:0a:ba:ed:dc:b5:e6"
+
+      - attach_workspace:
+          at: "./"
+
+      - run: ls
+      - run: ssh-keyscan zqz.ca >> ~/.ssh/known_hosts
+      - run: scp serv zqz@zqz.ca:serv-new
+
+
+  backend:
     docker:
       - image: dylanj/circleci-go:latest
 
@@ -10,6 +26,17 @@ jobs:
 
       - run: go get -v -t -d ./...
       - run: go test -v ./filedb
+      - attach_workspace:
+          at: ./frontend/build
+
+      - run: go get github.com/elazarl/go-bindata-assetfs/... && go get github.com/jteeuwen/go-bindata/...
+      - run: cd frontend && go-bindata-assetfs -pkg "main" -prefix "assets" build/... && mv bindata.go ../assets.go
+      - run: go build -ldflags='-s' -o bin/serv serv.go assets.go
+
+      - persist_to_workspace:
+          root: bin
+          paths:
+            - serv
 
   frontend:
     docker:
@@ -24,11 +51,23 @@ jobs:
           key: 'note-{{ checksum "frontend/yarn.lock" }}-{{ arch }}'
           paths:
             - node_modules
-      - run: cd frontend && yarn build
+
+      - run: cd frontend && node build
+      - persist_to_workspace:
+          root: frontend
+          paths:
+            - build
 
 workflows:
   version: 2
   gogo:
     jobs:
-      - build
+      - deploy:
+          requires:
+            - frontend
+            - backend
+
       - frontend
+      - backend:
+          requires:
+          - frontend
