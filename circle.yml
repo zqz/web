@@ -4,6 +4,7 @@ jobs:
     docker:
       - image: circleci/golang:1.9
     steps:
+      - checkout
       - add_ssh_keys:
           fingerprints:
             - "49:0b:d7:35:63:2d:96:73:bf:03:0a:ba:ed:dc:b5:e6"
@@ -14,6 +15,8 @@ jobs:
       - run: ls
       - run: ssh-keyscan zqz.ca >> ~/.ssh/known_hosts
       - run: scp serv zqz@zqz.ca:serv-new
+      - run: scp -r db/ zqz@zqz.ca:
+      - run: ssh zqz@zqz.ca "goose -env production up"
       - run: ssh zqz@zqz.ca "sudo systemctl stop zqz && mv serv serv-old && mv serv-new serv && sudo systemctl start zqz"
 
   backend:
