@@ -16,7 +16,7 @@ func init() {
 }
 
 func path(hash string) string {
-	return "/tmp/zqz/" + hash
+	return "./files/" + hash
 }
 
 func NewDiskPersistence() DiskPersistence {
