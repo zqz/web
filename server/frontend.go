@@ -55,9 +55,17 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		pushStaticAssets = append(pushStaticAssets, x)
 	}
 
+	var proto string
+
+	if r.TLS != nil {
+		proto = "https://"
+	} else {
+		proto = "http://"
+	}
+
 	tmplData := map[string]interface{}{
 		"WSPath":  template.JSStr('/'),
-		"ApiRoot": template.JSStr(fmt.Sprintf("http://%s/api", r.Host)),
+		"ApiRoot": template.JSStr(fmt.Sprintf("%s%s/api", proto, r.Host)),
 
 		"Assets": map[string]interface{}{
 			"Js":  js,
