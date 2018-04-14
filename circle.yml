@@ -2,9 +2,9 @@ version: 2
 jobs:
   deploy:
     docker:
-      - image: dylanj/circleci-go:latest
+      - image: circleci/golang:1.9
     steps:
-      - add_ssh_keys:  # add key from CircleCI account based on fingerprint
+      - add_ssh_keys:
           fingerprints:
             - "49:0b:d7:35:63:2d:96:73:bf:03:0a:ba:ed:dc:b5:e6"
 
@@ -14,7 +14,7 @@ jobs:
       - run: ls
       - run: ssh-keyscan zqz.ca >> ~/.ssh/known_hosts
       - run: scp serv zqz@zqz.ca:serv-new
-
+      - run: ssh zqz@zqz.ca "sudo systemctl stop zqz && mv serv serv-old && mv serv-new serv && sudo systemctl start zqz"
 
   backend:
     docker:
@@ -23,8 +23,13 @@ jobs:
     working_directory: /go/src/github.com/zqz/upl
     steps:
       - checkout
+      - restore_cache:
+          key: 'go-deps-{{ checksum "Gopkg.lock" }}-{{ arch }}'
 
-      - run: go get -v -t -d ./...
+      - restore_cache:
+          key: 'go-vend-{{ checksum "Gopkg.lock" }}-{{ arch }}'
+
+      - run: dep ensure
       - run: go test -v ./filedb
       - attach_workspace:
           at: ./frontend/build
@@ -32,6 +37,15 @@ jobs:
       - run: go get github.com/elazarl/go-bindata-assetfs/... && go get github.com/jteeuwen/go-bindata/...
       - run: cd frontend && go-bindata-assetfs -pkg "main" -prefix "assets" build/... && mv bindata.go ../assets.go
       - run: go build -ldflags='-s' -o bin/serv serv.go assets.go
+
+      - save_cache:
+          key: 'go-deps-{{ checksum "Gopkg.lock" }}-{{ arch }}'
+          paths:
+            - /go/pkg/dep
+      - save_cache:
+          key: 'go-vend-{{ checksum "Gopkg.lock" }}-{{ arch }}'
+          paths:
+            - vendor
 
       - persist_to_workspace:
           root: bin
