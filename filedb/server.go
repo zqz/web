@@ -92,6 +92,15 @@ func (s Server) files(w http.ResponseWriter, r *http.Request) {
 	b, _ := json.Marshal(&m)
 
 	w.Write(b)
+
+	pusher, ok := w.(http.Pusher)
+	if !ok {
+		return
+	}
+
+	for _, a := range m {
+		pusher.Push("/meta/"+a.Hash+"/thumbnail", nil)
+	}
 }
 
 func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
