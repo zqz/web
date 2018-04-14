@@ -12,10 +12,23 @@ import (
 )
 
 var indexCache string
+var pushStaticAssets []string
+
+func pushStatic(w http.ResponseWriter) {
+	pusher, ok := w.(http.Pusher)
+	if !ok {
+		return
+	}
+
+	for _, a := range pushStaticAssets {
+		pusher.Push(a, nil)
+	}
+}
 
 func serveIndex(w http.ResponseWriter, r *http.Request) {
 	if indexCache != "" {
 		render.HTML(w, r, indexCache)
+		pushStatic(w)
 		return
 	}
 
@@ -31,6 +44,15 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 	js, err = assets.AssetDir("build/static/js")
 	if err != nil {
 		panic(err)
+	}
+
+	pushStaticAssets = make([]string, 0)
+	for _, x := range css {
+		pushStaticAssets = append(pushStaticAssets, x)
+	}
+
+	for _, x := range js {
+		pushStaticAssets = append(pushStaticAssets, x)
 	}
 
 	tmplData := map[string]interface{}{
@@ -82,6 +104,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	indexCache = output.String()
 	render.HTML(w, r, indexCache)
+	pushStatic(w)
 }
 
 func serveAssets(r chi.Router) {
