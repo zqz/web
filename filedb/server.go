@@ -9,22 +9,19 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"github.com/goware/cors"
 	"github.com/zqz/upl/render"
 )
 
 // Server implements an HTTP File Uploading Server.
 type Server struct {
-	db            FileDB
-	EnableLogging bool
+	db FileDB
 }
 
 // NewServer returns a new Server.
 func NewServer(db FileDB) Server {
 	return Server{
-		db:            db,
-		EnableLogging: false,
+		db: db,
 	}
 }
 
@@ -198,10 +195,6 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 func (s Server) Router() http.Handler {
 	r := chi.NewRouter()
 
-	if s.EnableLogging {
-		r.Use(middleware.Logger)
-	}
-
 	r.Use(cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
@@ -212,7 +205,6 @@ func (s Server) Router() http.Handler {
 	}).Handler)
 
 	r.Get("/files", s.files)
-	// r.Get("/file/{token}/download", s.FileDownload)
 
 	r.Get("/data/{hash}", s.getData)
 	r.Get("/d/{slug}", s.getDataWithSlug)
