@@ -43,6 +43,7 @@ func (dc databaseConfig) loadDatabase() (*sql.DB, error) {
 }
 
 type config struct {
+	LogFile  string         `json:"log_file"`
 	Port     int            `json:"port"`
 	TLSPort  int            `json:"tls_port"`
 	Secure   bool           `json:"secure"`

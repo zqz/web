@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"golang.org/x/crypto/acme/autocert"
 
@@ -20,26 +21,39 @@ type Server struct {
 	logger   *log.Logger
 }
 
-func Init(path string, l *log.Logger) (Server, error) {
+func (s Server) Log(x ...interface{}) {
+	s.logger.Println(x...)
+}
+
+func Init(path string) (Server, error) {
 	s := Server{}
+	s.logger = log.New(os.Stdout, "", log.LstdFlags)
 
 	cfg, err := parseConfig(path)
 	if err != nil {
 		return s, err
 	}
 
-	l.Println("Parsed Config")
+	if cfg.LogFile != "" {
+		f, err := os.OpenFile(cfg.LogFile, os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
+			return s, err
+		}
+
+		s.logger = log.New(f, "", log.LstdFlags)
+	}
+
+	s.logger.Println("Parsed Config")
 
 	db, err := cfg.DBConfig.loadDatabase()
 	if err != nil {
 		return s, err
 	}
 
-	l.Println("Connected to DB")
+	s.logger.Println("Connected to DB")
 
 	s.database = db
 	s.config = cfg
-	s.logger = l
 
 	return s, nil
 }
@@ -86,20 +100,21 @@ func (s Server) runSecure(r chi.Router) error {
 }
 
 func (s Server) Run() error {
-	db := s.database
-
 	fdb := filedb.NewServer(
 		filedb.NewFileDB(
 			filedb.NewDiskPersistence(),
-			filedb.NewDBMetaStorage(db),
-			filedb.NewDBThumbnailStorage(db),
+			filedb.NewDBMetaStorage(s.database),
+			filedb.NewDBThumbnailStorage(s.database),
 		),
 	)
-	// fdb.SetLogger(l)
 
 	r := chi.NewRouter()
-	r.Use(middleware.Logger)
+
+	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: s.logger})
+	r.Use(logger)
+
 	r.Mount("/api", fdb.Router())
+
 	r.Get("/*", serveIndex)
 	serveAssets(r)
 
