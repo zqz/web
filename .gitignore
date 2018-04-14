@@ -3,3 +3,4 @@ Dockerfile
 sqlboiler.toml
 vendor
 serv
+config.json
