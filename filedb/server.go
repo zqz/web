@@ -60,7 +60,7 @@ func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	_, err := s.db.Write(hash, r.Body)
+	meta, err := s.db.FetchMeta(hash)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -68,7 +68,13 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	meta, err := s.db.FetchMeta(hash)
+	if meta.finished() {
+		w.WriteHeader(http.StatusConflict)
+		render.Error(w, "file already uploaded")
+		return
+	}
+
+	_, err = s.db.Write(hash, r.Body)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)

@@ -139,6 +139,28 @@ func TestPostDataNoMeta(t *testing.T) {
 	assert.Equal(t, "file not found", errorMessage(res))
 }
 
+func TestPostDataTwice(t *testing.T) {
+	ts := testServer()
+	defer ts.Close()
+
+	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
+
+	m := Meta{
+		Name: "foo",
+		Size: 5,
+		Hash: hash,
+	}
+
+	post(ts, "/meta", m)
+
+	res := postData(ts, "/data/"+hash, "bytes")
+	assert.Equal(t, 200, res.StatusCode)
+
+	post(ts, "/meta", m)
+	res = postData(ts, "/data/"+hash, "bytes")
+	assert.Equal(t, 409, res.StatusCode)
+}
+
 func TestPostData(t *testing.T) {
 	ts := testServer()
 	defer ts.Close()
