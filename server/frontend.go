@@ -48,11 +48,11 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	pushStaticAssets = make([]string, 0)
 	for _, x := range css {
-		pushStaticAssets = append(pushStaticAssets, x)
+		pushStaticAssets = append(pushStaticAssets, "/assets/static/css/"+x)
 	}
 
 	for _, x := range js {
-		pushStaticAssets = append(pushStaticAssets, x)
+		pushStaticAssets = append(pushStaticAssets, "/assets/static/js/"+x)
 	}
 
 	var proto string
