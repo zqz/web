@@ -34,6 +34,11 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if m2, err := s.db.m.FetchMeta(m.Hash); err == nil {
+		render.JSON(w, m2)
+		return
+	}
+
 	if err = s.db.StoreMeta(*m); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		render.Error(w, err.Error())
