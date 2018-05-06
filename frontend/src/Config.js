@@ -2,6 +2,9 @@ class Config {
   static root = () => {
     return window.apiRoot;
   }
+  static cdnroot = () => {
+    return window.cdnRoot;
+  }
 
   static get = (k) => {
     return localStorage.getItem(k);

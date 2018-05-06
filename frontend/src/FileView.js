@@ -37,7 +37,7 @@ class FileView extends Component {
       return <FileMissing/>;
     }
 
-    var dlurl = Config.root() + "/d/" + file.slug;
+    var dlurl = Config.cdnroot() + file.slug;
 
     return(
       <div className="FileView">

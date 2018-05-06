@@ -14,7 +14,11 @@ import (
 var indexCache string
 var pushStaticAssets []string
 
-func pushStatic(w http.ResponseWriter) {
+func (s Server) pushStatic(w http.ResponseWriter) {
+	if !s.config.Secure {
+		return
+	}
+
 	pusher, ok := w.(http.Pusher)
 	if !ok {
 		return
@@ -25,10 +29,10 @@ func pushStatic(w http.ResponseWriter) {
 	}
 }
 
-func serveIndex(w http.ResponseWriter, r *http.Request) {
+func (s Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 	if indexCache != "" {
 		render.HTML(w, r, indexCache)
-		pushStatic(w)
+		s.pushStatic(w)
 		return
 	}
 
@@ -63,9 +67,17 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 		proto = "http://"
 	}
 
+	var cdnRoot string
+	if s.config.Secure {
+		cdnRoot = "https://x.zqz.ca"
+	} else {
+		cdnRoot = proto + r.Host + "/api/d/"
+	}
+
 	tmplData := map[string]interface{}{
 		"WSPath":  template.JSStr('/'),
 		"ApiRoot": template.JSStr(fmt.Sprintf("%s%s/api", proto, r.Host)),
+		"CdnRoot": template.JSStr(cdnRoot),
 
 		"Assets": map[string]interface{}{
 			"Js":  js,
@@ -89,6 +101,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
   <body>
     <script type='text/javascript'>
       window.apiRoot = {{.ApiRoot}};
+      window.cdnRoot = {{.CdnRoot}};
     </script>
   	<noscript>You need to enable JavaScript to run this app.</noscript><div id="root"></div>
 
@@ -112,7 +125,7 @@ func serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	indexCache = output.String()
 	render.HTML(w, r, indexCache)
-	pushStatic(w)
+	s.pushStatic(w)
 }
 
 func serveAssets(r chi.Router) {
