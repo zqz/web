@@ -69,7 +69,7 @@ func (s Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 
 	var cdnRoot string
 	if s.config.Secure {
-		cdnRoot = "https://x.zqz.ca"
+		cdnRoot = "https://x.zqz.ca/"
 	} else {
 		cdnRoot = proto + r.Host + "/api/d/"
 	}
