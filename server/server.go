@@ -77,6 +77,7 @@ func (s Server) runSecure(r http.Handler) error {
 		Prompt: autocert.AcceptTOS,
 		HostPolicy: autocert.HostWhitelist(
 			"zqz.ca",
+			"x.zqz.ca",
 		),
 	}
 
