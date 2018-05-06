@@ -62,7 +62,7 @@ func (s Server) Close() {
 	s.database.Close()
 }
 
-func (s Server) runInsecure(r chi.Router) error {
+func (s Server) runInsecure(r http.Handler) error {
 	listenPort := fmt.Sprintf(":%d", s.config.Port)
 
 	s.logger.Println("[server] listening for HTTP traffic on port", listenPort)
@@ -70,7 +70,7 @@ func (s Server) runInsecure(r chi.Router) error {
 	return http.ListenAndServe(listenPort, r)
 }
 
-func (s Server) runSecure(r chi.Router) error {
+func (s Server) runSecure(r http.Handler) error {
 	c := autocert.DirCache("./")
 	m := autocert.Manager{
 		Cache:  c,
@@ -109,9 +109,11 @@ func (s Server) Run() error {
 	)
 
 	r := chi.NewRouter()
+	ra := chi.NewRouter()
 
 	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: s.logger})
 	r.Use(logger)
+	ra.Use(logger)
 
 	gzipTypes := []string{
 		"text/html",
@@ -128,18 +130,27 @@ func (s Server) Run() error {
 		"font/woff2",
 	}
 	r.Use(middleware.Compress(-1, gzipTypes...))
-
+	ra.Use(middleware.Compress(-1, gzipTypes...))
 	r.Mount("/api", fdb.Router())
-
 	r.Get("/*", serveIndex)
 	serveAssets(r)
 
+	ra.Get("/{slug}", fdb.GetDataWithSlug)
+
 	s.logger.Println("Listening for web traffic")
 
-	return s.run(r)
+	mux := http.NewServeMux()
+	mux.HandleFunc("x.zqz.ca/", func(w http.ResponseWriter, rx *http.Request) {
+		ra.ServeHTTP(w, rx)
+	})
+	mux.HandleFunc("/", func(w http.ResponseWriter, rx *http.Request) {
+		r.ServeHTTP(w, rx)
+	})
+
+	return s.run(mux)
 }
 
-func (s Server) run(r chi.Router) error {
+func (s Server) run(r http.Handler) error {
 	if s.config.Secure {
 		return s.runSecure(r)
 	} else {
