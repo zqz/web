@@ -18,7 +18,11 @@
 
 .Button {
   background-color: black;
-
   color: white;
   font-weight: bold;
+}
+
+.Dark .Button {
+  background-color: white;
+  color: black;
 }

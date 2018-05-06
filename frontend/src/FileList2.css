@@ -23,10 +23,17 @@
 	border-left: solid 5px black;
 }
 
+.Dark .FileList.Rows .List .File { 
+	border-left: solid 5px white;
+}
+
 .FileList.Rows .List a.File:hover {
 	background:url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAEklEQVQImWM4dOjQfwZ0QJogALuNDRUNPqAgAAAAAElFTkSuQmCC);
 }
 
+.Dark .FileList.Rows .List a.File {
+  color: white;
+}
 .FileList.Rows .List a.File {
 	text-decoration: none;
 	color: black;

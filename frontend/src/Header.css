@@ -5,6 +5,10 @@
   border-bottom: solid 5px black;
 }
 
+.Dark .Header {
+  border-bottom: solid 5px white;
+}
+
 .Header .Logo {
   font-weight: bold;
 }
@@ -14,6 +18,10 @@
   color: black;
   text-transform: lowercase;
   font-weight: bold;
+}
+
+.Dark .Header a {
+  color: white;
 }
 
 .Header .Navigation a {

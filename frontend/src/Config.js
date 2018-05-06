@@ -10,6 +10,14 @@ class Config {
   static set = (k, v) => {
     localStorage.setItem(k, v);
   }
+
+  static toggleDark = () => {
+    if (Config.get('dark') == 'true') {
+      document.body.classList.add('Dark');
+    } else {
+      document.body.classList.remove('Dark');
+    }
+  }
 }
 
 export default Config;

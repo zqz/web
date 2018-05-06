@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import App from './App';
+import ReactDOM from 'react-dom';
 import Checkbox from './Checkbox';
 import Config from './Config';
 import './Settings.css';
@@ -9,6 +11,7 @@ class Settings extends Component {
 
     this.state = {
       instant: this.get('instant') === 'true',
+      dark: this.get('dark') === 'true',
       other: this.get('other') === 'true',
       'filelist-rows': this.get('filelist-rows') !== 'true'
     };
@@ -29,6 +32,10 @@ class Settings extends Component {
       s[option] = v;
       this.set(option, v);
       this.setState(s);
+
+      if (option === 'dark') {
+        Config.toggleDark();
+      }
     }
   }
 
@@ -47,6 +54,10 @@ class Settings extends Component {
             desc="When adding a file, the upload will start immediately"
             checked={this.state.instant}
             onClick={this.change('instant')}/>
+          <Checkbox
+            label="Night Mode"
+            checked={this.state.dark}
+            onClick={this.change('dark')}/>
           <Checkbox
             label="Another Checkbox"
             checked={this.state.other}
