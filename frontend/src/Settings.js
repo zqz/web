@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import App from './App';
-import ReactDOM from 'react-dom';
 import Checkbox from './Checkbox';
 import Config from './Config';
 import './Settings.css';

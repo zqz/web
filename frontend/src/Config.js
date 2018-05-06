@@ -12,7 +12,7 @@ class Config {
   }
 
   static toggleDark = () => {
-    if (Config.get('dark') == 'true') {
+    if (Config.get('dark') === 'true') {
       document.body.classList.add('Dark');
     } else {
       document.body.classList.remove('Dark');
