@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
+import ExifOrientationImg from 'react-exif-orientation-img'
+
 import Config from './Config';
 import './Preview.css';
 
 class Preview extends Component {
-
   inside() {
     var f = this.props.file;
     if (f == null) {
@@ -13,7 +14,12 @@ class Preview extends Component {
     if (f.type.startsWith('image')) {
       var imgpath = Config.cdnroot() + f.slug;
       var alt = "preview of " + f.name;
-      return (<img alt={alt} src={imgpath}/>);
+
+      if (f.type.endsWith('jpeg') || f.type.endsWith('jpg')) {
+        return (<ExifOrientationImg src={imgpath} alt={alt}/>);
+      } else {
+        return (<img alt={alt} src={imgpath}/>);
+      }
     }
   }
 
