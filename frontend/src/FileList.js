@@ -19,7 +19,7 @@ class Toggle extends Component {
     }
 
     return (
-      <div className="pointer" onClick={this.props.onClick}>{text}</div>
+      <div className={"pointer ico " + text} onClick={this.props.onClick}></div>
     );
   }
 }

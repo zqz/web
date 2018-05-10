@@ -26,7 +26,6 @@ class Preview extends Component {
   render() {
     return (
       <div>
-        <div>Preview</div>
         {this.inside()}
       </div>
     );

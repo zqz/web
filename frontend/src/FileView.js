@@ -10,11 +10,35 @@ class FileView extends Component {
     super(props);
 
     this.state = {
-      file: null
+      file: null,
+      gotFile: false,
     };
   }
 
+  getDerivedStateFromProps() {
+
+  }
+
+  componentWillReceiveProps(nextProps) {
+    var hash = nextProps.match.params.hash;
+    if (hash !== this.state.hash) {
+      this.setState({
+        hash: hash,
+        file: null
+      });
+    }
+  }
+
   componentDidMount() {
+    var hash = this.props.match.params.hash;
+
+    this.setState({
+      hash: hash,
+      file: null
+    });
+  }
+
+  work() {
     var hash = this.props.match.params.hash;
 
     fetch(Config.root() + "/meta/" + hash)
@@ -31,7 +55,13 @@ class FileView extends Component {
   }
 
   render() {
+    if (this.state.file === null) {
+      console.log("lols");
+      this.work();
+      return(<div>loading</div>);
+    }
     var file = this.state.file;
+      console.log("lols");
 
     if (file === null) {
       return <FileMissing/>;

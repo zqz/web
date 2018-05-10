@@ -22,17 +22,18 @@ class FileListEntry extends Component {
   render() {
     var f = this.props.file;
     var style = {};
+    var classes = "";
 
-    if (f.thumbnail !== "" && !this.props.rows) {
+    if (f.thumbnail === undefined) {
+      console.log ("thumb", f.thumbnail);
+      classes = "NoThumb";
+    } else if (f.thumbnail !== "" && !this.props.rows) {
       var thumbnailUrl = Config.root() + "/meta/" + f.hash + "/thumbnail";
-
       style.backgroundImage = "url('" + thumbnailUrl + "')";
-
     }
 
-
     return (
-      <Link style={style} onMouseEnter={this.mouseIn} onMouseLeave={this.mouseOut} className="File" to={"/file/" + f.hash} alt={f.name}>
+      <Link style={style} onMouseEnter={this.mouseIn} onMouseLeave={this.mouseOut} className={classes + " File"} to={"/file/" + f.hash} alt={f.name}>
         <div className="Name">
           {f.name}
         </div>

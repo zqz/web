@@ -1,23 +1,25 @@
 .Header {
   line-height: 30px;
   vertical-align: middle;
-
-  border-bottom: solid 5px black;
 }
 
 .Dark .Header {
   border-bottom: solid 5px white;
 }
 
-.Header .Logo {
+.Header a.Logo {
   font-weight: bold;
 }
 
 .Header a {
   text-decoration: none;
-  color: black;
+  color: #1A4C3A;
   text-transform: lowercase;
   font-weight: bold;
+}
+
+.Header a:hover {
+  color: #395339;
 }
 
 .Dark .Header a {

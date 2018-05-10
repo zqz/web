@@ -16,7 +16,7 @@ class Button extends Component {
 
 
 class FileItemButtons extends Component {
-  open = () => <Link to={"/file/" + this.props.hash} key="button_open" className="Button">Open</Link>
+  open = () => <Link key={"button_open_" + this.props.hash} to={`/file/${this.props.hash}`} className="Button">Open</Link>
   start = () => <Button key="start" text="Start" onClick={this.props.onStart}/>
   stop = () => <Button key="stop" text="Stop" onClick={this.props.onStop}/>
   resume = () => <Button key="resume" text="Resume" onClick={this.props.onResume}/>

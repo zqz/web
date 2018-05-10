@@ -32,7 +32,7 @@ class Settings extends Component {
       this.setState(s);
 
       if (option === 'dark') {
-        Config.toggleDark();
+        // Config.toggleDark();
       }
     }
   }

@@ -14,7 +14,7 @@ class App extends Component {
       <BrowserRouter>
       <div className="App">
         <Header />
-        <div className="Container">
+        <div className="MainContainer Container">
           <Uploader/>
           <div className="Main">
             <Route exact path="/" component={FileList}/>

@@ -21,30 +21,27 @@ input[type=checkbox] {
 
 .Checkbox {
   background-color: white;
-  border: solid 1px black;
   display: inline-block;
   width: 20px;
   height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #eee;
   cursor: pointer;
 }
 
 .Checkbox .Inside {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAF0lEQVQImWNggID/DGgAQwAbIKwLLgAA/moE/FwLUTgAAAAASUVORK5CYII=);
   width: 10px;
   height: 10px;
 }
 
-.Checkbox:hover .Inside {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAK0lEQVQYV1WMQQoAAAjC5v8fbUgU5XFOBdg2kpgo5IIUqb1Kzz6cmzXvbwFCAhP+QJDg2gAAAABJRU5ErkJggg==);
-}
-
-.Checkbox.Active:hover .Inside {
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAF0lEQVQImWNggID/DGgAQwAbIKwLLgAA/moE/FwLUTgAAAAASUVORK5CYII=);
-}
-
 .Checkbox.Active .Inside {
-  background-color: black;
+  left: 9px;
+  top: 5px;
+  width: 5px;
+  height: 10px;
+  border: solid  #2C6FD1;
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
 }

@@ -89,6 +89,7 @@ class FileItem extends Component {
 
   buttons = () => {
     return <FileItemButtons
+      hash={this.state.hash}
       slug={this.state.slug}
       done={this.fileDone}
       onStart={this.start}
