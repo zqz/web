@@ -52,7 +52,7 @@ export default {
 
         // creates `main.css` and `main.css.map` — pass `false`
         // as the second argument if you don't want the sourcemap
-        css.write('public/main.css');
+        css.write('public/build/main.css');
       },
 
       // Warnings are normally passed straight to Rollup. You can
