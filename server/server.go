@@ -110,8 +110,6 @@ func (s Server) Run() error {
 	r.Use(middleware.Compress(-1, gzipTypes...))
 	ra.Use(middleware.Compress(-1, gzipTypes...))
 	r.Mount("/api", fdb.Router())
-	r.Get("/*", s.serveIndex)
-	serveAssets(r)
 
 	ra.Get("/{slug}", fdb.GetDataWithSlug)
 
