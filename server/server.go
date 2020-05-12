@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/goware/cors"
 	"github.com/zqz/upl/filedb"
 )
 
@@ -82,16 +81,6 @@ func (s Server) Run() error {
 	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: s.logger})
 	r.Use(logger)
 	ra.Use(logger)
-
-	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://zqz.ca"},
-		AllowedMethods:   []string{"GET"},
-		AllowedHeaders:   []string{"Accept"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	})
-	ra.Use(cors.Handler)
 
 	r.Mount("/api", fdb.Router())
 
