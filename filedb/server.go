@@ -149,7 +149,7 @@ func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
 	s.sendfile(meta.Hash, w, r)
 }
 
-func (s Server) GetDataWithSlug(w http.ResponseWriter, r *http.Request) {
+func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
 	meta, err := s.db.FetchMetaWithSlug(slug)
@@ -191,12 +191,12 @@ func (s Server) Router() http.Handler {
 
 	r.Get("/files", s.files)
 
-	r.Get("/data/{hash}", s.getData)
-	r.Get("/d/{slug}", s.GetDataWithSlug)
+	r.Get("/data/by-hash/{hash}", s.getData)
+	r.Get("/data/by-slug/{slug}", s.getDataWithSlug)
 	r.Post("/data/{hash}", s.postData)
 
-	r.Post("/meta", s.postMeta)
 	r.Get("/meta/{hash}", s.getMeta)
+	r.Post("/meta", s.postMeta)
 
 	return r
 }
