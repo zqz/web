@@ -8,11 +8,6 @@ import (
 	"io"
 )
 
-type thumbnailStorer interface {
-	StoreThumbnail(Thumbnail) error
-	FetchThumbnails([]int) (map[int]Thumbnail, error)
-}
-
 type persister interface {
 	Del(string) error
 	Put(string) (io.WriteCloser, error)
@@ -30,15 +25,13 @@ type metaStorer interface {
 type FileDB struct {
 	p persister
 	m metaStorer
-	t thumbnailStorer
 }
 
 // NewFileDB returns an instance of a FileDB.
-func NewFileDB(p persister, m metaStorer, t thumbnailStorer) FileDB {
+func NewFileDB(p persister, m metaStorer) FileDB {
 	return FileDB{
 		m: m,
 		p: p,
-		t: t,
 	}
 }
 
@@ -51,21 +44,6 @@ func (db FileDB) List(page int) ([]*Meta, error) {
 	metaIds := make([]int, len(metas))
 	for i, m := range metas {
 		metaIds[i] = m.ID
-	}
-
-	thumbnails, err := db.t.FetchThumbnails(metaIds)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for _, m := range metas {
-		t, ok := thumbnails[m.ID]
-		if !ok {
-			continue
-		}
-
-		m.Thumbnail = t.Hash
 	}
 
 	return metas, nil
@@ -234,33 +212,8 @@ func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
 	return 0, nil
 }
 
-func (db FileDB) generateThumbnailFromMeta(m *Meta) error {
-	b := new(bytes.Buffer)
-	err := db.Read(m.Hash, b)
-	if err != nil {
-		return err
-	}
-
-	t, err := generateThumbnail(b)
-	if err != nil {
-		return err
-	}
-
-	t.MetaID = m.ID
-
-	err = db.t.StoreThumbnail(t)
-	if err != nil {
-		return err
-	}
-
-	w, err := db.p.Put(t.Hash)
-	_, err = io.Copy(w, t.Data)
-
-	return err
-}
-
 func (db FileDB) process(m *Meta) error {
-	return db.generateThumbnailFromMeta(m)
+	return nil
 }
 
 func (db FileDB) store(m *Meta, rc io.ReadCloser) error {

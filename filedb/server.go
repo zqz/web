@@ -163,41 +163,6 @@ func (s Server) GetDataWithSlug(w http.ResponseWriter, r *http.Request) {
 	s.download(meta, w, r)
 }
 
-func (s Server) getThumbnail(w http.ResponseWriter, r *http.Request) {
-	hash := chi.URLParam(r, "hash")
-
-	m, err := s.db.m.FetchMeta(hash)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
-
-	if m.ID == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	tns, err := s.db.t.FetchThumbnails([]int{m.ID})
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println(err.Error())
-		return
-	}
-
-	if len(tns) == 0 {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	t := tns[m.ID]
-
-	s.sendfile(t.Hash, w, r)
-
-}
-
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
@@ -229,8 +194,6 @@ func (s Server) Router() http.Handler {
 	r.Get("/data/{hash}", s.getData)
 	r.Get("/d/{slug}", s.GetDataWithSlug)
 	r.Post("/data/{hash}", s.postData)
-
-	r.Get("/meta/{hash}/thumbnail", s.getThumbnail)
 
 	r.Post("/meta", s.postMeta)
 	r.Get("/meta/{hash}", s.getMeta)

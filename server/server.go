@@ -106,7 +106,6 @@ func (s Server) Run() error {
 		filedb.NewFileDB(
 			filedb.NewDiskPersistence(),
 			filedb.NewDBMetaStorage(s.database),
-			filedb.NewDBThumbnailStorage(s.database),
 		),
 	)
 
