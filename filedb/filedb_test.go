@@ -358,7 +358,6 @@ func TestListPartial(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
-		t: NewMemoryThumbnailStorage(),
 	}
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
@@ -385,7 +384,6 @@ func TestList(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
-		t: NewMemoryThumbnailStorage(),
 	}
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"

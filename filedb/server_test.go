@@ -15,7 +15,6 @@ func testServer() *httptest.Server {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
-		t: NewMemoryThumbnailStorage(),
 	}
 
 	s := Server{
@@ -59,7 +58,7 @@ func get(ts *httptest.Server, path string) *http.Response {
 	return res
 }
 
-func postData(ts *httptest.Server, path string, data string) *http.Response {
+func postFile(ts *httptest.Server, path string, data string) *http.Response {
 	buf := bytes.NewBufferString(data)
 	res, _ := http.Post(ts.URL+path, "application/octet-stream", buf)
 	return res
@@ -85,7 +84,6 @@ func TestPostMeta(t *testing.T) {
 	}
 
 	res := post(ts, "/meta", m)
-
 	assert.Equal(t, 200, res.StatusCode)
 
 	responseBody, _ := ioutil.ReadAll(res.Body)
@@ -101,7 +99,7 @@ func TestGetMetaNotFound(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	res := get(ts, "/meta/"+hash)
+	res := get(ts, "/meta/by-hash/"+hash)
 
 	assert.Equal(t, 404, res.StatusCode)
 	assert.Equal(t, "file not found", errorMessage(res))
@@ -120,26 +118,25 @@ func TestGetMetaFound(t *testing.T) {
 	}
 
 	post(ts, "/meta", m)
-
-	res := get(ts, "/meta/"+hash)
+	res := get(ts, "/meta/by-hash/"+hash)
 
 	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, toJSON(m), readBody(res))
 }
 
-func TestPostDataNoMeta(t *testing.T) {
+func TestPostFileNoMeta(t *testing.T) {
 	ts := testServer()
 	defer ts.Close()
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	res := post(ts, "/data/"+hash, "foobar")
+	res := post(ts, "/file/"+hash, "foobar")
 
 	assert.Equal(t, 404, res.StatusCode)
 	assert.Equal(t, "file not found", errorMessage(res))
 }
 
-func TestPostDataTwice(t *testing.T) {
+func TestPostFileTwice(t *testing.T) {
 	ts := testServer()
 	defer ts.Close()
 
@@ -153,15 +150,15 @@ func TestPostDataTwice(t *testing.T) {
 
 	post(ts, "/meta", m)
 
-	res := postData(ts, "/data/"+hash, "bytes")
+	res := postFile(ts, "/file/"+hash, "bytes")
 	assert.Equal(t, 200, res.StatusCode)
 
 	post(ts, "/meta", m)
-	res = postData(ts, "/data/"+hash, "bytes")
+	res = postFile(ts, "/file/"+hash, "bytes")
 	assert.Equal(t, 409, res.StatusCode)
 }
 
-func TestPostData(t *testing.T) {
+func TestPostFile(t *testing.T) {
 	ts := testServer()
 	defer ts.Close()
 
@@ -175,11 +172,11 @@ func TestPostData(t *testing.T) {
 
 	post(ts, "/meta", m)
 
-	res := postData(ts, "/data/"+hash, "byt")
+	res := postFile(ts, "/file/"+hash, "byt")
 	assert.Equal(t, 404, res.StatusCode)
 	assert.Equal(t, "got partial data", errorMessage(res))
 
-	res = postData(ts, "/data/"+hash, "es")
+	res = postFile(ts, "/file/"+hash, "es")
 	assert.Equal(t, 200, res.StatusCode)
 
 	json.Unmarshal([]byte(readBody(res)), &m)
@@ -193,7 +190,7 @@ func TestGetDataNotFound(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	res := get(ts, "/data/"+hash)
+	res := get(ts, "/file/by-hash/"+hash)
 	assert.Equal(t, 404, res.StatusCode)
 	assert.Equal(t, "file not found", errorMessage(res))
 }
@@ -212,14 +209,14 @@ func TestGetDataWithSlug(t *testing.T) {
 	}
 
 	post(ts, "/meta", m)
-	postData(ts, "/data/"+hash, "bytes")
+	postFile(ts, "/file/"+hash, "bytes")
 
-	res := get(ts, "/meta/"+hash)
+	res := get(ts, "/meta/by-hash/"+hash)
 	b, _ := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 	json.Unmarshal(b, &m)
 
-	res = get(ts, "/d/"+m.Slug)
+	res = get(ts, "/file/by-slug/"+m.Slug)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, "foo/bar", res.Header.Get("Content-Type"))
 	assert.Equal(t, hash, res.Header.Get("Etag"))
@@ -241,9 +238,9 @@ func TestGetData(t *testing.T) {
 	}
 
 	post(ts, "/meta", m)
-	postData(ts, "/data/"+hash, "bytes")
+	postFile(ts, "/file/"+hash, "bytes")
 
-	res := get(ts, "/data/"+hash)
+	res := get(ts, "/file/by-hash/"+hash)
 	assert.Equal(t, 200, res.StatusCode)
 	assert.Equal(t, "foo/bar", res.Header.Get("Content-Type"))
 	assert.Equal(t, hash, res.Header.Get("Etag"))
@@ -265,9 +262,9 @@ func TestGetDataCachedInBrowser(t *testing.T) {
 	}
 
 	post(ts, "/meta", m)
-	postData(ts, "/data/"+hash, "bytes")
+	postFile(ts, "/file/"+hash, "bytes")
 
-	req, _ := http.NewRequest("GET", ts.URL+"/data/"+hash, nil)
+	req, _ := http.NewRequest("GET", ts.URL+"/file/by-hash/"+hash, nil)
 	req.Header.Add("If-None-Match", hash)
 	res, _ := http.DefaultClient.Do(req)
 
@@ -280,7 +277,7 @@ func TestGetDataUnknwonCachedInBrowser(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	req, _ := http.NewRequest("GET", ts.URL+"/data/"+hash, nil)
+	req, _ := http.NewRequest("GET", ts.URL+"/file/by-hash/"+hash, nil)
 	req.Header.Add("If-None-Match", hash)
 	res, _ := http.DefaultClient.Do(req)
 
@@ -316,7 +313,7 @@ func TestGetFilesWithFiles(t *testing.T) {
 	}
 
 	post(ts, "/meta", m)
-	postData(ts, "/data/"+hash, "bytes")
+	postFile(ts, "/file/"+hash, "bytes")
 
 	req, _ := http.NewRequest("GET", ts.URL+"/files", nil)
 	res, _ := http.DefaultClient.Do(req)

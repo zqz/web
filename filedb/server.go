@@ -190,12 +190,11 @@ func (s Server) Router() http.Handler {
 	}).Handler)
 
 	r.Get("/files", s.files)
+	r.Get("/file/by-hash/{hash}", s.getData)
+	r.Get("/file/by-slug/{slug}", s.getDataWithSlug)
+	r.Post("/file/{hash}", s.postData)
 
-	r.Get("/data/by-hash/{hash}", s.getData)
-	r.Get("/data/by-slug/{slug}", s.getDataWithSlug)
-	r.Post("/data/{hash}", s.postData)
-
-	r.Get("/meta/{hash}", s.getMeta)
+	r.Get("/meta/by-hash/{hash}", s.getMeta)
 	r.Post("/meta", s.postMeta)
 
 	return r
