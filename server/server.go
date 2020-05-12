@@ -30,23 +30,12 @@ func Init(path string) (Server, error) {
 	if err != nil {
 		return s, err
 	}
-
-	if cfg.LogFile != "" {
-		f, err := os.OpenFile(cfg.LogFile, os.O_RDWR|os.O_CREATE, 0755)
-		if err != nil {
-			return s, err
-		}
-
-		s.logger = log.New(f, "", log.LstdFlags)
-	}
-
 	s.logger.Println("Parsed Config")
 
 	db, err := cfg.DBConfig.loadDatabase()
 	if err != nil {
 		return s, err
 	}
-
 	s.logger.Println("Connected to DB")
 
 	s.database = db

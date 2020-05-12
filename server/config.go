@@ -16,6 +16,11 @@ type databaseConfig struct {
 	User string `json:"user"`
 }
 
+type config struct {
+	Port     int            `json:"port"`
+	DBConfig databaseConfig `json:"database"`
+}
+
 func (dc databaseConfig) openstring() string {
 	s := fmt.Sprintf(
 		"host=%s port=%d user=%s dbname=%s sslmode=disable",
@@ -40,12 +45,6 @@ func (dc databaseConfig) loadDatabase() (*sql.DB, error) {
 	}
 
 	return db, nil
-}
-
-type config struct {
-	LogFile  string         `json:"log_file"`
-	Port     int            `json:"port"`
-	DBConfig databaseConfig `json:"database"`
 }
 
 func parseConfig(path string) (config, error) {
