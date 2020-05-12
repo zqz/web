@@ -1,5 +1,4 @@
 <style type="text/scss">
-
   .logo-container {
     display: flex;
     flex-direction: column;
@@ -24,13 +23,11 @@
     }
   }
 
-
   .logo {
     background-image: url("https://avatars1.githubusercontent.com/u/111311?s=60&amp;v=4");
     background-size: 100%;
     width: 64px;
     height: 64px;
-
   }
 </style>
 

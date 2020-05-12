@@ -7,6 +7,7 @@
   })()
 </script>
 
+{#if false}
 {#await fetchFiles}
 in progress
 {:then files}
@@ -16,4 +17,4 @@ in progress
 {:catch error}
 error
 {/await}
-
+{/if}
