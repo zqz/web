@@ -93,22 +93,6 @@ func (s Server) Run() error {
 	})
 	ra.Use(cors.Handler)
 
-	gzipTypes := []string{
-		"text/html",
-		"text/css",
-		"text/plain",
-		"text/javascript",
-		"application/javascript",
-		"application/json",
-		"application/atom+xml",
-		"application/rss+xml",
-		"image/svg",
-		"image/ico",
-		"image/svg+xml",
-		"font/woff2",
-	}
-	r.Use(middleware.Compress(-1, gzipTypes...))
-	ra.Use(middleware.Compress(-1, gzipTypes...))
 	r.Mount("/api", fdb.Router())
 
 	ra.Get("/{slug}", fdb.GetDataWithSlug)
