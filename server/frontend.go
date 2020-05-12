@@ -15,10 +15,6 @@ var indexCache string
 var pushStaticAssets []string
 
 func (s Server) pushStatic(w http.ResponseWriter) {
-	if !s.config.Secure {
-		return
-	}
-
 	pusher, ok := w.(http.Pusher)
 	if !ok {
 		return
@@ -68,11 +64,7 @@ func (s Server) serveIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var cdnRoot string
-	if s.config.Secure {
-		cdnRoot = "https://x.zqz.ca/"
-	} else {
-		cdnRoot = proto + r.Host + "/api/d/"
-	}
+	cdnRoot = proto + r.Host + "/api/d/"
 
 	tmplData := map[string]interface{}{
 		"WSPath":  template.JSStr('/'),

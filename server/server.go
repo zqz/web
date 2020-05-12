@@ -1,14 +1,11 @@
 package server
 
 import (
-	"crypto/tls"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-
-	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -69,36 +66,6 @@ func (s Server) runInsecure(r http.Handler) error {
 	s.logger.Println("[server] listening for HTTP traffic on port", listenPort)
 
 	return http.ListenAndServe(listenPort, r)
-}
-
-func (s Server) runSecure(r http.Handler) error {
-	c := autocert.DirCache("./")
-	m := autocert.Manager{
-		Cache:  c,
-		Prompt: autocert.AcceptTOS,
-		HostPolicy: autocert.HostWhitelist(
-			"zqz.ca",
-			"x.zqz.ca",
-		),
-	}
-
-	tlsPort := fmt.Sprintf(":%d", s.config.TLSPort)
-
-	h := &http.Server{
-		Addr:      tlsPort,
-		TLSConfig: &tls.Config{GetCertificate: m.GetCertificate},
-		Handler:   r,
-		ErrorLog:  s.logger,
-	}
-
-	listenPort := fmt.Sprintf(":%d", s.config.Port)
-	go http.ListenAndServe(listenPort, m.HTTPHandler(s.secureRedirect()))
-
-	s.logger.Println("[server] listening for TLS traffic on port", s.config.TLSPort)
-	s.logger.Println("[server] redirecting HTTP traffic on port", s.config.Port, "to HTTPS")
-
-	// start https server
-	return h.ListenAndServeTLS("", "")
 }
 
 func (s Server) Run() error {
@@ -162,18 +129,5 @@ func (s Server) Run() error {
 }
 
 func (s Server) run(r http.Handler) error {
-	if s.config.Secure {
-		return s.runSecure(r)
-	} else {
-		return s.runInsecure(r)
-	}
-}
-
-func (s Server) secureRedirect() http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		redir := "https://" + req.Host + req.RequestURI
-
-		s.logger.Println("[server] redirected request to", redir)
-		http.Redirect(w, req, redir, http.StatusMovedPermanently)
-	}
+	return s.runInsecure(r)
 }
