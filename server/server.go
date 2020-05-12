@@ -76,22 +76,17 @@ func (s Server) Run() error {
 	)
 
 	r := chi.NewRouter()
-	ra := chi.NewRouter()
 
 	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: s.logger})
 	r.Use(logger)
-	ra.Use(logger)
 
 	r.Mount("/api", fdb.Router())
 
-	ra.Get("/{slug}", fdb.GetDataWithSlug)
+	// ra.Get("/{slug}", fdb.GetDataWithSlug)
 
 	s.logger.Println("Listening for web traffic")
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("x.zqz.ca/", func(w http.ResponseWriter, rx *http.Request) {
-		ra.ServeHTTP(w, rx)
-	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, rx *http.Request) {
 		r.ServeHTTP(w, rx)
 	})
