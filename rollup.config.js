@@ -24,7 +24,7 @@ export default {
     svelte({
       // You can restrict which files are compiled
       // using `include` and `exclude`
-      include: 'src/*.svelte',
+      include: 'src/**/*.svelte',
 
       // By default, the client-side compiler is used. You
       // can also use the server-side rendering compiler

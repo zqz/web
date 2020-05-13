@@ -1,8 +1,6 @@
 <script>
-  import Overview from './Overview.svelte';
+  import Overview from './Overview/Index.svelte';
   import Logo from './Logo.svelte';
-  import Uploader from './Uploader.svelte';
-  import Line from './Line.svelte';
 </script>
 
 <main>
@@ -11,7 +9,6 @@
   </div>
   <div id="right">
     <h1>zqz.ca</h1>
-    <Uploader />
     <Overview/>
   </div>
 </main>

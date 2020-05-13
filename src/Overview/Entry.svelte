@@ -1,5 +1,5 @@
 <script>
-  import bytes from './Util/FileSize.js';
+  import bytes from '../Util/FileSize.js';
   export let file;
 
   const url = `https://x.zqz.ca/${file.slug}`;
