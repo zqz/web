@@ -3,4 +3,6 @@ Dockerfile
 sqlboiler.toml
 vendor
 serv
+upl
 config.json
+files
