@@ -1,8 +1,9 @@
 <script>
   import bytes from '../Util/FileSize.js';
+  import Config from '../Config.js';
   export let file;
 
-  const url = `https://x.zqz.ca/${file.slug}`;
+  const url = `${Config.url}/api/file/by-slug/${file.slug}`;
 </script>
 
 <div class="entry">
