@@ -1,21 +1,24 @@
 package filedb
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"sync"
 
-	"github.com/volatiletech/sqlboiler/queries/qm"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/zqz/upl/models"
-	"gopkg.in/volatiletech/null.v6"
 )
 
 type DBMetaStorage struct {
 	entries      map[string]*Meta
 	entriesMutex sync.Mutex
 	db           *sql.DB
+	ctx          context.Context
 }
 
 func file2meta(f *models.File) Meta {
@@ -116,11 +119,12 @@ func NewDBMetaStorage(db *sql.DB) *DBMetaStorage {
 	return &DBMetaStorage{
 		entries: make(map[string]*Meta, 0),
 		db:      db,
+		ctx:     context.TODO(),
 	}
 }
 
 func (s *DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
-	f, err := models.Files(s.db, qm.Where("hash=?", h)).One()
+	f, err := models.Files(qm.Where("hash=?", h)).One(s.ctx, s.db)
 
 	if err != nil {
 		return Meta{}, err
@@ -130,7 +134,7 @@ func (s *DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
 }
 
 func (s *DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
-	f, err := models.Files(s.db, qm.Where("slug=?", slug)).One()
+	f, err := models.Files(qm.Where("slug=?", slug)).One(s.ctx, s.db)
 
 	if err != nil {
 		return Meta{}, err
@@ -178,7 +182,7 @@ func (s *DBMetaStorage) StoreMeta(m *Meta) error {
 
 	if m.finished() {
 		f := meta2file(m)
-		if err := f.Insert(s.db); err != nil {
+		if err := f.Insert(s.ctx, s.db, boil.Infer()); err != nil {
 			fmt.Println("error", err.Error())
 			return err
 		}
