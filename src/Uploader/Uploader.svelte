@@ -60,11 +60,16 @@
     const filesToAdd = Array.from(e.target.files).map((f) => ({id: 1, data: f}));
     files = [...files, ...filesToAdd];
   }
+
+  function onFileRemoved(e) {
+    console.log('removing', e);
+    files = files.filter(x => x.id != e.detail.id);
+  }
 </script>
 
 <div class="file-list" bind:this={container}>
   {#each files as file}
-    <File file={file} on:file:uploaded />
+    <File file={file} on:file:uploaded on:file:removed={onFileRemoved} />
   {/each}
 </div>
 

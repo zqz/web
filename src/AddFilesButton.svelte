@@ -18,7 +18,7 @@
     color: white;
     background-color: $link-normal;
     padding: 10px 20px;
-    border-radius: 3px;
+    border-radius: $border-radius;
     flex-shrink: 0;
   }
 </style>

@@ -62,7 +62,7 @@
   }
 
   function remove() {
-
+    dispatch('file:removed', { id: file.id });
   }
 
   // meta callbacks
@@ -148,11 +148,31 @@
       {truncate(file.name, 20)}
     </div>
     <div class="buttons">
-      {#if status === STATUS_DONE}
-        <a href={`${Config.url}/api/file/by-slug/${file.meta.slug}`}>Go to
-          File</a>
+      {#if status == STATUS_READY}
+        <div class="button" aria-label="Start uploading" on:click={start}>
+          {#if file.meta.bytes_received > 0}
+            continue
+          {:else}
+            start
+          {/if}
+        </div>
+        <div class="button remove" aria-label="Remove file from queue"  on:click={remove}>
+          x
+        </div>
       {/if}
-      buttons
+      {#if status === STATUS_IN_PROGRESS}
+        <div class="button" on:click={cancel}>
+          cancel
+        </div>
+      {/if}
+      {#if status === STATUS_DONE}
+        <a class="button" title="View file" href={`${Config.url}/api/file/by-slug/${file.meta.slug}`}>
+          goto :file
+        </a>
+        <div class="button remove" aria-label="Remove uploaded File from List" on:click={remove}>
+          x
+        </div>
+      {/if}
     </div>
   </div>
   <div class="row">
@@ -173,7 +193,7 @@
       {#if status === STATUS_IN_PROGRESS}
         <ProgressStats updates={progressUpdates}/> 
       {:else}
-        {status}
+        <span class="monospace">{status}</span>
       {/if}
     </div>
   </div>
@@ -185,25 +205,6 @@
   <pre>
   {JSON.stringify(file, null, 2)}
   </pre>
-  status: {status}
-
-  {#if status === STATUS_HASHING}
-    <Hashing/>
-  {/if}
-
-  {#if file.hash !== undefined && status == STATUS_READY}
-  <button on:click={start}>
-    start
-  </button>
-  <button on:click={remove}>
-    remove
-  </button>
-  {/if}
-  {#if status == STATUS_IN_PROGRESS}
-    <button on:click={cancel}>
-      cancel
-    </button>
-  {/if}
 </div>
 </div>
 
@@ -213,17 +214,58 @@
     display: flex;
     flex-direction: column;
 
-    border-left: solid 4px $link-normal;
-    padding-left: 4px;
+    border-left: solid 8px $link-normal;
+    padding-left: 8px;
+    padding-bottom: 4px;
+
+    .buttons {
+      display: flex;
+      flex-direction: row;
+      .button {
+        text-decoration: none;
+        cursor: pointer;
+        background-color: $button-color;
+        color: white;
+        padding: 4px 12px;
+        border-radius: $border-radius;
+        font-weight: 500;
+        line-height: 1;
+        height: 22px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        user-select: none;
+        margin-left: 4px;
+
+        &:hover {
+          background-color: darken($link-normal, $button-hover-darken);
+          box-shadow: 0;
+        }
+
+        &:active {
+          background-color: darken($link-normal, $button-active-darken);
+          box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+        }
+
+        &.remove {
+          padding: 4px 8px;
+          background-color: $button-remove-color;
+
+          &:hover {
+            background-color: darken($button-remove-color, $button-hover-darken);
+          }
+
+          &:active {
+            background-color: darken($button-remove-color, $button-active-darken);
+          }
+        }
+      }
+    }
 
     &.done {
-      border-left: solid 4px $file-done;
-    }
-    &:hover {
-      border-width: 8px;
+      border-color: $file-done;
     }
 
     .row {
+      align-items: flex-end;
       font-size: 0.8rem;
 
       .name {
