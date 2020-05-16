@@ -1,7 +1,6 @@
 <script>
   import { createEventDispatcher } from 'svelte';
   import Config from '../Config.js';
-  import Rusha from 'rusha';
   import Upload from './Upload.js';
   import Meta from './Meta.js';
   import Hashing from './Hashing.svelte';
