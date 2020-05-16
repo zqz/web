@@ -16,7 +16,13 @@
     document.addEventListener('selectFiles', openFileSelect);
   });
 
-  let files = [];
+  let b = new Blob(['edaed'], {type: 'text/plain'});
+  b.name = 'awdawd awdpokwadawd awd awawdawd awd awddexample';
+  let files = [{
+    id: 1,
+    data: b,
+  }];
+
   let container;
 
   function openFileSelect() {
@@ -37,6 +43,7 @@
     e.preventDefault();
     console.log('drop', e);
 
+    debugger;
     handleFiles(e.dataTransfer.items);
   }
 
@@ -55,10 +62,15 @@
   }
 </script>
 
-<div>
-  <div bind:this={container}>
-    {#each files as file}
-      <File file={file} on:file:uploaded />
-    {/each}
-  </div>
+<div class="file-list" bind:this={container}>
+  {#each files as file}
+    <File file={file} on:file:uploaded />
+  {/each}
 </div>
+
+<style>
+  .file-list{
+    display: flex;
+    flex-direction: column-reverse;
+  }
+</style>
