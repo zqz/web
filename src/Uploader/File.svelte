@@ -150,7 +150,7 @@
     <div class="buttons">
       {#if status == STATUS_READY}
         <div class="button" aria-label="Start uploading" on:click={start}>
-          {#if file.meta.bytes_received > 0}
+          {#if file.meta && file.meta.bytes_received > 0}
             continue
           {:else}
             start
