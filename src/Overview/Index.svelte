@@ -4,6 +4,7 @@
   import Entry from './Entry.svelte';
 
   let promise = fetchFiles();
+  let delay = 1;
 
   async function fetchFiles() {
     const res = await fetch(`${Config.url}/api/files`);
@@ -16,18 +17,31 @@
     }
   }
 
-  function onFileUploaded() {
+  function loadFiles() {
     promise = fetchFiles();
+  }
+
+  function timeoutLoadFiles() {
+    delay = delay + 1;
+    setTimeout(loadFiles, delay*1000);
+    return '';
   }
 </script>
 
-<Uploader on:file:uploaded={onFileUploaded}/>
-{#await promise}
-in progress
-{:then files}
-  {#each files as f}
-    <Entry file={f}/>
-  {/each}
-{:catch error}
-error
-{/await}
+<Uploader on:file:uploaded={loadFiles}/>
+<div>
+  {#await promise}
+    <p>
+      Loading Files...
+    </p>
+  {:then files}
+    {#each files as f}
+      <Entry file={f}/>
+    {/each}
+  {:catch error}
+    <p>
+      {timeoutLoadFiles()}
+      There was an error, retrying in {delay}s...
+    </p>
+  {/await}
+</div>
