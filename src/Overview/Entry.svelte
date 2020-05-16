@@ -12,6 +12,8 @@
 </div>
 
 <style type="text/scss">
+  @import "../variables.scss";
+
   .entry {
     display: flex;
     flex-direction: row;
@@ -20,10 +22,10 @@
 
     a {
       text-decoration: none;
-      color: #4A89DC;
+      color: $link-normal;
 
       &:visited {
-        color: #967ADC;
+        color: $link-visited;
       }
 
       &:hover {

@@ -13,7 +13,9 @@
   </div>
 </main>
 
-<style>
+<style type="text/scss">
+  @import "variables.scss";
+
   main {
     display: flex;
     flex-direction: row;
@@ -30,6 +32,7 @@
     line-height: 48px;
     vertical-align: middle;
     width: 100%;
+    color: $black;
   }
 
   #left {
