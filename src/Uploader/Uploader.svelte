@@ -11,18 +11,37 @@
   onMount(() => {
     container.appendChild(uploader);
     document.addEventListener('paste', onPaste);
+    document.addEventListener('drop', onDrop);
+    document.addEventListener('dragover', onDragOver);
   });
 
   let files = [];
   let container;
 
+  function onDragOver(e) {
+    e.preventDefault();
+    console.log('dragover', e);
+  }
+
   function onPaste(e) {
-    let pastedFiles = Array.from(e.clipboardData.items)
+    console.log('paste', e);
+    handleFiles(e.clipboardData.items);
+  }
+
+  function onDrop(e) {
+    e.preventDefault();
+    console.log('drop', e);
+
+    handleFiles(e.dataTransfer.items);
+  }
+
+  function handleFiles(files) {
+    let newFiles = Array.from(files)
       .map((i) => i.getAsFile())
       .filter(x => x)
       .map((i) => ({id: 1, data: i}));
 
-    files = [...files, ...pastedFiles];
+    files = [...files, ...newFiles];
   }
 
 
