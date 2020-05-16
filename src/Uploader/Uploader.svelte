@@ -13,10 +13,15 @@
     document.addEventListener('paste', onPaste);
     document.addEventListener('drop', onDrop);
     document.addEventListener('dragover', onDragOver);
+    document.addEventListener('selectFiles', openFileSelect);
   });
 
   let files = [];
   let container;
+
+  function openFileSelect() {
+    uploader.click();
+  }
 
   function onDragOver(e) {
     e.preventDefault();
@@ -44,28 +49,16 @@
     files = [...files, ...newFiles];
   }
 
-
   function onChange(e) {
     const filesToAdd = Array.from(e.target.files).map((f) => ({id: 1, data: f}));
     files = [...files, ...filesToAdd];
   }
-
-  function addFile() {
-    uploader.click();
-  }
 </script>
 
 <div>
-  <button on:click={addFile}>
-    Add
-  </button>
-
   <div bind:this={container}>
     {#each files as file}
       <File file={file} on:file:uploaded />
     {/each}
   </div>
 </div>
-
-<style>
-</style>

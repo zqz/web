@@ -1,6 +1,7 @@
 <script>
   import Overview from './Overview/Index.svelte';
   import Logo from './Logo.svelte';
+  import AddFilesButton from './AddFilesButton.svelte';
 </script>
 
 <main>
@@ -8,7 +9,10 @@
     <Logo/>
   </div>
   <div id="right">
-    <h1>zqz.ca</h1>
+    <header>
+      <h1>zqz.ca</h1>
+      <AddFilesButton />
+    </header>
     <Overview/>
   </div>
 </main>
@@ -20,6 +24,14 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+  }
+
+
+  header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
 
   h1 {
