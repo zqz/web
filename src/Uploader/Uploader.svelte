@@ -16,12 +16,15 @@
     document.addEventListener('selectFiles', openFileSelect);
   });
 
+  let files = [];
+  /*
   let b = new Blob(['edaed'], {type: 'text/plain'});
   b.name = 'awdawd awdpokwadawd awd awawdawd awd awddexample';
   let files = [{
     id: 1,
     data: b,
   }];
+  */
 
   let container;
 
