@@ -49,7 +49,7 @@ func meta2file(m *Meta) *models.File {
 
 const paginationSQL = `
 	SELECT
-	f.id, f.hash, f.name, f.slug, f.created_at, f.size
+	f.id, f.hash, f.name, f.slug, f.content_type, f.created_at, f.size
 	FROM files AS f
 	ORDER BY f.created_at DESC
 	OFFSET $1
@@ -71,16 +71,17 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 
 	for rows.Next() {
 		var e struct {
-			ID   int
-			Name null.String
-			Hash null.String
-			Slug null.String
-			Date null.Time
-			Size int
+			ID          int
+			Hash        null.String
+			Name        null.String
+			Slug        null.String
+			ContentType null.String
+			Date        null.Time
+			Size        int
 		}
 
 		err = rows.Scan(
-			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.Date, &e.Size,
+			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.ContentType, &e.Date, &e.Size,
 		)
 
 		if err != nil {
@@ -103,6 +104,13 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 			x.Slug = e.Slug.String
 		}
 
+		if e.ContentType.Valid {
+			x.ContentType = e.ContentType.String
+		}
+
+		if e.Date.Valid {
+			x.Date = e.Date.Time
+		}
 		x.Size = e.Size
 
 		entries = append(entries, &x)
