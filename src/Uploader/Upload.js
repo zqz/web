@@ -1,13 +1,10 @@
 import Config from '../Config.js';
+import Meta from './Meta.js';
+import Hash from './Hash.js';
 
-const Upload = () => {
-  let file = null;
+const Upload = (file) => {
   let xhr = new XMLHttpRequest();
   let callbacks = {};
-
-  function setFile(f) {
-    file = f;
-  }
 
   function on(callback, func) {
     callbacks[callback] = func;
@@ -24,6 +21,35 @@ const Upload = () => {
 
   function abort() {
     xhr.abort();
+  }
+
+  function start() {
+    if (file.meta !== undefined) {
+      upload();
+      return;
+    }
+
+    let m = Meta(file);
+    m.on('create', function() {
+      file.meta = m.get();
+      upload();
+    });
+    m.create();
+  }
+
+  function fetchMeta() {
+    let m = Meta(file);
+    m.on('found', onMetaFound);
+    m.on('notfound', onMetaNotFound);
+    m.retrieve();
+  }
+
+  async function hash() {
+    onHash();
+    Hash(file, function(h) {
+      file.hash = h;
+      fetchMeta();
+    });
   }
 
   function upload() {
@@ -78,6 +104,10 @@ const Upload = () => {
     cb('start');
   }
 
+  function onHash() {
+    cb('hash');
+  };
+
   function onUploadProgress(event) {
     let prg = {
       loaded: getOffset() + event.loaded,
@@ -88,6 +118,19 @@ const Upload = () => {
     cb('progress', prg);
   }
 
+  function onMetaFound(m) {
+    file.meta = m;
+    cb('meta_found', m)
+  }
+
+  function onMetaNotFound() {
+    cb('meta_notfound');
+  }
+
+  function onMetaCheck() {
+    cb('meta_check');
+  }
+
   function now() {
     const d = new Date();
     return d.getTime();
@@ -95,9 +138,10 @@ const Upload = () => {
 
   return {
     on,
-    upload,
+    fetchMeta,
+    start,
+    hash,
     abort,
-    setFile
   }
 }
 

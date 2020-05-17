@@ -2,8 +2,6 @@
   import { createEventDispatcher } from 'svelte';
   import Config from '../Config.js';
   import Upload from './Upload.js';
-  import Hash from './Hash.js';
-  import Meta from './Meta.js';
   import bytes from '../Util/FileSize.js';
 
   import Hashing from './Hashing.svelte';
@@ -36,29 +34,24 @@
     }
   }
 
-  let u = Upload();
+  let u = Upload(file);
   u.on('start', onUploadStart);
   u.on('finish', onUploadFinish);
   u.on('progress', onUploadProgress);
+  u.on('hash', onHash);
   u.on('abort', onUploadAbort);
+  u.on('meta_check', onMetaCheck);
+  u.on('meta_found', onMetaFound);
+  u.on('meta_notfound', onMetaNotFound);
+
+  function onHash() {
+    status = STATUS_HASHING;
+  }
 
   // actions
   function start() {
     progressUpdates = []; // clear progress history, if any.
-    u.setFile(file);
-
-    if (file.meta !== undefined) {
-      u.upload();
-      return;
-    }
-
-    let m = Meta(file);
-    m.on('create', function() {
-      file.meta = m.get();
-      u.upload();
-    });
-
-    m.create();
+    u.start();
   }
 
   function cancel() {
@@ -71,8 +64,6 @@
 
   // meta callbacks
   function onMetaFound(m) {
-    file.meta = m;
-
     if (m.bytes_received == m.size) {
       status = STATUS_DONE;
     } else {
@@ -101,24 +92,11 @@
 
   function onUploadAbort() {
     status = STATUS_QUEUE;
-    fetchMeta(file);
+    u.fetchMeta();
   };
 
-  function fetchMeta(file) {
+  function onMetaCheck() {
     status = STATUS_META_CHECK;
-
-    let m = Meta(file);
-    m.on('found', onMetaFound);
-    m.on('notfound', onMetaNotFound);
-    m.retrieve();
-  }
-
-  async function hashFile() {
-    status = STATUS_HASHING;
-    Hash(file, function(hash) {
-      file.hash = hash;
-      fetchMeta(file);
-    });
   }
 
   function copyAttributes() {
@@ -136,7 +114,7 @@
 
   // immediately request a hash
   copyAttributes();
-  hashFile();
+  u.hash();
 </script>
 
 <div>

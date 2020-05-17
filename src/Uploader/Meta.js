@@ -83,7 +83,6 @@ const Meta = (file) => {
     cb(...args);
   }
 
-
   return {
     retrieve,
     create,
