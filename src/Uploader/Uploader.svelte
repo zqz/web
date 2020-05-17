@@ -35,11 +35,15 @@
     handleFiles(e.dataTransfer.items);
   }
 
+  function randomId() {
+    return Math.random().toString(20).substr(2, 8)
+  }
+
   function handleFiles(files) {
     let newFiles = Array.from(files)
       .map((i) => i.getAsFile())
       .filter(x => x)
-      .map((i) => ({id: 1, data: i}));
+      .map((i) => ({id: randomId(), data: i}));
 
     files = [...files, ...newFiles];
   }
@@ -49,7 +53,7 @@
   }
 
   function onChange(e) {
-    const filesToAdd = Array.from(e.target.files).map((f) => ({id: 1, data: f}));
+    const filesToAdd = Array.from(e.target.files).map((f) => ({id: randomId(), data: f}));
     files = [...files, ...filesToAdd];
   }
 
