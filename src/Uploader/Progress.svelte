@@ -18,12 +18,11 @@
     return `top: -${height}px;`;
   }
 
-$: {
-  if (line !== undefined) {
-    line.style.width = `${percent * 100}%`;
+  $: {
+    if (line !== undefined) {
+      line.style.width = `${percent * 100}%`;
+    }
   }
-  }
-
 </script>
 
 <div class="line-container">
@@ -49,20 +48,20 @@ $: {
     display: flex;
     justify-content: flex-start;
     position: relative;
-    /* margin-bottom: 8px; */
   }
 
   .line-start {
     border-top-left-radius: 50%;
     border-bottom-left-radius: 50%;
   }
+
   .line-end {
     border-top-right-radius: 50%;
     border-bottom-right-radius: 50%;
   }
 
   .line-progress {
-    transition: width 0.5s linear 0s;
+    transition: width 1s linear 0s;
   }
 
   .line-fill {

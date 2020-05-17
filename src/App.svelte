@@ -26,7 +26,6 @@
     justify-content: space-between;
   }
 
-
   header {
     display: flex;
     flex-direction: row;

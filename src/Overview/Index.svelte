@@ -28,20 +28,26 @@
   }
 </script>
 
-<Uploader on:file:uploaded={loadFiles}/>
 <div>
-  {#await promise}
-    <p>
-      Loading Files...
-    </p>
-  {:then files}
-    {#each files as f}
-      <Entry file={f}/>
-    {/each}
-  {:catch error}
-    <p>
-      {timeoutLoadFiles()}
-      There was an error, retrying in {delay}s...
-    </p>
-  {/await}
+  <Uploader on:file:uploaded={loadFiles}/>
+  <div class="files-list">
+    {#await promise}
+      <p>Loading Files...</p>
+    {:then files}
+      {#each files as f}
+        <Entry file={f}/>
+      {/each}
+    {:catch error}
+      <p>
+        {timeoutLoadFiles()}
+        There was an error, retrying in {delay}s...
+      </p>
+    {/await}
+  </div>
 </div>
+
+<style>
+  .files-list {
+    margin-top: 16px;
+  }
+</style>

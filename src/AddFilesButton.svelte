@@ -1,24 +1,12 @@
 <script>
+  import Button from './Button.svelte';
+
   function onClick() {
-    var event = new Event('selectFiles');
-    document.dispatchEvent(event);
+    var e = new Event('selectFiles');
+    document.dispatchEvent(e);
   }
 </script>
 
-<span class="add-files-button" on:click={onClick}>
+<Button title="Add file to upload queue" size="large" on:click={onClick}>
   add files
-</span>
-
-<style type="text/scss">
-  @import "variables.scss";
-
-  .add-files-button {
-    cursor: pointer;
-    font-weight: 500;
-    color: white;
-    background-color: $link-normal;
-    padding: 10px 20px;
-    border-radius: $border-radius;
-    flex-shrink: 0;
-  }
-</style>
+</Button>

@@ -4,6 +4,8 @@
   import Upload from './Upload.js';
   import Meta from './Meta.js';
   import Hashing from './Hashing.svelte';
+  import Button from '../Button.svelte';
+  import LinkButton from '../LinkButton.svelte';
   import Progress from './Progress.svelte';
   import ProgressStats from './ProgressStats.svelte';
   import bytes from '../Util/FileSize.js';
@@ -120,7 +122,6 @@
       file.hash = hashHex;
       fetchMeta(file);
     });
-
   }
 
   function copyAttributes() {
@@ -147,31 +148,31 @@
     <div class="name">
       {truncate(file.name, 20)}
     </div>
-    <div class="buttons">
+    <div class="row">
       {#if status == STATUS_READY}
-        <div class="button" aria-label="Start uploading" on:click={start}>
+        <Button title="Start uploading" on:click={start}>
           {#if file.meta && file.meta.bytes_received > 0}
             continue
           {:else}
             start
           {/if}
-        </div>
-        <div class="button remove" aria-label="Remove file from queue"  on:click={remove}>
+        </Button>
+        <Button title="Remove file from queue" size="remove" on:click={remove}>
           x
-        </div>
+        </Button>
       {/if}
       {#if status === STATUS_IN_PROGRESS}
-        <div class="button" on:click={cancel}>
+        <Button title="Cancel file upload" on:click={cancel}>
           cancel
-        </div>
+        </Button>
       {/if}
       {#if status === STATUS_DONE}
-        <a class="button" title="View file" href={`${Config.url}/api/file/by-slug/${file.meta.slug}`}>
+        <LinkButton title="View file" target="_blank" url={`${Config.url}/api/file/by-slug/${file.meta.slug}`}>
           goto :file
-        </a>
-        <div class="button remove" aria-label="Remove uploaded File from List" on:click={remove}>
+        </LinkButton>
+        <Button title="Remove uploaded File from List" size="remove" on:click={remove}>
           x
-        </div>
+        </Button>
       {/if}
     </div>
   </div>
@@ -189,12 +190,14 @@
       {/if}
       </div>
     </div>
-    <div class="status">
-      {#if status === STATUS_IN_PROGRESS}
-        <ProgressStats updates={progressUpdates}/> 
-      {:else}
-        <span class="monospace">{status}</span>
-      {/if}
+    <div class="row">
+      <div class="status">
+        {#if status === STATUS_IN_PROGRESS}
+          <ProgressStats updates={progressUpdates}/>
+        {:else}
+          <span class="monospace">{status}</span>
+        {/if}
+      </div>
     </div>
   </div>
   {#if status === STATUS_IN_PROGRESS}
@@ -218,55 +221,16 @@
     padding-left: 8px;
     padding-bottom: 4px;
 
-    .buttons {
-      display: flex;
-      flex-direction: row;
-      .button {
-        text-decoration: none;
-        cursor: pointer;
-        background-color: $button-color;
-        color: white;
-        padding: 4px 12px;
-        border-radius: $border-radius;
-        font-weight: 500;
-        line-height: 1;
-        height: 22px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        user-select: none;
-        margin-left: 4px;
-
-        &:hover {
-          background-color: darken($link-normal, $button-hover-darken);
-          box-shadow: 0;
-        }
-
-        &:active {
-          background-color: darken($link-normal, $button-active-darken);
-          box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-        }
-
-        &.remove {
-          padding: 4px 8px;
-          background-color: $button-remove-color;
-
-          &:hover {
-            background-color: darken($button-remove-color, $button-hover-darken);
-          }
-
-          &:active {
-            background-color: darken($button-remove-color, $button-active-darken);
-          }
-        }
-      }
-    }
-
     &.done {
       border-color: $file-done;
     }
 
     .row {
-      align-items: flex-end;
       font-size: 0.8rem;
+
+      .status {
+        align-self: flex-end;
+      }
 
       .name {
         font-size: 1.3rem;

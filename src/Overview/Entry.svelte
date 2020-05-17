@@ -1,26 +1,27 @@
 <script>
   import bytes from '../Util/FileSize.js';
   import Config from '../Config.js';
+
   export let file;
 
   const url = `${Config.url}/api/file/by-slug/${file.slug}`;
+  const [registry, name] = file.type.split('/');
 
-const [registry, name] = file.type.split('/'); // split mime
-function color() {
-  switch(registry) {
-    case 'application': return '#434a54';
-    case 'audio': return '#fcbb42';
-    case 'font': return '#37bc9b';
-    case 'example': return '#da4453';
-    case 'image': return '#4a89dc';
-    case 'message': return '#da4453';
-    case 'multipart': return '#da4453';
-    case 'text': return '#967adc';
-    case 'video': return '#a0d468';
+  function color() {
+    switch(registry) {
+      case 'application': return '#434a54';
+      case 'audio': return '#fcbb42';
+      case 'font': return '#37bc9b';
+      case 'example': return '#da4453';
+      case 'image': return '#4a89dc';
+      case 'message': return '#da4453';
+      case 'multipart': return '#da4453';
+      case 'text': return '#967adc';
+      case 'video': return '#a0d468';
+    }
+
+    return '434a54';
   }
-
-  return '434a54';
-}
 </script>
 
 <div class="entry">

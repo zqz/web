@@ -28,23 +28,16 @@
 
   let container;
 
-  function openFileSelect() {
-    uploader.click();
-  }
-
   function onDragOver(e) {
     e.preventDefault();
-    console.log('dragover', e);
   }
 
   function onPaste(e) {
-    console.log('paste', e);
     handleFiles(e.clipboardData.items);
   }
 
   function onDrop(e) {
     e.preventDefault();
-    console.log('drop', e);
 
     debugger;
     handleFiles(e.dataTransfer.items);
@@ -59,13 +52,16 @@
     files = [...files, ...newFiles];
   }
 
+  function openFileSelect() {
+    uploader.click();
+  }
+
   function onChange(e) {
     const filesToAdd = Array.from(e.target.files).map((f) => ({id: 1, data: f}));
     files = [...files, ...filesToAdd];
   }
 
   function onFileRemoved(e) {
-    console.log('removing', e);
     files = files.filter(x => x.id != e.detail.id);
   }
 </script>
