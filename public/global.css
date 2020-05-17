@@ -10,6 +10,13 @@ body, html {
   padding: 32px;
 }
 
+@media (max-width: 767px) {
+  /* low res, mobile landscape */
+  html {
+    padding: 0 !important;
+  }
+}
+
 body {
   font-family: 'Rubik', sans-serif;
   font-weight: 300;

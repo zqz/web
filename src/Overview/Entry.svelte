@@ -25,9 +25,10 @@
 <div class="entry">
   <div class="row">
     <div class="sq" style="background-color: {color()}"></div>
-    <a href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
+    <a class="name" href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
   </div>
-  <span class="small">{bytes(file.size)}</span>
+  <span class="monospace small hash">{file.hash}</span>
+  <span class="size small">{bytes(file.size)}</span>
 </div>
 
 <style type="text/scss">
@@ -44,6 +45,7 @@
     }
 
     .sq {
+      min-width: 8px;
       width: 8px;
       height: 100%;
     }
@@ -58,9 +60,42 @@
       }
     }
 
+    .hash {
+      display: none;
+      width: 10%;
+      flex-grow: 1;
+      text-align: right;
+    }
+
+    .size {
+      width: 16%;
+      text-align: right;
+    }
     .small {
       font-size: 0.8rem;
       align-self: center;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    /* tablets */
+    .entry {
+      .hash {
+        display: block;
+      }
+    }
+  }
+
+  @media (max-width: 767px) {
+    .entry {
+      .row {
+        overflow:hidden;
+        max-width: 70%;
+        .name {
+          white-space: nowrap;
+          overflow:hidden;
+        }
+      }
     }
   }
 </style>

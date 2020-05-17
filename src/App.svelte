@@ -42,7 +42,6 @@
     margin-bottom: 8px;
     line-height: 48px;
     vertical-align: middle;
-    width: 100%;
     color: $black;
   }
 
@@ -58,6 +57,27 @@
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+  }
+
+  @media (min-width: 768px) and (max-width: 1024px) {
+    /* tablets */
+    #left {
+      min-width: 100px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    /* low res, mobile landscape */
+    #left {
+      display: none;
+      width: 0;
+      min-width: 0;
+    }
+
+    #right {
+      padding-left: 0;
+    }
   }
 
   @media (min-width: 640px) {
