@@ -117,8 +117,7 @@
   u.hash();
 </script>
 
-<div>
-  <div class="file {status}">
+<div class="file {status}">
   <div class="row">
     <div class="name">
       {truncate(file.name, 40)}
@@ -157,12 +156,12 @@
         {bytes(file.size)}
       </div>
       <div class="monospace">
-      {#if status === STATUS_HASHING}
-        <Hashing/>
-      {/if}
-      {#if file.hash !== undefined}
-        {file.hash}
-      {/if}
+        {#if status === STATUS_HASHING}
+          <Hashing/>
+        {/if}
+        {#if file.hash !== undefined}
+          {file.hash}
+        {/if}
       </div>
     </div>
     <div class="row">
@@ -179,18 +178,13 @@
     <Progress percent={percent} height={6}/>
   {/if}
 </div>
-<div>
-  <pre>
-  {JSON.stringify(file, null, 2)}
-  </pre>
-</div>
-</div>
 
 <style type="text/scss">
   @import "../variables.scss";
   .file {
     display: flex;
     flex-direction: column;
+    margin-bottom: 8px;
 
     border-left: solid 8px $link-normal;
     padding-left: 8px;
