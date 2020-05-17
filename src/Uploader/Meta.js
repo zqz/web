@@ -1,8 +1,26 @@
 import Config from '../Config.js';
 
+import CallbacksHandler from './CallbacksHandler.js';
+
+const MetaCallbacks = () => {
+  let callbacks = CallbacksHandler();
+
+  function on(...args) { callbacks.on(...args) }
+  function onMetaFound(meta) { callbacks.call('found', meta) }
+  function onMetaNotFound() { callbacks.call('notfound') }
+  function onMetaCreate() { callbacks.call('create') }
+
+  return {
+    onMetaFound,
+    onMetaNotFound,
+    onMetaCreate,
+    on
+  }
+}
+
 const Meta = (file) => {
   let meta = null;
-  let callbacks = {};
+  let callbacks = MetaCallbacks();
   let xhr = new XMLHttpRequest();
 
   function payload() {
@@ -24,16 +42,20 @@ const Meta = (file) => {
     return meta;
   }
 
+  function on(...args) {
+    callbacks.on(...args);
+  }
+
   async function retrieve() {
     const response = await fetch(Config.getMetaUrl(file.hash));
     const json = await response.json();
 
     if (json.message === 'file not found') {
-      onMetaNotFound();
+      callbacks.onMetaNotFound();
       return;
     }
 
-    onMetaFound(json);
+    callbacks.onMetaFound(json);
   }
 
   function create() {
@@ -53,34 +75,7 @@ const Meta = (file) => {
     }
 
     meta = JSON.parse(text);
-    onMetaCreate();
-  }
-
-  // callbacks
-  function onMetaFound(meta) {
-    cb('found', meta);
-  }
-
-  function onMetaNotFound() {
-    cb('notfound');
-  }
-
-  function onMetaCreate() {
-    cb('create');
-  }
-
-  // callback helpers
-  function on(callback, func) {
-    callbacks[callback] = func;
-  }
-
-  function cb(name, ...args) {
-    const cb = callbacks[name];
-    if ( cb === undefined) {
-      return;
-    }
-
-    cb(...args);
+    callbacks.onMetaCreate();
   }
 
   return {
