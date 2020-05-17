@@ -23,7 +23,7 @@ jobs:
 
     - name: 'Build Artifact'
       run: |
-        tar -cvzf deploy.tar.gz public/build/
+        tar -cvzf deploy.tar.gz public/
 
     - name: 'Copy Artifact to Server'
       uses: appleboy/scp-action@master
