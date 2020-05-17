@@ -38,8 +38,9 @@
 
   function onDrop(e) {
     e.preventDefault();
-
-    debugger;
+    if (e.dataTransfer === undefined) {
+      return;
+    }
     handleFiles(e.dataTransfer.items);
   }
 

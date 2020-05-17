@@ -1,36 +1,51 @@
 import Config from '../Config.js';
+import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
 import Hash from './Hash.js';
 
-const CallbackHandler = () => {
-  let callbacks = {};
+const UploadCallbacks = (file) => {
+  let callbacks = CallbacksHandler();
 
-  function on(callback, func) {
-    callbacks[callback] = func;
+  function on(...args) { callbacks.on(...args) }
+  function onUploadError() { callbacks.call('error') }
+  function onUploadAbort() { callbacks.call('abort') }
+  function onUploadFinish(meta) { callbacks.call('finish', meta) }
+  function onUploadStart() { callbacks.call('start') }
+  function onUploadProgress(e) { callbacks.call('progress', e) }
+  function onHash() { callbacks.call('hash') }
+
+  function onMetaFound(m) {
+    file.meta = m;
+    callbacks.call('meta_found', m)
   }
 
-  function call(name, ...args) {
-    const cb = callbacks[name];
-    if ( cb === undefined) {
-      return;
-    }
+  function onMetaNotFound() { callbacks.call('meta_notfound') }
+  function onMetaCheck() { callbacks.call('meta_check') }
 
-    cb(...args);
+  return {
+    onUploadAbort,
+    onUploadProgress,
+    onUploadError,
+    onUploadStart,
+    onUploadFinish,
+    onHash,
+    onMetaCheck,
+    onMetaFound,
+    onMetaNotFound,
+    on
   }
-
-  return { on, call };
 }
 
 const Upload = (file) => {
   let xhr = new XMLHttpRequest();
-  let callbacks = CallbackHandler();
-
-  function on(...args) {
-    callbacks.on(...args);
-  }
+  let callbacks = UploadCallbacks(file);
 
   function abort() {
     xhr.abort();
+  }
+
+  function on(...args) {
+    callbacks.on(...args);
   }
 
   function start() {
@@ -49,13 +64,13 @@ const Upload = (file) => {
 
   function fetchMeta() {
     let m = Meta(file);
-    m.on('found', onMetaFound);
-    m.on('notfound', onMetaNotFound);
+    m.on('found', callbacks.onMetaFound);
+    m.on('notfound', callbacks.onMetaNotFound);
     m.retrieve();
   }
 
   async function hash() {
-    onHash();
+    callbacks.onHash();
     Hash(file, function(h) {
       file.hash = h;
       fetchMeta();
@@ -64,22 +79,22 @@ const Upload = (file) => {
 
   function upload() {
     xhr.upload.addEventListener('progress', onUploadProgress);
-    xhr.upload.addEventListener('error', onUploadError);
-    xhr.upload.addEventListener('abort', onUploadAbort);
+    xhr.upload.addEventListener('error', callbacks.onUploadError);
+    xhr.upload.addEventListener('abort', callbacks.onUploadAbort);
     xhr.addEventListener('readystatechange', onUploadStateChange);
     xhr.open('POST', Config.postFileUrl(file.hash), true);
     xhr.send(file.data.slice(getOffset()));
-    onUploadStart();
+    callbacks.onUploadStart();
   }
 
-  function getOffset() {
-    const m = file.meta;
+  function onUploadProgress(event) {
+    let prg = {
+      loaded: getOffset() + event.loaded,
+      total: file.data.size,
+      time: now()
+    };
 
-    if (m.bytes_received === undefined) {
-      return 0;
-    }
-
-    return m.bytes_received;
+    callbacks.onUploadProgress(prg);
   }
 
   function onUploadStateChange(event) {
@@ -93,50 +108,18 @@ const Upload = (file) => {
     }
 
     const meta = JSON.parse(text);
-    onUploadFinish(meta);
+    callbacks.onUploadFinish(meta);
   }
 
-  function onUploadError() {
-    callbacks.call('error');
-  }
 
-  function onUploadAbort() {
-    callbacks.call('abort');
-  }
+  function getOffset() {
+    const m = file.meta;
 
-  function onUploadFinish(meta) {
-    callbacks.call('finish', meta);
-  }
+    if (m.bytes_received === undefined) {
+      return 0;
+    }
 
-  function onUploadStart() {
-    callbacks.call('start');
-  }
-
-  function onHash() {
-    callbacks.call('hash');
-  };
-
-  function onUploadProgress(event) {
-    let prg = {
-      loaded: getOffset() + event.loaded,
-      total: file.data.size,
-      time: now()
-    };
-
-    callbacks.call('progress', prg);
-  }
-
-  function onMetaFound(m) {
-    file.meta = m;
-    callbacks.call('meta_found', m)
-  }
-
-  function onMetaNotFound() {
-    callbacks.call('meta_notfound');
-  }
-
-  function onMetaCheck() {
-    callbacks.call('meta_check');
+    return m.bytes_received;
   }
 
   function now() {
