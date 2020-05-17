@@ -3,8 +3,6 @@
   import Config from '../Config.js';
 
   export let file;
-
-  const url = `${Config.url}/api/file/by-slug/${file.slug}`;
   const [registry, name] = file.type.split('/');
 
   function color() {
@@ -20,14 +18,14 @@
       case 'video': return '#a0d468';
     }
 
-    return '434a54';
+    return '#434a54';
   }
 </script>
 
 <div class="entry">
   <div class="row">
     <div class="sq" style="background-color: {color()}"></div>
-    <a href={url} target="_blank">{file.name}</a>
+    <a href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
   </div>
   <span class="small">{bytes(file.size)}</span>
 </div>

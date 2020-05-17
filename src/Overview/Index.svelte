@@ -3,11 +3,12 @@
   import Uploader from '../Uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
 
+  let page = 0;
   let promise = fetchFiles();
   let delay = 1;
 
   async function fetchFiles() {
-    const res = await fetch(`${Config.url}/api/files`);
+    const res = await fetch(Config.getFilesListUrl(page));
     const json = await res.json();
 
     if (res.ok) {

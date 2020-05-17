@@ -25,7 +25,7 @@ const Meta = (file) => {
   }
 
   async function retrieve() {
-    const response = await fetch(`${Config.url}/api/meta/by-hash/${file.hash}`);
+    const response = await fetch(Config.getMetaUrl(file.hash));
     const json = await response.json();
 
     if (json.message === 'file not found') {
@@ -38,7 +38,7 @@ const Meta = (file) => {
 
   function create() {
     xhr.addEventListener('readystatechange', onMetaStateChange);
-    xhr.open('POST', `${Config.url}/api/meta`, true);
+    xhr.open('POST', Config.postMetaUrl(), true);
     xhr.send(payload());
   }
 

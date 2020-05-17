@@ -57,9 +57,7 @@ const Upload = (file) => {
     xhr.upload.addEventListener('error', onUploadError);
     xhr.upload.addEventListener('abort', onUploadAbort);
     xhr.addEventListener('readystatechange', onUploadStateChange);
-
-    xhr.open('POST', `${Config.url}/api/file/` + file.hash, true);
-
+    xhr.open('POST', Config.postFileUrl(file.hash), true);
     xhr.send(file.data.slice(getOffset()));
     onUploadStart();
   }
