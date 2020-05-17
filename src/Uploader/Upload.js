@@ -2,21 +2,31 @@ import Config from '../Config.js';
 import Meta from './Meta.js';
 import Hash from './Hash.js';
 
-const Upload = (file) => {
-  let xhr = new XMLHttpRequest();
+const CallbackHandler = () => {
   let callbacks = {};
 
   function on(callback, func) {
     callbacks[callback] = func;
   }
 
-  function cb(name, ...args) {
+  function call(name, ...args) {
     const cb = callbacks[name];
     if ( cb === undefined) {
       return;
     }
 
     cb(...args);
+  }
+
+  return { on, call };
+}
+
+const Upload = (file) => {
+  let xhr = new XMLHttpRequest();
+  let callbacks = CallbackHandler();
+
+  function on(...args) {
+    callbacks.on(...args);
   }
 
   function abort() {
@@ -87,23 +97,23 @@ const Upload = (file) => {
   }
 
   function onUploadError() {
-    cb('error');
+    callbacks.call('error');
   }
 
   function onUploadAbort() {
-    cb('abort');
+    callbacks.call('abort');
   }
 
   function onUploadFinish(meta) {
-    cb('finish', meta);
+    callbacks.call('finish', meta);
   }
 
   function onUploadStart() {
-    cb('start');
+    callbacks.call('start');
   }
 
   function onHash() {
-    cb('hash');
+    callbacks.call('hash');
   };
 
   function onUploadProgress(event) {
@@ -113,20 +123,20 @@ const Upload = (file) => {
       time: now()
     };
 
-    cb('progress', prg);
+    callbacks.call('progress', prg);
   }
 
   function onMetaFound(m) {
     file.meta = m;
-    cb('meta_found', m)
+    callbacks.call('meta_found', m)
   }
 
   function onMetaNotFound() {
-    cb('meta_notfound');
+    callbacks.call('meta_notfound');
   }
 
   function onMetaCheck() {
-    cb('meta_check');
+    callbacks.call('meta_check');
   }
 
   function now() {
