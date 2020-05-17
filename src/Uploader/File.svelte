@@ -2,13 +2,15 @@
   import { createEventDispatcher } from 'svelte';
   import Config from '../Config.js';
   import Upload from './Upload.js';
+  import Hash from './Hash.js';
   import Meta from './Meta.js';
+  import bytes from '../Util/FileSize.js';
+
   import Hashing from './Hashing.svelte';
   import Button from '../Button.svelte';
   import LinkButton from '../LinkButton.svelte';
   import Progress from './Progress.svelte';
   import ProgressStats from './ProgressStats.svelte';
-  import bytes from '../Util/FileSize.js';
 
   export let file;
 
@@ -113,13 +115,8 @@
 
   async function hashFile() {
     status = STATUS_HASHING;
-
-    var bp = file.data.arrayBuffer();
-    bp.then(async (b) => {
-      const hashBuffer = await crypto.subtle.digest('SHA-1', b);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      file.hash = hashHex;
+    Hash(file, function(hash) {
+      file.hash = hash;
       fetchMeta(file);
     });
   }
@@ -146,7 +143,7 @@
   <div class="file {status}">
   <div class="row">
     <div class="name">
-      {truncate(file.name, 20)}
+      {truncate(file.name, 40)}
     </div>
     <div class="row">
       {#if status == STATUS_READY}
@@ -170,7 +167,7 @@
         <LinkButton title="View file" target="_blank" url={`${Config.url}/api/file/by-slug/${file.meta.slug}`}>
           goto :file
         </LinkButton>
-        <Button title="Remove uploaded File from List" size="remove" on:click={remove}>
+        <Button title="Remove uploaded file from list" size="remove" on:click={remove}>
           x
         </Button>
       {/if}
