@@ -24,7 +24,7 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         source: "upl"
-        target: "/home/zqz/upl-latest"
+        target: "/home/zqz"
 
     - name: 'Extact Artifact'
       uses: appleboy/ssh-action@master
@@ -34,7 +34,8 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         script: |
+          cp upl upl-$GITHUB_SHA
           sudo systemctl stop zqz
-          mv upl upl-previous
-          mv upl-latest upl
+          mv upl-current upl-previous
+          mv upl upl-current
           sudo systemctl start zqz
