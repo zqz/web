@@ -15,14 +15,14 @@ jobs:
         go-verison: '1.14.2'
 
     - run: |
-        go build
+        go mod download && go build
 
     - name: 'Test and Coverage'
-      uses: paambaati/codeclimate-action@v2.6.0
+      uses: paambaati/codeclimate-action@v2.5.0
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_ID }}
       with:
-        coverageCommand: go test -coverprofile c.out ./...
+        coverageCommand: go test ./... -coverprofile c.out
         prefix: github.com/zqz/upl
 
     - name: 'Copy Build to Server'
