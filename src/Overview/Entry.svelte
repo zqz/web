@@ -27,7 +27,7 @@
     <div class="sq" style="background-color: {color()}"></div>
     <a class="name" href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
   </div>
-  <span class="monospace small hash">{file.hash}</span>
+  <span class="monospace hash">{file.hash}</span>
   <span class="size small">{bytes(file.size)}</span>
 </div>
 
@@ -53,7 +53,7 @@
     flex-direction: row;
     justify-content: space-between;
     margin-bottom: 4px;
-    color: $link-normal;
+    color: $black;
 
     .row {
       align-items: center;
@@ -85,6 +85,11 @@
       text-align: right;
       align-self: center;
       font-size: 0.85rem;
+    }
+
+    .small {
+      align-self: center;
+      font-size: 0.8rem;
     }
 
     .size {
