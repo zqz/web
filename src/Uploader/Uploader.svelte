@@ -39,8 +39,8 @@
     return Math.random().toString(20).substr(2, 8)
   }
 
-  function handleFiles(files) {
-    let newFiles = Array.from(files)
+  function handleFiles(x) {
+    let newFiles = Array.from(x)
       .map((i) => i.getAsFile())
       .filter(x => x)
       .map((i) => ({id: randomId(), data: i}));
