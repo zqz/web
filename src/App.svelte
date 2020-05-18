@@ -2,11 +2,13 @@
   import Overview from './Overview/Index.svelte';
   import Logo from './Logo.svelte';
   import AddFilesButton from './AddFilesButton.svelte';
+  import ThemeToggle from './ThemeToggle.svelte';
 </script>
 
 <main>
   <div id="left">
     <Logo/>
+    <ThemeToggle/>
   </div>
   <div id="right">
     <header>
@@ -19,6 +21,21 @@
 
 <style type="text/scss">
   @import "variables.scss";
+
+  :global(body) {
+    background-color: $white;
+    color: $black;
+    transition: color 0.5 linear;
+  }
+
+  :global(body.dark-mode) {
+    color: $white;
+    background-color: $black;
+
+    h1 {
+      color: $white;
+    }
+  }
 
   main {
     display: flex;

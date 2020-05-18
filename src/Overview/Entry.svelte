@@ -34,14 +34,33 @@
 <style type="text/scss">
   @import "../variables.scss";
 
+  :global(body.dark-mode) {
+    .entry {
+      color: $white;
+
+      a {
+        color: $white;
+      }
+
+      &:hover {
+        background-color: darken(#434a54, 10);
+      }
+    }
+  }
+
   .entry {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     margin-bottom: 4px;
+    color: $link-normal;
 
     .row {
       align-items: center;
+    }
+
+    &:hover {
+      background-color: #e6e9ed;
     }
 
     .sq {
@@ -53,7 +72,6 @@
     a {
       padding-left: 8px;
       text-decoration: none;
-      color: $link-normal;
 
       &:hover {
         font-weight: 500;
@@ -65,15 +83,13 @@
       width: 10%;
       flex-grow: 1;
       text-align: right;
+      align-self: center;
+      font-size: 0.85rem;
     }
 
     .size {
       width: 16%;
       text-align: right;
-    }
-    .small {
-      font-size: 0.8rem;
-      align-self: center;
     }
   }
 
