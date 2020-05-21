@@ -134,13 +134,6 @@ func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	io.Copy(w, rr)
-
-	// err := s.p.Get(hash, w)
-	// if err != nil {
-	// 	w.WriteHeader(http.StatusNotFound)
-	// 	render.Error(w, err.Error())
-	// 	return
-	// }
 }
 
 func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
