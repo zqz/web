@@ -29,11 +29,14 @@
   let imgPreview;
 
   function onMouseMove(e) {
-    imgPreview.style.left = `${e.clientX}px`;
+    const x = e.pageX;
+    const y = e.pageY;
+
+    imgPreview.style.left = `${x}px`;
     if (e.clientY < 300) {
-      imgPreview.style.top = `${e.clientY + 20}px`;
+      imgPreview.style.top = `${y + 20}px`;
     } else {
-      imgPreview.style.top = `${e.clientY - 310}px`;
+      imgPreview.style.top = `${y - 310}px`;
     }
   }
 
