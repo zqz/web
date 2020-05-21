@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi"
@@ -90,8 +91,18 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, meta)
 }
 
+func queryParamInt(r *http.Request, key string) (int, error) {
+	v := r.URL.Query().Get(key)
+	return strconv.Atoi(v)
+}
+
 func (s Server) files(w http.ResponseWriter, r *http.Request) {
-	m, err := s.db.List(0)
+	page, err := queryParamInt(r, "page")
+	if err != nil {
+		page = 0
+	}
+
+	m, err := s.db.List(page)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
