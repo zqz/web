@@ -4,9 +4,9 @@ production:
 
 development:
   driver: postgres
-  open: dbname=zqz2-dev sslmode=disable
+  open: dbname=zqz-dev sslmode=disable
 
 test:
   driver: postgres
-  open: dbname=zqz2-test sslmode=disable
+  open: dbname=zqz-test sslmode=disable
 

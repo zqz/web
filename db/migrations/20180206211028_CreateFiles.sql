@@ -1,7 +1,6 @@
 
 -- +goose Up
 -- SQL in section 'Up' is executed when this migration is applied
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE files (
   id serial not null primary key,
   size   integer not null,
