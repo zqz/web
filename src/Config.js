@@ -5,7 +5,11 @@ const Config = {
   postFileUrl: (hash) => (`${Config.url}/file/${hash}`),
   getMetaUrl: (hash) => (`${Config.url}/meta/by-hash/${hash}`),
   postMetaUrl: (h) => (`${Config.url}/meta`),
-  getFileBySlugUrl: (slug) => (`${Config.url}/file/by-slug/${slug}`),
+  getFileBySlugUrl: (slug) => (
+    isProduction ?
+    `https://x.zqz.ca/${slug}` :
+    `${Config.url}/file/by-slug/${slug}`
+  ),
   getFilesListUrl: (page) => (`${Config.url}/files?page=${page}`),
 };
 
