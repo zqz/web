@@ -2,10 +2,16 @@
   import Config from '../Config.js';
   import Uploader from '../Uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
+  import Button from '../Button.svelte';
 
   let page = 0;
   let promise = fetchFiles();
   let delay = 1;
+
+  function loadNext() {
+    page++;
+    promise = fetchFiles();
+  }
 
   async function fetchFiles() {
     const res = await fetch(Config.getFilesListUrl(page));
@@ -38,12 +44,14 @@
       {#each files as f}
         <Entry file={f}/>
       {/each}
+
     {:catch error}
       <p>
         {timeoutLoadFiles()}
         There was an error, retrying in {delay}s...
       </p>
     {/await}
+    <Button on:click={loadNext} size="large">load more</Button>
   </div>
 </div>
 
