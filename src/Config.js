@@ -11,6 +11,7 @@ const Config = {
     `${Config.url}/file/by-slug/${slug}`
   ),
   getFilesListUrl: (page) => (`${Config.url}/files?page=${page}`),
+  thumbnailUrl: (slug) => (`https://thumbnails.zqz.ca/${slug}`)
 };
 
 export default Config;

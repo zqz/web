@@ -20,12 +20,45 @@
 
     return '#434a54';
   }
+
+  function isImage() {
+    return registry === 'image';
+  }
+
+  let entry;
+  let imgPreview;
+
+  function onMouseMove(e) {
+    imgPreview.style.left = `${e.clientX}px`;
+    if (e.clientY < 300) {
+      imgPreview.style.top = `${e.clientY + 20}px`;
+    } else {
+      imgPreview.style.top = `${e.clientY - 310}px`;
+    }
+  }
+
+  function showPreview() {
+    if (!isImage()) {
+      return;
+    }
+    imgPreview.style.display = 'block';
+    entry.addEventListener('mousemove', onMouseMove);
+  }
+
+  function hidePreview() {
+    if (!isImage()) {
+      return;
+    }
+    imgPreview.style.display = 'none';
+    entry.removeEventListener('mousemove', onMouseMove);
+  }
 </script>
 
-<div class="entry">
+<div bind:this={entry} class="entry">
   <div class="row">
+    <div bind:this={imgPreview} class="preview" style="background-image: url({Config.thumbnailUrl(file.slug)});"></div>
     <div class="sq" style="background-color: {color()}"></div>
-    <a class="name" href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
+    <a on:mouseover={showPreview} on:mouseout={hidePreview} class="name" href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
   </div>
   <span class="monospace hash">{file.hash}</span>
   <span class="size small">{bytes(file.size)}</span>
@@ -46,6 +79,18 @@
         background-color: darken(#434a54, 10);
       }
     }
+  }
+
+  .preview {
+    width: 420px;
+    height: 300px;
+    position: absolute;
+    background-position: center center;
+    background-size: cover;
+    border-radius: 3px;
+    display: none;
+    left: 0;
+    top: 0;
   }
 
   .entry {
