@@ -1,6 +1,7 @@
 <script>
   import bytes from '../Util/FileSize.js';
   import Config from '../Config.js';
+  import Thumbnail from './Thumbnail.svelte';
 
   export let file;
   const [registry, name] = file.type.split('/');
@@ -25,26 +26,29 @@
     return registry === 'image';
   }
 
+  let thumbVisible = false;
+  let thumbPosX;
+  let thumbPosY;
   let entry;
-  let imgPreview;
 
   function onMouseMove(e) {
     const x = e.pageX;
     const y = e.pageY;
 
-    imgPreview.style.left = `${x}px`;
+    thumbPosX = `${x}px`;
     if (e.clientY < 300) {
-      imgPreview.style.top = `${y + 20}px`;
+      thumbPosY = `${y + 20}px`;
     } else {
-      imgPreview.style.top = `${y - 310}px`;
+      thumbPosY = `${y - 310}px`;
     }
   }
 
-  function showPreview() {
+  function showPreview(e) {
     if (!isImage()) {
       return;
     }
-    imgPreview.style.display = 'block';
+    onMouseMove(e);
+    thumbVisible = true;
     entry.addEventListener('mousemove', onMouseMove);
   }
 
@@ -52,16 +56,25 @@
     if (!isImage()) {
       return;
     }
-    imgPreview.style.display = 'none';
+    thumbVisible = false;
     entry.removeEventListener('mousemove', onMouseMove);
   }
 </script>
 
-<div bind:this={entry} class="entry">
+<div 
+  bind:this={entry} 
+  class="entry"
+  on:mouseover={showPreview}
+  on:mouseout={hidePreview} >
   <div class="row">
-    <div bind:this={imgPreview} class="preview" style="background-image: url({Config.thumbnailUrl(file.slug)});"></div>
+    <Thumbnail visible={thumbVisible} posX={thumbPosX} posY={thumbPosY} file={file}/>
     <div class="sq" style="background-color: {color()}"></div>
-    <a on:mouseover={showPreview} on:mouseout={hidePreview} class="name" href={Config.getFileBySlugUrl(file.slug)} target="_blank">{file.name}</a>
+    <a
+      class="name"
+      href={Config.getFileBySlugUrl(file.slug)}
+      target="_blank">
+      {file.name}
+    </a>
   </div>
   <span class="monospace hash">{file.hash}</span>
   <span class="size small">{bytes(file.size)}</span>
@@ -82,18 +95,6 @@
         background-color: darken(#434a54, 10);
       }
     }
-  }
-
-  .preview {
-    width: 420px;
-    height: 300px;
-    position: absolute;
-    background-position: center center;
-    background-size: cover;
-    border-radius: 3px;
-    display: none;
-    left: 0;
-    top: 0;
   }
 
   .entry {
