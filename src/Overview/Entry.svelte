@@ -30,6 +30,7 @@
   let thumbPosX;
   let thumbPosY;
   let entry;
+  let renderTop = false;
 
   function onMouseMove(e) {
     const x = e.pageX;
@@ -38,8 +39,10 @@
     thumbPosX = `${x}px`;
     if (e.clientY < 300) {
       thumbPosY = `${y + 20}px`;
+      renderTop = false;
     } else {
       thumbPosY = `${y - 310}px`;
+      renderTop = true;
     }
   }
 
@@ -62,12 +65,12 @@
 </script>
 
 <div 
-  bind:this={entry} 
+  bind:this={entry}
   class="entry"
   on:mouseover={showPreview}
   on:mouseout={hidePreview} >
   <div class="row">
-    <Thumbnail visible={thumbVisible} posX={thumbPosX} posY={thumbPosY} file={file}/>
+    <Thumbnail top={renderTop} visible={thumbVisible} posX={thumbPosX} posY={thumbPosY} file={file}/>
     <div class="sq" style="background-color: {color()}"></div>
     <a
       class="name"
