@@ -1,4 +1,4 @@
-import Config from '../Config';
+import URLs from '$lib/urls';
 
 import CallbacksHandler from './CallbacksHandler.js';
 
@@ -47,7 +47,7 @@ const Meta = (file) => {
   }
 
   async function retrieve() {
-    const response = await fetch(Config.getMetaUrl(file.hash));
+    const response = await fetch(URLs.getMetaUrl(file.hash));
     const json = await response.json();
 
     if (json.message === 'file not found') {
@@ -60,7 +60,7 @@ const Meta = (file) => {
 
   function create() {
     xhr.addEventListener('readystatechange', onMetaStateChange);
-    xhr.open('POST', Config.postMetaUrl(), true);
+    xhr.open('POST', URLs.postMetaUrl(), true);
     xhr.send(payload());
   }
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Config from '../Config';
+  import URLs from '$lib/urls';
   import Uploader from '../Uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
   import Button from '../Button.svelte';
@@ -15,7 +15,7 @@
   }
 
   async function fetchFiles() {
-    const res = await fetch(Config.getFilesListUrl(page));
+    const res = await fetch(URLs.getFilesListUrl(page));
     const json = await res.json();
 
     if (res.ok) {

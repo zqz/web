@@ -1,12 +1,12 @@
 <script>
-  import Config from '../Config';
+  import URLs from '$lib/urls';
   export let file;
   export let visible;
   export let posX;
   export let posY;
   export let top;
   let imgPath;
-  $: imgPath = Config.thumbnailUrl(file.slug);
+  $: imgPath = URLs.thumbnailUrl(file.slug);
   $: bgPos = !top ? 'top left' : 'bottom left';
 </script>
 

@@ -1,6 +1,6 @@
 <script>
-  import bytes from '../Util/FileSize.js';
-  import Config from '../Config';
+  import bytes from '$lib/size';
+  import URLs from '$lib/urls';
   import Thumbnail from './Thumbnail.svelte';
 
   export let file;
@@ -74,7 +74,7 @@
     <div class="sq" style="background-color: {color()}"></div>
     <a
       class="name"
-      href={Config.getFileBySlugUrl(file.slug)}
+      href={URLs.getFileBySlugUrl(file.slug)}
       target="_blank">
       {file.name}
     </a>

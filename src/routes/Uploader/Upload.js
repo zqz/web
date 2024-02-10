@@ -1,4 +1,4 @@
-import Config from '../Config';
+import URLs from '$lib/urls';
 import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
 import Hash from './Hash';
@@ -82,7 +82,7 @@ const Upload = (file) => {
     xhr.upload.addEventListener('error', callbacks.onUploadError);
     xhr.upload.addEventListener('abort', callbacks.onUploadAbort);
     xhr.addEventListener('readystatechange', onUploadStateChange);
-    xhr.open('POST', Config.postFileUrl(file.hash), true);
+    xhr.open('POST', URLs.postFileUrl(file.hash), true);
     xhr.send(file.data.slice(getOffset()));
     callbacks.onUploadStart();
   }

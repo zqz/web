@@ -1,5 +1,5 @@
-<script>
-  import bytes from '../Util/FileSize.js';
+<script lang="ts">
+  import bytes from '$lib/size';
   export let updates;
 
   let percent;
