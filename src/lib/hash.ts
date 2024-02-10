@@ -1,4 +1,4 @@
-const Hash = (file: globalThis.File, callback: any) => {
+const hashFile = (file: globalThis.File, callback: any) => {
   function hex(buf: ArrayBuffer) {
     const hashArray = Array.from(new Uint8Array(buf));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
@@ -15,4 +15,4 @@ const Hash = (file: globalThis.File, callback: any) => {
   }
 }
 
-export default Hash;
+export default hashFile;

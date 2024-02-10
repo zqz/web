@@ -1,7 +1,7 @@
 import URLs from '$lib/urls';
 import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
-import Hash from './Hash';
+import hashFile from '$lib/hash';
 
 const UploadCallbacks = (file) => {
   let callbacks = CallbacksHandler();
@@ -71,7 +71,7 @@ const Upload = (file) => {
 
   async function hash() {
     callbacks.onHash();
-    Hash(file.data, function(h) {
+    hashFile(file.data, function(h) {
       file.hash = h;
       fetchMeta();
     });
