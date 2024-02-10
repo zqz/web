@@ -10,19 +10,21 @@
 	<meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<section>
-  <div id="left">
-    <Logo/>
-    <ThemeToggle/>
-  </div>
-  <div id="right">
-    <header>
-      <h1>zqz.ca</h1>
-      <AddFilesButton />
-    </header>
-    <Overview/>
-  </div>
-</section>
+<main>
+  <section>
+    <div id="left">
+      <Logo/>
+      <ThemeToggle/>
+    </div>
+    <div id="right">
+      <header>
+        <h1>zqz.ca</h1>
+        <AddFilesButton />
+      </header>
+      <Overview/>
+    </div>
+  </section>
+</main>
 
 <style lang="scss">
   @import "variables.scss";
