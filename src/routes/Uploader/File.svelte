@@ -41,7 +41,7 @@
   u.on('hash', onHash);
   u.on('abort', onUploadAbort);
   u.on('meta_check', onMetaCheck);
-  u.on('meta_found', onMetFound);
+  u.on('meta_found', onMetaFound);
   u.on('meta_notfound', onMetaNotFound);
 
   function onHash() {
