@@ -1,21 +1,27 @@
 <script lang="ts">
-  let ticks = 0;
-  let text = '';
+import { onMount } from 'svelte';
 
-  $: text = getText(ticks);
+const maxTicks = 4;
+const updateFrequency = 500;
+let ticks = 0;
+let text = '';
 
-  function getText(ticks) {
-    const repititions = ticks % 4;
-    const dots = ".".repeat(repititions);
-    return "hashing" + dots;
-  }
+$: text = getText(ticks);
 
-  function update() {
+function getText(ticks: number) {
+  const repititions = ticks % maxTicks;
+  const dots = ".".repeat(repititions);
+  return "hashing" + dots;
+}
+
+onMount(() => {
+  const interval = setInterval(() => {
     ticks++;
-    setTimeout(update, 500);
-  }
+    console.log('still ticking');
+    }, updateFrequency);
 
-  update();
+  return () => clearInterval(interval);
+});
 </script>
 
-{text}
+<div>{text}</div>

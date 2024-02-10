@@ -1,120 +1,120 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
-  import URLs from '$lib/urls';
-  import Upload from './Upload';
-  import bytes from '$lib/size';
+import { createEventDispatcher } from 'svelte';
+import URLs from '$lib/urls';
+import Upload from './Upload';
+import bytes from '$lib/size';
 
-  import Hashing from './Hashing.svelte';
-  import Button from '../Button.svelte';
-  import LinkButton from '../LinkButton.svelte';
-  import Progress from './Progress.svelte';
-  import ProgressStats from './ProgressStats.svelte';
+import Hashing from './Hashing.svelte';
+import Button from '../Button.svelte';
+import LinkButton from '../LinkButton.svelte';
+import Progress from './Progress.svelte';
+import ProgressStats from './ProgressStats.svelte';
 
-  export let file : File
+export let file : File
 
-  const STATUS_QUEUE = 'queued';
-  const STATUS_HASHING = 'hashing';
-  const STATUS_META_CHECK = 'meta_check';
-  const STATUS_READY = 'ready';
-  const STATUS_IN_PROGRESS = 'in_progres';
-  const STATUS_DONE = 'done';
+const STATUS_QUEUE = 'queued';
+const STATUS_HASHING = 'hashing';
+const STATUS_META_CHECK = 'meta_check';
+const STATUS_READY = 'ready';
+const STATUS_IN_PROGRESS = 'in_progres';
+const STATUS_DONE = 'done';
 
-  const dispatch = createEventDispatcher();
+const dispatch = createEventDispatcher();
 
-  let status = STATUS_QUEUE;
-  let progressUpdates = [];
-  let percent;
+let status = STATUS_QUEUE;
+let progressUpdates = [];
+let percent;
 
-  $: {
-    let first = progressUpdates[0];
-    let last = progressUpdates[progressUpdates.length-1];
+$: {
+  let first = progressUpdates[0];
+  let last = progressUpdates[progressUpdates.length-1];
 
-    if (first != undefined && last != undefined) {
-      percent = last.loaded / last.total;
-    }
+  if (first != undefined && last != undefined) {
+    percent = last.loaded / last.total;
   }
+}
 
-  let u = Upload(file);
-  u.on('start', onUploadStart);
-  u.on('finish', onUploadFinish);
-  u.on('progress', onUploadProgress);
-  u.on('hash', onHash);
-  u.on('abort', onUploadAbort);
-  u.on('meta_check', onMetaCheck);
-  u.on('meta_found', onMetaFound);
-  u.on('meta_notfound', onMetaNotFound);
+let u = Upload(file);
+u.on('start', onUploadStart);
+u.on('finish', onUploadFinish);
+u.on('progress', onUploadProgress);
+u.on('hash', onHash);
+u.on('abort', onUploadAbort);
+u.on('meta_check', onMetaCheck);
+u.on('meta_found', onMetaFound);
+u.on('meta_notfound', onMetaNotFound);
 
-  function onHash() {
-    status = STATUS_HASHING;
-  }
+function onHash() {
+  status = STATUS_HASHING;
+}
 
-  // actions
-  function start() {
-    progressUpdates = []; // clear progress history, if any.
-    u.start();
-  }
+// actions
+function start() {
+  progressUpdates = []; // clear progress history, if any.
+  u.start();
+}
 
-  function cancel() {
-    u.abort();
-  }
+function cancel() {
+  u.abort();
+}
 
-  function remove() {
-    dispatch('file:removed', { id: file.id });
-  }
+function remove() {
+  dispatch('file:removed', { id: file.id });
+}
 
-  // meta callbacks
-  function onMetaFound(m) {
-    if (m.bytes_received == m.size) {
-      status = STATUS_DONE;
-    } else {
-      status = STATUS_READY;
-    }
-  }
-
-  function onMetaNotFound() {
+// meta callbacks
+function onMetaFound(m) {
+  if (m.bytes_received == m.size) {
+    status = STATUS_DONE;
+  } else {
     status = STATUS_READY;
   }
+}
 
-  // upload callbacks
-  function onUploadStart() {
-    status = STATUS_IN_PROGRESS;
+function onMetaNotFound() {
+  status = STATUS_READY;
+}
+
+// upload callbacks
+function onUploadStart() {
+  status = STATUS_IN_PROGRESS;
+}
+
+function onUploadFinish(meta) {
+  file.meta = meta;
+  dispatch('file:uploaded');
+  status = STATUS_DONE;
+}
+
+function onUploadProgress(e) {
+  progressUpdates = [...progressUpdates, e];
+}
+
+function onUploadAbort() {
+  status = STATUS_QUEUE;
+  u.fetchMeta();
+};
+
+function onMetaCheck() {
+  status = STATUS_META_CHECK;
+}
+
+function copyAttributes() {
+  file.name = file.data.name;
+  file.size = file.data.size;
+}
+
+function truncate(v, len) {
+  if (v.length < len - 3) {
+    return v;
   }
 
-  function onUploadFinish(meta) {
-    file.meta = meta;
-    dispatch('file:uploaded');
-    status = STATUS_DONE;
-  }
+  return `${v.substr(0, len)}...`;
+}
 
-  function onUploadProgress(e) {
-    progressUpdates = [...progressUpdates, e];
-  }
-
-  function onUploadAbort() {
-    status = STATUS_QUEUE;
-    u.fetchMeta();
-  };
-
-  function onMetaCheck() {
-    status = STATUS_META_CHECK;
-  }
-
-  function copyAttributes() {
-    file.name = file.data.name;
-    file.size = file.data.size;
-  }
-
-  function truncate(v, len) {
-    if (v.length < len - 3) {
-      return v;
-    }
-
-    return `${v.substr(0, len)}...`;
-  }
-
-  // immediately request a hash
-  copyAttributes();
-  u.hash();
+// immediately request a hash
+copyAttributes();
+u.hash();
 </script>
 
 <div class="file {status}">
@@ -180,32 +180,32 @@
 </div>
 
 <style lang="scss">
-  @import "../variables.scss";
-  .file {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 8px;
+@import "../variables.scss";
+.file {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
 
-    border-left: solid 8px $link-normal;
-    padding-left: 8px;
-    padding-bottom: 4px;
+  border-left: solid 8px $link-normal;
+  padding-left: 8px;
+  padding-bottom: 4px;
 
-    &.done {
-      border-color: $file-done;
+  &.done {
+    border-color: $file-done;
+  }
+
+  .row {
+    font-size: 0.8rem;
+
+    .status {
+      align-self: flex-end;
     }
 
-    .row {
-      font-size: 0.8rem;
-
-      .status {
-        align-self: flex-end;
-      }
-
-      .name {
-        font-size: 1.3rem;
-        font-weight: 500;
-        padding-bottom: 4px;
-      }
+    .name {
+      font-size: 1.3rem;
+      font-weight: 500;
+      padding-bottom: 4px;
     }
   }
+}
 </style>
