@@ -1,3 +1,5 @@
+// todo: add proper types here
+//
 const hashFile = (file: globalThis.File, callback: any) => {
   function hex(buf: ArrayBuffer) {
     const hashArray = Array.from(new Uint8Array(buf));
