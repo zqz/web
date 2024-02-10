@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   let ticks = 0;
   let text = '';
 
