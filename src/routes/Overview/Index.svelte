@@ -1,11 +1,12 @@
-<script>
-  import Config from '../Config.js';
+<script lang="ts">
+  import Config from '../Config';
   import Uploader from '../Uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
   import Button from '../Button.svelte';
+  import { onMount } from "svelte";
 
-  let page = 0;
-  let promise = fetchFiles();
+  $: page = 0;
+  $: promise = null;
   let delay = 1;
 
   function loadNext() {
@@ -33,11 +34,16 @@
     setTimeout(loadFiles, delay*1000);
     return '';
   }
+
+  onMount(() => {
+    promise = fetchFiles();
+  });
 </script>
 
 <div>
   <Uploader on:file:uploaded={loadFiles}/>
   <div class="files-list">
+    {#if promise}
     {#await promise}
       <p>Loading Files...</p>
     {:then files}
@@ -51,6 +57,7 @@
         There was an error, retrying in {delay}s...
       </p>
     {/await}
+    {/if}
     <Button on:click={loadNext} size="large">load more</Button>
   </div>
 </div>

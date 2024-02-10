@@ -1,6 +1,7 @@
 <script>
 	import Header from './Header.svelte';
-	// Vimport './styles.css';
+  export const ssr = false;
+	import './styles.scss';
 </script>
 
 <div class="app">
@@ -11,7 +12,6 @@
 	</main>
 
 	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
 	</footer>
 </div>
 

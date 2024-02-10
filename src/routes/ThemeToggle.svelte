@@ -1,5 +1,5 @@
 <script>
-  import Settings from './Settings.js';
+  import Settings from './Settings';
 
   let text = Settings.getTheme();
   let light = true;
@@ -31,6 +31,6 @@
   }
 </style>
 
-<div class="toggle monospace" on:click={toggle}>
+<button class="toggle monospace" on:click={toggle}>
   {text}
-</div>
+</button>

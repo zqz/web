@@ -1,14 +1,16 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
   import File from './File.svelte';
 
-  const uploader = document.createElement('input');
-  uploader.type = 'file';
-  uploader.addEventListener('change', onChange);
-  uploader.style.display = 'none';
-  uploader.multiple = true;
+  let uploader = null;
 
   onMount(() => {
+    uploader = document.createElement('input');
+    uploader.type = 'file';
+    uploader.addEventListener('change', onChange);
+    uploader.style.display = 'none';
+    uploader.multiple = true;
+
     container.appendChild(uploader);
     document.addEventListener('paste', onPaste);
     document.addEventListener('drop', onDrop);
@@ -24,6 +26,7 @@
   }
 
   function onPaste(e) {
+    // https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.datatransfer.html
     handleFiles(e.clipboardData.items);
   }
 
@@ -39,7 +42,7 @@
     return Math.random().toString(20).substr(2, 8)
   }
 
-  function handleFiles(x) {
+  function handleFiles(x: DataTransferItems) {
     let newFiles = Array.from(x)
       .map((i) => i.getAsFile())
       .filter(x => x)

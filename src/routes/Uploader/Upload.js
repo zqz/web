@@ -1,7 +1,7 @@
-import Config from '../Config.js';
+import Config from '../Config';
 import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
-import Hash from './Hash.js';
+import Hash from './Hash';
 
 const UploadCallbacks = (file) => {
   let callbacks = CallbacksHandler();

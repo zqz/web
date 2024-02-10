@@ -1,5 +1,5 @@
 <script>
-  import Config from '../Config.js';
+  import Config from '../Config';
   export let file;
   export let visible;
   export let posX;
@@ -18,7 +18,7 @@
   </div>
 {/if}
 
-<style type="text/scss">
+<style lang="scss">
   .preview {
     position: absolute;
     display: flex;

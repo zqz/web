@@ -38,7 +38,7 @@
   </div>
 </div>
 
-<style type="text/scss">
+<style lang="scss">
   .back {
     display: flex;
     flex-direction: row;

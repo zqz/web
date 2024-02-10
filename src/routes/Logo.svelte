@@ -1,7 +1,7 @@
 <script>
 </script>
 
-<style type="text/scss">
+<style lang="scss">
   .logo-container {
     display: flex;
     flex-direction: column;

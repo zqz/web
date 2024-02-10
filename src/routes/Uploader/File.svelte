@@ -1,6 +1,6 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import Config from '../Config.js';
+  import Config from '../Config';
   import Upload from './Upload.js';
   import bytes from '../Util/FileSize.js';
 
@@ -10,7 +10,7 @@
   import Progress from './Progress.svelte';
   import ProgressStats from './ProgressStats.svelte';
 
-  export let file;
+  export let file : File
 
   const STATUS_QUEUE = 'queued';
   const STATUS_HASHING = 'hashing';
@@ -41,7 +41,7 @@
   u.on('hash', onHash);
   u.on('abort', onUploadAbort);
   u.on('meta_check', onMetaCheck);
-  u.on('meta_found', onMetaFound);
+  u.on('meta_found', onMetFound);
   u.on('meta_notfound', onMetaNotFound);
 
   function onHash() {
@@ -179,7 +179,7 @@
   {/if}
 </div>
 
-<style type="text/scss">
+<style lang="scss">
   @import "../variables.scss";
   .file {
     display: flex;

@@ -1,6 +1,6 @@
 <script>
   import bytes from '../Util/FileSize.js';
-  import Config from '../Config.js';
+  import Config from '../Config';
   import Thumbnail from './Thumbnail.svelte';
 
   export let file;
@@ -83,7 +83,7 @@
   <span class="size small">{bytes(file.size)}</span>
 </div>
 
-<style type="text/scss">
+<style lang="scss">
   @import "../variables.scss";
 
   :global(body.dark-mode) {
