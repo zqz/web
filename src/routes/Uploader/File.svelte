@@ -141,7 +141,7 @@
         </Button>
       {/if}
       {#if status === STATUS_DONE}
-        <LinkButton title="View file" target="_blank" url={Config.getFileBySlugUrl(file.meta.slug)}>
+        <LinkButton title="View file" target="_blank" url={URLs.getFileBySlugUrl(file.meta.slug)}>
           goto :file
         </LinkButton>
         <Button title="Remove uploaded file from list" size="remove" on:click={remove}>
