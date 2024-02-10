@@ -7,7 +7,7 @@ const URLs = {
   url: url,
   postFileUrl: (hash: string) => (`${url}/file/${hash}`),
   getMetaUrl: (hash: string) => (`${url}/meta/by-hash/${hash}`),
-  postMetaUrl: (_: string) => (`${url}/meta`),
+  postMetaUrl: () => (`${url}/meta`),
   getFileBySlugUrl: (slug: string) => (
     isProduction ?
     `https://x.zqz.ca/${slug}` :
