@@ -18,35 +18,45 @@
     document.addEventListener('selectFiles', openFileSelect);
   });
 
-  let files = [];
+  interface FileWithData {
+    id: string;
+    data: globalThis.File;
+  }
+
+  let files : Array<FileWithData> = [];
   let container;
 
-  function onDragOver(e) {
+  function onDragOver(e: DragEvent) {
     e.preventDefault();
   }
 
-  function onPaste(e) {
+  function onPaste(e: ClipboardEvent) {
     // https://microsoft.github.io/PowerBI-JavaScript/interfaces/_node_modules_typedoc_node_modules_typescript_lib_lib_dom_d_.datatransfer.html
+    if (e.clipboardData === undefined || e.clipboardData === null) {
+      return;
+    }
+
     handleFiles(e.clipboardData.items);
   }
 
-  function onDrop(e) {
+  function onDrop(e: DragEvent) {
     e.preventDefault();
-    if (e.dataTransfer === undefined) {
+    if (e.dataTransfer === undefined || e.dataTransfer === null) {
       return;
     }
+    
     handleFiles(e.dataTransfer.items);
   }
 
-  function randomId() {
-    return Math.random().toString(20).substr(2, 8)
+  function randomId() : string {
+    return Math.random().toString(20).slice(2, 8);
   }
 
-  function handleFiles(x: DataTransferItems) {
+  function handleFiles(x: DataTransferItemList) {
     let newFiles = Array.from(x)
       .map((i) => i.getAsFile())
       .filter(x => x)
-      .map((i) => ({id: randomId(), data: i}));
+      .map((i) => ({id: randomId(), data: i!}));
 
     files = [...files, ...newFiles];
   }
@@ -55,8 +65,18 @@
     uploader.click();
   }
 
-  function onChange(e) {
-    const filesToAdd = Array.from(e.target.files).map((f) => ({id: randomId(), data: f}));
+  function onChange(e: Event) {
+    const target = e.target as HTMLInputElement;
+
+    if (target.files === undefined || target.files === null) {
+      return;
+    }
+
+    if (target.files.length === 0) {
+      return;
+    }
+    
+    const filesToAdd = Array.from(target.files).map((f) => ({id: randomId(), data: f}));
     files = [...files, ...filesToAdd];
   }
 

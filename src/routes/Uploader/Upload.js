@@ -71,7 +71,7 @@ const Upload = (file) => {
 
   async function hash() {
     callbacks.onHash();
-    Hash(file, function(h) {
+    Hash(file.data, function(h) {
       file.hash = h;
       fetchMeta();
     });
