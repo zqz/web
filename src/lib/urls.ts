@@ -3,7 +3,7 @@ const productionUrl = 'https://api.zqz.ca';
 const devUrl = 'http://localhost:3001/api';
 const url = isProduction ? productionUrl : devUrl;
 
-const URLs = {
+export const URLs = {
   url: url,
   postFileUrl: (hash: string) => (`${url}/file/${hash}`),
   getMetaUrl: (hash: string) => (`${url}/meta/by-hash/${hash}`),
@@ -16,5 +16,3 @@ const URLs = {
   getFilesListUrl: (page: string) => (`${url}/files?page=${page}`),
   thumbnailUrl: (slug: string) => (`https://thumbnails.zqz.ca/${slug}`)
 };
-
-export default URLs;

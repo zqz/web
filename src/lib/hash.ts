@@ -3,7 +3,7 @@ function hex(buf: ArrayBuffer) : string {
   return arr.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-const hashFile = (file: globalThis.File, callback: (h: string) => void) => {
+export const hashFile = (file: globalThis.File, callback: (h: string) => void) => {
   async function onBuffer(b: BufferSource) {
     const buf = await crypto.subtle.digest('SHA-1', b);
     const hash = hex(buf);
@@ -14,5 +14,3 @@ const hashFile = (file: globalThis.File, callback: (h: string) => void) => {
     file.arrayBuffer().then(onBuffer);
   }
 }
-
-export default hashFile;

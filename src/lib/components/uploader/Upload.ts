@@ -1,6 +1,5 @@
-import URLs from '$lib/urls';
+import { URLs, hashFile } from '$lib/util';
 import CallbacksHandler from './CallbacksHandler.js';
-import hashFile from '$lib/hash';
 import { FileEvent } from '$lib/types.js';
 import type { FileProgress, Meta, Uploadable } from '$lib/types.js';
 import fetchFileMeta from './Meta.js';

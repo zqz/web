@@ -1,5 +1,5 @@
 <script lang="ts">
-  import URLs from '$lib/urls';
+  import { URLs } from '$lib/util';
   import Uploader from '$lib/components/uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
   import Button from '$lib/components/Button.svelte';

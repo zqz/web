@@ -1,5 +1,5 @@
 <script>
-  import URLs from '$lib/urls';
+  import { URLs } from '$lib/util';
   export let file;
   export let visible;
   export let posX;

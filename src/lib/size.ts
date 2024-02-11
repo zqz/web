@@ -1,6 +1,6 @@
 const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
 
-const bytes = (value: number) : string => {
+export const bytes = (value: number) : string => {
   if (value === 0 || isNaN(value)) return '0';
   const i = Math.floor(Math.log(value) / Math.log(1024));
   const v = value / Math.pow(1024, i);
@@ -12,5 +12,3 @@ const bytes = (value: number) : string => {
 
   return `${n.toFixed(2)} ${sizes[i]}`;
 }
-
-export default bytes;

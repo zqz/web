@@ -1,4 +1,4 @@
-import URLs from '$lib/urls';
+import { URLs } from '$lib/util';
 import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from '$lib/types';
 import CallbacksHandler from './CallbacksHandler.js';
 

@@ -1,9 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
-import URLs from '$lib/urls';
+import { bytes, URLs, truncate } from '$lib/util';
 import { uploadFile } from './Upload';
-import bytes from '$lib/size';
-import { truncate } from '$lib/text';
 
 import Hashing from './Hashing.svelte';
 import Button from '$lib/components/Button.svelte';

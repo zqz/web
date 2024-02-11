@@ -1,6 +1,7 @@
-<script>
-  import bytes from '$lib/size';
-  import URLs from '$lib/urls';
+<script lang="ts">
+  import { bytes, URLs, color } from '$lib/util';
+
+  import type { Meta } from '$lib/types';
   import Thumbnail from './Thumbnail.svelte';
 
   export let file;
