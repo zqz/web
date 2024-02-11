@@ -55,6 +55,15 @@ function UploadCallbacks(file: Uploadable) : UploadHandler {
 export const uploadFile = (file: Uploadable) => {
   let xhr = new XMLHttpRequest();
   let callbacks = UploadCallbacks(file);
+  
+    let m = fetchFileMeta(file);
+    m.on(FileEvent.MetaFound, callbacks.onMetaFound);
+    m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
+    m.on(FileEvent.MetaCreate, (meta: Meta) => {
+      file.meta = meta;
+      console.log('starting: meta created, uploading', meta);
+      upload()
+    });
 
   function abort() {
     xhr.abort();
@@ -70,20 +79,11 @@ export const uploadFile = (file: Uploadable) => {
     }
 
     console.log('starting: creating meta');
-    let m = fetchFileMeta(file);
-    m.on(FileEvent.MetaCreate, (meta: Meta) => {
-      file.meta = meta;
-      console.log('starting: meta created, uploading', meta);
-      upload()
-    });
     m.create();
   }
 
   function fetchMeta() {
     console.log('fetching meta');
-    let m = fetchFileMeta(file);
-    m.on(FileEvent.MetaFound, callbacks.onMetaFound);
-    m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
     m.retrieve();
   }
 
