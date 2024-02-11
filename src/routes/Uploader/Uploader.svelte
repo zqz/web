@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
   import File from './File.svelte';
+  import { generateId } from '$lib/text';
 
   let uploader = null;
 
@@ -48,15 +49,11 @@
     handleFiles(e.dataTransfer.items);
   }
 
-  function randomId() : string {
-    return Math.random().toString(20).slice(2, 8);
-  }
-
   function handleFiles(x: DataTransferItemList) {
     let newFiles = Array.from(x)
       .map((i) => i.getAsFile())
       .filter(x => x)
-      .map((i) => ({id: randomId(), data: i!}));
+      .map((i) => ({id: generateId(), data: i!}));
 
     files = [...files, ...newFiles];
   }
@@ -76,7 +73,7 @@
       return;
     }
     
-    const filesToAdd = Array.from(target.files).map((f) => ({id: randomId(), data: f}));
+    const filesToAdd = Array.from(target.files).map((f) => ({id: generateId(), data: f}));
     files = [...files, ...filesToAdd];
   }
 
