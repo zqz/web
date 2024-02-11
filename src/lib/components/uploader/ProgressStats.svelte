@@ -1,12 +1,12 @@
 <script lang="ts">
+	import type { FileProgress } from '$lib/types';
   import { bytes } from '$lib/util';
-  export let updates;
+  export let updates : Array<FileProgress>;
 
-  let percent;
-  let speed;
-  let transferred;
-  let total;
-  let estimate = '';
+  let transferred: string;
+  let speed: string;
+  let total: string;
+  let estimate: string;
 
   // any time progress changes, this runs.
   $: {
