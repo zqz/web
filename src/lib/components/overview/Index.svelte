@@ -6,15 +6,15 @@
   import { onMount } from "svelte";
 
   $: page = 0;
-  $: promise = null;
+  $: reload = 0;
   let delay = 1;
 
   function loadNext() {
     page++;
-    promise = fetchFiles();
   }
 
-  async function fetchFiles() {
+  async function fetchFiles(page: number, reload: number) {
+    console.log('reload', reload);
     const res = await fetch(URLs.getFilesListUrl(page));
     const json = await res.json();
 
@@ -26,7 +26,9 @@
   }
 
   function loadFiles() {
-    promise = fetchFiles();
+    console.log('reloading files');
+    reload++;
+    page = 0;
   }
 
   function timeoutLoadFiles() {
@@ -34,18 +36,13 @@
     setTimeout(loadFiles, delay*1000);
     return '';
   }
-
-  onMount(() => {
-    promise = fetchFiles();
-  });
 </script>
 
 <div>
   <Uploader on:file:uploaded={loadFiles}/>
 
   <div class="files-list">
-    {#if promise}
-    {#await promise}
+    {#await fetchFiles(page, reload)}
       <p>Loading Files...</p>
     {:then files}
       {#each files as file (file.hash)}
@@ -55,10 +52,9 @@
     {:catch error}
       <p>
         {timeoutLoadFiles()}
-        There was an error, retrying in {delay}s...
+        There was an error, retrying in {delay}s... {error.message}
       </p>
     {/await}
-    {/if}
     <Button title="load more" on:click={loadNext} size="large">load more</Button>
   </div>
 </div>

@@ -88,7 +88,7 @@ function uploadableFromFile(f: globalThis.File) {
     type="file" multiple
     class="hidden-upload"/>
 
-  <FileList files={files} on:file:remove={onFileRemove} />
+  <FileList files={files} on:file:remove={onFileRemove} on:file:uploaded/>
 </div>
 
 <style lang="scss">

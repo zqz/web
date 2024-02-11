@@ -7,7 +7,7 @@
 
 <div class="file-list">
   {#each files as file (file.internalId)}
-    <FileListEntry file={file} on:file:remove />
+    <FileListEntry file={file} on:file:remove on:file:uploaded />
   {/each}
 </div>
 
