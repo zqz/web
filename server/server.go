@@ -71,8 +71,6 @@ func (s Server) Run() error {
 
 	r.Mount("/api", fdb.Router())
 
-	// ra.Get("/{slug}", fdb.GetDataWithSlug)
-
 	s.logger.Println("Listening for web traffic")
 
 	return s.run(r)
