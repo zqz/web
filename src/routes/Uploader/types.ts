@@ -23,3 +23,13 @@ export interface Uploadable {
   hash?: string;
   id?: string;
 }
+
+export interface FileMeta {
+  bytes_received: number;
+  date: string;
+  hash: string;
+  name: string;
+  size: number;
+  slug: string;
+  type: string;
+}
