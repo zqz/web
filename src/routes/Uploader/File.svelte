@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
 import URLs from '$lib/urls';
-import Upload from './Upload';
+import { uploadFile } from './Upload';
 import bytes from '$lib/size';
 
 import Hashing from './Hashing.svelte';
@@ -9,6 +9,7 @@ import Button from '../Button.svelte';
 import LinkButton from '../LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
+import { FileEvent } from './types';
 
 export let file : File
 
@@ -34,7 +35,7 @@ $: {
   }
 }
 
-let u = Upload(file);
+let u = uploadFile(file);
 u.on('start', onUploadStart);
 u.on('finish', onUploadFinish);
 u.on('progress', onUploadProgress);
