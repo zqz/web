@@ -4,9 +4,9 @@ import { URLs } from '$lib/util';
 
 export let file : Meta;
 export let visible : boolean;
+export let top: boolean;
 export let posX: string;
 export let posY: string;
-export let top: string;
 let imgPath: string ;
 
 $: imgPath = URLs.thumbnailUrl(file.slug);
