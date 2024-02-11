@@ -2,30 +2,9 @@ import { URLs } from '$lib/util';
 import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from '$lib/types';
 import CallbacksHandler from './CallbacksHandler.js';
 
-function buildFileMetaRequest(f: Uploadable) : FileMetaRequest {
-  const d = f.data;
-
-  if (f.hash === undefined) {
-    throw "file missing hash";
-  }
-
-  return {
-    name: d.name,
-    type: d.type,
-    path: '?',
-    size: d.size,
-    hash: f.hash
-  }
-}
-
-const fetchFileMeta = (file: Uploadable) => {
+export const fetchFileMeta = (file: Uploadable) => {
   let cb = CallbacksHandler<FileEvent>();
   let xhr = new XMLHttpRequest();
-
-  function payload() {
-    const r = buildFileMetaRequest(file);
-    return JSON.stringify(r);
-  }
 
   // actions
   async function retrieve() {
@@ -61,6 +40,11 @@ const fetchFileMeta = (file: Uploadable) => {
     cb.emit(FileEvent.MetaCreate, meta);
   }
 
+  function payload() {
+    const r = buildFileMetaRequest(file);
+    return JSON.stringify(r);
+  }
+
   return {
     retrieve,
     create,
@@ -68,4 +52,19 @@ const fetchFileMeta = (file: Uploadable) => {
   }
 }
 
-export default fetchFileMeta;
+function buildFileMetaRequest(f: Uploadable) : FileMetaRequest {
+  const d = f.data;
+
+  if (f.hash === undefined) {
+    throw "file missing hash";
+  }
+
+  return {
+    name: d.name,
+    type: d.type,
+    path: '?',
+    size: d.size,
+    hash: f.hash
+  }
+}
+
