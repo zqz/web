@@ -3,7 +3,7 @@ import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
 import hashFile from '$lib/hash';
 import { FileEvent } from './types.js';
-import type { FileProgress } from './types.js';
+import type { FileProgress, Uploadable } from './types.js';
 
 interface UploadHandler {
   onUploadError() : void;
@@ -18,7 +18,7 @@ interface UploadHandler {
   on: (name: FileEvent, fn: Function) => void;
 }
 
-function UploadCallbacks(file) : UploadHandler {
+function UploadCallbacks(file: Uploadable) : UploadHandler {
   let callbacks = CallbacksHandler<FileEvent>();
 
   function onUploadError() { callbacks.call(FileEvent.Error) }
