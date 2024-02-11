@@ -2,21 +2,6 @@ import { URLs } from '$lib/util';
 import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from '$lib/types';
 import CallbacksHandler from './CallbacksHandler.js';
 
-const MetaCallbacks = () => {
-  let callbacks = CallbacksHandler<FileEvent>();
-
-  function onMetaFound(meta: Meta) { callbacks.call(FileEvent.MetaFound, meta) }
-  function onMetaNotFound() { callbacks.call(FileEvent.MetaNotFound) }
-  function onMetaCreate(meta: Meta) { callbacks.call(FileEvent.MetaCreate, meta) }
-
-  return {
-    onMetaFound,
-    onMetaNotFound,
-    onMetaCreate,
-    on: callbacks.on
-  }
-}
-
 function buildFileMetaRequest(f: Uploadable) : FileMetaRequest {
   const d = f.data;
 
@@ -34,8 +19,7 @@ function buildFileMetaRequest(f: Uploadable) : FileMetaRequest {
 }
 
 const fetchFileMeta = (file: Uploadable) => {
-  let meta:Meta;
-  let callbacks = MetaCallbacks();
+  let cb = CallbacksHandler<FileEvent>();
   let xhr = new XMLHttpRequest();
 
   function payload() {
@@ -49,11 +33,11 @@ const fetchFileMeta = (file: Uploadable) => {
     const json = await response.json();
 
     if (json.message === 'file not found') {
-      callbacks.onMetaNotFound();
+      cb.emit(FileEvent.MetaNotFound);
       return;
     }
 
-    callbacks.onMetaFound(json);
+    cb.emit(FileEvent.MetaFound, json as Meta);
   }
 
   function create() {
@@ -74,13 +58,13 @@ const fetchFileMeta = (file: Uploadable) => {
     }
 
     const meta = JSON.parse(text);
-    callbacks.onMetaCreate(meta);
+    cb.emit(FileEvent.MetaCreate, meta);
   }
 
   return {
     retrieve,
     create,
-    on: callbacks.on,
+    on: cb.on,
   }
 }
 
