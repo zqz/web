@@ -42,13 +42,14 @@
 
 <div>
   <Uploader on:file:uploaded={loadFiles}/>
+
   <div class="files-list">
     {#if promise}
     {#await promise}
       <p>Loading Files...</p>
     {:then files}
-      {#each files as f}
-        <Entry file={f}/>
+      {#each files as file (file.hash)}
+        <Entry file={file}/>
       {/each}
 
     {:catch error}
