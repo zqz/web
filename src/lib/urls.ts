@@ -13,6 +13,6 @@ export const URLs = {
     `https://x.zqz.ca/${slug}` :
     `${url}/file/by-slug/${slug}`
   ),
-  getFilesListUrl: (page: string) => (`${url}/files?page=${page}`),
+  getFilesListUrl: (page: number) => (`${url}/files?page=${page}`),
   thumbnailUrl: (slug: string) => (`https://thumbnails.zqz.ca/${slug}`)
 };
