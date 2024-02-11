@@ -18,8 +18,8 @@ export interface FileProgress {
 }
 
 export interface Uploadable {
-  data: globalThis.File
-  size: number,
+  data: globalThis.File;
+  size: number;
   hash?: string;
   id?: string;
 }
