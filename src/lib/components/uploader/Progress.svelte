@@ -1,16 +1,16 @@
 <script lang="ts">
-  export let height;
-  export let percent;
+  export let height: number;
+  export let percent: number;
 
   let bgColor = '#434a54';
   let fgColor = '#a0d468';
-  let line;
+  let line: HTMLElement;
 
-  const endStyle = function(color) {
+  const endStyle = function(color: string) {
     return `height: ${height}px; width: ${height}px; background-color: ${color};`;
   }
 
-  const lineStyle = function(color) {
+  const lineStyle = function(color: string) {
     return `height: ${height}px; width: ${percent * 100}%; background-color: ${color};`;
   }
 
