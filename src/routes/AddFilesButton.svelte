@@ -1,5 +1,5 @@
 <script>
-  import Button from './Button.svelte';
+  import Button from '$lib/components/Button.svelte';
 
   function onClick() {
     var e = new Event('selectFiles');

@@ -1,5 +1,5 @@
 import URLs from '$lib/urls';
-import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from './types';
+import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from '$lib/types';
 import CallbacksHandler from './CallbacksHandler.js';
 
 const MetaCallbacks = () => {

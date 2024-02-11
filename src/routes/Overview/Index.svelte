@@ -1,8 +1,8 @@
 <script lang="ts">
   import URLs from '$lib/urls';
-  import Uploader from '../Uploader/Uploader.svelte';
+  import Uploader from '$lib/components/uploader/Uploader.svelte';
   import Entry from './Entry.svelte';
-  import Button from '../Button.svelte';
+  import Button from '$lib/components/Button.svelte';
   import { onMount } from "svelte";
 
   $: page = 0;

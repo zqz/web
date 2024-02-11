@@ -1,5 +1,5 @@
 <script>
-  import Button from './Button.svelte';
+  import Button from '$lib/components/Button.svelte';
   export let url = '';
   export let target = '';
   export let title = '';

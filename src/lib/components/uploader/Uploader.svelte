@@ -1,7 +1,7 @@
 <script lang="ts">
 import FileList from './FileList.svelte';
 import { onMount } from 'svelte';
-import type { Uploadable } from './types';
+import type { Uploadable } from '$lib/types';
 import { generateId } from '$lib/text';
 
 let uploader: HTMLInputElement;

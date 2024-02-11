@@ -84,7 +84,7 @@
 </div>
 
 <style lang="scss">
-  @import "../variables.scss";
+  @import "$lib/variables.scss";
 
   :global(body.dark-mode) {
     .entry {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import FileListEntry from "./FileListEntry.svelte";
-	import type { Uploadable } from "./types";
+	import type { Uploadable } from "$lib/types";
 
   export let files : Array<Uploadable> = [];
 </script>

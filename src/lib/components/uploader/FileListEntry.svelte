@@ -6,11 +6,11 @@ import bytes from '$lib/size';
 import { truncate } from '$lib/text';
 
 import Hashing from './Hashing.svelte';
-import Button from '../Button.svelte';
-import LinkButton from '../LinkButton.svelte';
+import Button from '$lib/components/Button.svelte';
+import LinkButton from '$lib/components/LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
-import { FileEvent, FileStatus, type FileProgress, type Uploadable } from './types';
+import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
 
 export let file: Uploadable;
 
@@ -166,7 +166,7 @@ u.hash();
 </div>
 
 <style lang="scss">
-@import "../variables.scss";
+@import "$lib/variables.scss";
 .file {
   display: flex;
   flex-direction: column;

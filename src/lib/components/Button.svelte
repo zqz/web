@@ -8,7 +8,7 @@
 </div>
 
 <style lang="scss">
-  @import "variables.scss";
+  @import "$lib/variables.scss";
 
   .button {
     text-decoration: none;
