@@ -9,7 +9,6 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"github.com/newrelic/go-agent/v3/newrelic"
 	"github.com/zqz/upl/filedb"
 )
 
@@ -57,31 +56,7 @@ func (s Server) runInsecure(r http.Handler) error {
 	return http.ListenAndServe(listenPort, r)
 }
 
-func instrumentNewRelic(app *newrelic.Application) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		mw := func(w http.ResponseWriter, r *http.Request) {
-			txn := app.StartTransaction(r.URL.Path)
-			defer txn.End()
-			txn.SetWebRequestHTTP(r)
-			next.ServeHTTP(txn.SetWebResponse(w), r)
-		}
-		return http.HandlerFunc(mw)
-	}
-}
-
 func (s Server) Run() error {
-	app, err := newrelic.NewApplication(
-		newrelic.ConfigAppName("zqz.ca"),
-		newrelic.ConfigLicense("eu01xx5c9482d2075bd8fb489adfa40d4b2aNRAL"),
-		newrelic.ConfigDistributedTracerEnabled(true),
-	)
-
-	if err != nil {
-		s.logger.Println("failed to start newrelic", err.Error())
-	} else {
-		s.logger.Println("looks like new relic started")
-	}
-
 	fdb := filedb.NewServer(
 		filedb.NewFileDB(
 			filedb.NewDiskPersistence(),
@@ -100,18 +75,7 @@ func (s Server) Run() error {
 
 	s.logger.Println("Listening for web traffic")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc(
-		newrelic.WrapHandleFunc(
-			app,
-			"/",
-			func(w http.ResponseWriter, rx *http.Request) {
-				r.ServeHTTP(w, rx)
-			},
-		),
-	)
-
-	return s.run(mux)
+	return s.run(r)
 }
 
 func (s Server) run(r http.Handler) error {
