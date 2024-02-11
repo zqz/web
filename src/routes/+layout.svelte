@@ -1,6 +1,5 @@
-<script>
+<script lang="ts">
 	import Header from './Header.svelte';
-  export const ssr = false;
 	import './styles.scss';
 </script>
 

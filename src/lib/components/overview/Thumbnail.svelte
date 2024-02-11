@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { URLs } from '$lib/util';
   export let file;
   export let visible;

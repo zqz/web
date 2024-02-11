@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Settings from './Settings';
 
   let text = Settings.getTheme();

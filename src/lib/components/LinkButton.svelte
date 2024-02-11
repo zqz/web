@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Button from '$lib/components/Button.svelte';
   export let url = '';
   export let target = '';
