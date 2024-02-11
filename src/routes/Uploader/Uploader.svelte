@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
   import File from './File.svelte';
+  import type { Uploadable } from './types';
   import { generateId } from '$lib/text';
 
-  let uploader = null;
+  let uploader: HTMLInputElement;
 
   onMount(() => {
     uploader = document.createElement('input');
@@ -19,13 +20,8 @@
     document.addEventListener('selectFiles', openFileSelect);
   });
 
-  interface FileWithData {
-    id: string;
-    data: globalThis.File;
-  }
-
-  let files : Array<FileWithData> = [];
-  let container;
+  let files : Array<Uploadable> = [];
+  let container : HTMLElement;
 
   function onDragOver(e: DragEvent) {
     e.preventDefault();

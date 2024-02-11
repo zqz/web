@@ -16,3 +16,10 @@ export interface FileProgress {
   total: number;
   time: number; // why is this a number?
 }
+
+export interface Uploadable {
+  data: globalThis.File
+  size: number,
+  hash?: string;
+  id?: string;
+}

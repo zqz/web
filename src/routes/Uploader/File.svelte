@@ -25,7 +25,7 @@ const dispatch = createEventDispatcher();
 
 let status = STATUS_QUEUE;
 let progressUpdates: Array<FileProgress> = [];
-let percent;
+let percent: number = 0;
 
 $: {
   let first = progressUpdates[0];
