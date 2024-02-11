@@ -11,6 +11,15 @@ export const enum FileEvent {
   MetaNotFound = "meta_notfound"
 }
 
+export const enum FileStatus {
+  Queue = "queued",
+  Hashing = "hashing",
+  MetaCheck = "meta_check",
+  Ready = "ready",
+  InProgress = "in_progress",
+  Done = "done"
+}
+
 export interface FileProgress {
   loaded: number;
   total: number;

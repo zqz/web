@@ -10,20 +10,13 @@ import Button from '../Button.svelte';
 import LinkButton from '../LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
-import { FileEvent, type Meta, type FileProgress, type Uploadable } from './types';
+import { FileEvent, FileStatus, type FileProgress, type Uploadable } from './types';
 
 export let file: Uploadable;
 
-const STATUS_QUEUE = 'queued';
-const STATUS_HASHING = 'hashing';
-const STATUS_META_CHECK = 'meta_check';
-const STATUS_READY = 'ready';
-const STATUS_IN_PROGRESS = 'in_progres';
-const STATUS_DONE = 'done';
-
 const dispatch = createEventDispatcher();
 
-let status = STATUS_QUEUE;
+let status = FileStatus.Queue;
 let progressUpdates: Array<FileProgress> = [];
 let percent: number = 0;
 
@@ -48,7 +41,7 @@ u.on(FileEvent.MetaFound, onMetaFound);
 u.on(FileEvent.MetaNotFound, onMetaNotFound);
 
 function onHash() {
-  status = STATUS_HASHING;
+  status = FileStatus.Hashing;
 }
 
 // actions
@@ -71,26 +64,26 @@ function onMetaFound() {
   const m = file.meta!;
 
   if (m.bytes_received === m.size) {
-    status = STATUS_DONE;
+    status = FileStatus.Done;
   } else {
-    status = STATUS_READY;
+    status = FileStatus.Ready;
   }
 }
 
 function onMetaNotFound() {
   console.log('meta not found');
-  status = STATUS_READY;
+  status = FileStatus.Ready;
 }
 
 // upload callbacks
 function onUploadStart() {
-  status = STATUS_IN_PROGRESS;
+  status = FileStatus.InProgress;
 }
 
 function onUploadFinish() {
   console.log('upload finished');
   dispatch('file:uploaded');
-  status = STATUS_DONE;
+  status = FileStatus.Done;
 }
 
 function onUploadProgress(e: FileProgress) {
@@ -98,12 +91,12 @@ function onUploadProgress(e: FileProgress) {
 }
 
 function onUploadAbort() {
-  status = STATUS_QUEUE;
+  status = FileStatus.Queue;
   u.fetchMeta();
 };
 
 function onMetaCheck() {
-  status = STATUS_META_CHECK;
+  status = FileStatus.MetaCheck;
 }
 
 // immediately request a hash
@@ -116,7 +109,7 @@ u.hash();
       {truncate(file.data.name, 40)}
     </div>
     <div class="row">
-      {#if status == STATUS_READY}
+      {#if status == FileStatus.Ready}
         <Button title="Start uploading" on:click={start}>
           {#if file.meta && file.meta.bytes_received > 0}
             continue
@@ -128,12 +121,12 @@ u.hash();
           x
         </Button>
       {/if}
-      {#if status === STATUS_IN_PROGRESS}
+      {#if status === FileStatus.InProgress}
         <Button title="Cancel file upload" on:click={cancel}>
           cancel
         </Button>
       {/if}
-      {#if status === STATUS_DONE}
+      {#if status === FileStatus.Done}
         <LinkButton title="View file" target="_blank" url={URLs.getFileBySlugUrl(file.meta.slug)}>
           goto :file
         </LinkButton>
@@ -149,7 +142,7 @@ u.hash();
         {bytes(file.data.size)}
       </div>
       <div class="monospace">
-        {#if status === STATUS_HASHING}
+        {#if status === FileStatus.Hashing}
           <Hashing/>
         {/if}
         {#if file.hash !== undefined}
@@ -159,7 +152,7 @@ u.hash();
     </div>
     <div class="row">
       <div class="status">
-        {#if status === STATUS_IN_PROGRESS}
+        {#if status === FileStatus.InProgress}
           <ProgressStats updates={progressUpdates}/>
         {:else}
           <span class="monospace">{status}</span>
@@ -167,7 +160,7 @@ u.hash();
       </div>
     </div>
   </div>
-  {#if status === STATUS_IN_PROGRESS}
+  {#if status === FileStatus.InProgress}
     <Progress percent={percent} height={6}/>
   {/if}
 </div>
