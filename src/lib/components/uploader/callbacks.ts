@@ -1,4 +1,4 @@
-function CallbackHandler<T>() {
+export function callbacks<T>() {
   let callbacks = new Map<T, Function>();
 
   function on(eventName: T, func: Function) {
@@ -17,5 +17,3 @@ function CallbackHandler<T>() {
 
   return { on, emit };
 }
-
-export default CallbackHandler;

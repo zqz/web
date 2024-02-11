@@ -1,12 +1,12 @@
 import { URLs, hashFile } from '$lib/util';
-import CallbacksHandler from './CallbacksHandler.js';
-import { FileEvent } from '$lib/types.js';
-import type { Meta, Uploadable } from '$lib/types.js';
-import { fetchFileMeta } from './Meta.js';
+import { callbacks } from './callbacks';
+import { FileEvent } from '$lib/types';
+import type { Meta, Uploadable } from '$lib/types';
+import { fetchFileMeta } from './fetchMeta';
 
 export const uploadFile = (file: Uploadable) => {
   let xhr = new XMLHttpRequest();
-  let cb = CallbacksHandler<FileEvent>();
+  let cb = callbacks<FileEvent>();
   let m = fetchFileMeta(file);
 
   m.on(FileEvent.MetaFound, (m: Meta) => {
@@ -26,9 +26,9 @@ export const uploadFile = (file: Uploadable) => {
 
   function start() {
     if (file.meta) {
-      m.create();
-    } else {
       upload();
+    } else {
+      m.create();
     }
   }
 
@@ -47,8 +47,9 @@ export const uploadFile = (file: Uploadable) => {
 
   function upload() {
     xhr.upload.addEventListener('progress', onProgress);
-    xhr.upload.addEventListener('error', (err) => cb.emit(FileEvent.Error, err));
+    xhr.upload.addEventListener('error', () => cb.emit(FileEvent.Error));
     xhr.upload.addEventListener('abort', () => cb.emit(FileEvent.Abort));
+
     xhr.addEventListener('readystatechange', onStateChange);
     xhr.open('POST', URLs.postFileUrl(file.hash!), true);
     xhr.send(file.data.slice(getOffset()));
