@@ -1,7 +1,7 @@
 <script>
   import Logo from './Logo.svelte';
   import ThemeToggle from './ThemeToggle.svelte';
-  import Overview from './Overview/Index.svelte';
+  import Overview from '$lib/components/overview/Index.svelte';
   import AddFilesButton from './AddFilesButton.svelte';
 </script>
 
