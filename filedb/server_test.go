@@ -3,7 +3,7 @@ package filedb
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -37,7 +37,7 @@ func errorMessage(res *http.Response) string {
 		Message string `json:"message"`
 	}{}
 
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
 	json.Unmarshal(b, &o)
@@ -46,7 +46,7 @@ func errorMessage(res *http.Response) string {
 }
 
 func readBody(res *http.Response) string {
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
 	return string(b)
@@ -86,7 +86,7 @@ func TestPostMeta(t *testing.T) {
 	res := post(ts, "/meta", m)
 	assert.Equal(t, 200, res.StatusCode)
 
-	responseBody, _ := ioutil.ReadAll(res.Body)
+	responseBody, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
 	b, _ := json.Marshal(&m)
@@ -212,7 +212,7 @@ func TestGetDataWithSlug(t *testing.T) {
 	postFile(ts, "/file/"+hash, "bytes")
 
 	res := get(ts, "/meta/by-hash/"+hash)
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 	json.Unmarshal(b, &m)
 
@@ -292,7 +292,7 @@ func TestGetFilesNoFiles(t *testing.T) {
 	req, _ := http.NewRequest("GET", ts.URL+"/files", nil)
 	res, _ := http.DefaultClient.Do(req)
 
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
 	assert.Equal(t, 200, res.StatusCode)
@@ -318,7 +318,7 @@ func TestGetFilesWithFiles(t *testing.T) {
 	req, _ := http.NewRequest("GET", ts.URL+"/files", nil)
 	res, _ := http.DefaultClient.Do(req)
 
-	b, _ := ioutil.ReadAll(res.Body)
+	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
 	var metas []Meta
