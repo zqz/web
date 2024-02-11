@@ -12,7 +12,7 @@ interface UploadHandler {
   onUploadStart() : void;
   onUploadFinish() : void;
   onHash() : void; // start hashing
-  onMetaFound() : void;
+  onMetaFound(m: Meta) : void;
   onMetaNotFound() : void;
   onMetaCheck() : void;
   on: (name: FileEvent, fn: Function) => void;
@@ -55,15 +55,15 @@ function UploadCallbacks(file: Uploadable) : UploadHandler {
 export const uploadFile = (file: Uploadable) => {
   let xhr = new XMLHttpRequest();
   let callbacks = UploadCallbacks(file);
-  
-    let m = fetchFileMeta(file);
-    m.on(FileEvent.MetaFound, callbacks.onMetaFound);
-    m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
-    m.on(FileEvent.MetaCreate, (meta: Meta) => {
-      file.meta = meta;
-      console.log('starting: meta created, uploading', meta);
-      upload()
-    });
+
+  let m = fetchFileMeta(file);
+  m.on(FileEvent.MetaFound, callbacks.onMetaFound);
+  m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
+  m.on(FileEvent.MetaCreate, (meta: Meta) => {
+    file.meta = meta;
+    console.log('starting: meta created, uploading', meta);
+    upload()
+  });
 
   function abort() {
     xhr.abort();
