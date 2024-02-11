@@ -50,7 +50,7 @@ function UploadCallbacks(file) : UploadHandler {
   }
 }
 
-export const uploadFile = (file) => {
+export const uploadFile = (file: Uploadable) => {
   let xhr = new XMLHttpRequest();
   let callbacks = UploadCallbacks(file);
 

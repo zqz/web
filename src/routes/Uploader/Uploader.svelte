@@ -47,9 +47,9 @@
 
   function handleFiles(x: DataTransferItemList) {
     let newFiles = Array.from(x)
-      .map((i) => i.getAsFile())
+      .map(i => i.getAsFile())
       .filter(x => x)
-      .map((i) => ({id: generateId(), data: i!}));
+      .map(f => uploadableFromFile(f!));
 
     files = [...files, ...newFiles];
   }
@@ -69,12 +69,20 @@
       return;
     }
     
-    const filesToAdd = Array.from(target.files).map((f) => ({id: generateId(), data: f}));
+    const filesToAdd = Array.from(target.files).map(f => uploadableFromFile(f));
     files = [...files, ...filesToAdd];
   }
 
-  function onFileRemoved(e) {
+  function onFileRemoved(e: CustomEvent) {
     files = files.filter(x => x.id != e.detail.id);
+  }
+
+  function uploadableFromFile(f: globalThis.File) {
+    return {
+      data: f,
+      size: f.size,
+      id: generateId()
+    }
   }
 </script>
 

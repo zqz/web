@@ -10,9 +10,9 @@ import Button from '../Button.svelte';
 import LinkButton from '../LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
-import { FileEvent, type FileProgress } from './types';
+import { FileEvent, type FileProgress, type Uploadable } from './types';
 
-export let file : File
+export let file : Uploadable;
 
 const STATUS_QUEUE = 'queued';
 const STATUS_HASHING = 'hashing';
