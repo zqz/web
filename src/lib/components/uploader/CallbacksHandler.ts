@@ -2,7 +2,7 @@ function CallbackHandler<T>() {
   let callbacks = new Map<T, Function>();
 
   function on(eventName: T, func: Function) {
-    callbacks.set(eventName, func);
+    callbacks.set(eventName, () => func(eventName));
   }
 
   function emit(eventName: T, ...args: any[]) {
