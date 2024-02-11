@@ -15,17 +15,7 @@ function CallbackHandler<T>() {
     cb(...args);
   }
 
-  function call(eventName: T, ...args: any[]) {
-    const cb = callbacks.get(eventName);
-
-    if (cb === undefined || cb === null) {
-      return;
-    }
-
-    cb(...args);
-  }
-
-  return { on, emit, call };
+  return { on, emit };
 }
 
 export default CallbackHandler;
