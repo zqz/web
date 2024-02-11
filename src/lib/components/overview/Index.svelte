@@ -59,7 +59,7 @@
       </p>
     {/await}
     {/if}
-    <Button on:click={loadNext} size="large">load more</Button>
+    <Button title="load more" on:click={loadNext} size="large">load more</Button>
   </div>
 </div>
 
