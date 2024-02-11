@@ -10,9 +10,9 @@ import Button from '../Button.svelte';
 import LinkButton from '../LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
-import { FileEvent, type FileProgress, type Uploadable } from './types';
+import { FileEvent, type Meta, type FileProgress, type Uploadable } from './types';
 
-export let file : Uploadable;
+export let file: Uploadable;
 
 const STATUS_QUEUE = 'queued';
 const STATUS_HASHING = 'hashing';
@@ -62,12 +62,15 @@ function cancel() {
 }
 
 function remove() {
-  dispatch('file:removed', { id: file.id });
+  dispatch('file:remove', file);
 }
 
 // meta callbacks
-function onMetaFound(m) {
-  if (m.bytes_received == m.size) {
+function onMetaFound() {
+  console.log('meta found');
+  const m = file.meta!;
+
+  if (m.bytes_received === m.size) {
     status = STATUS_DONE;
   } else {
     status = STATUS_READY;
@@ -75,6 +78,7 @@ function onMetaFound(m) {
 }
 
 function onMetaNotFound() {
+  console.log('meta not found');
   status = STATUS_READY;
 }
 
@@ -83,8 +87,8 @@ function onUploadStart() {
   status = STATUS_IN_PROGRESS;
 }
 
-function onUploadFinish(meta) {
-  file.meta = meta;
+function onUploadFinish() {
+  console.log('upload finished');
   dispatch('file:uploaded');
   status = STATUS_DONE;
 }
@@ -102,20 +106,14 @@ function onMetaCheck() {
   status = STATUS_META_CHECK;
 }
 
-function copyAttributes() {
-  file.name = file.data.name;
-  file.size = file.data.size;
-}
-
 // immediately request a hash
-copyAttributes();
 u.hash();
 </script>
 
 <div class="file {status}">
   <div class="row">
     <div class="name">
-      {truncate(file.name, 40)}
+      {truncate(file.data.name, 40)}
     </div>
     <div class="row">
       {#if status == STATUS_READY}
@@ -148,7 +146,7 @@ u.hash();
   <div class="row">
     <div class="stats">
       <div>
-        {bytes(file.size)}
+        {bytes(file.data.size)}
       </div>
       <div class="monospace">
         {#if status === STATUS_HASHING}

@@ -1,13 +1,13 @@
 import URLs from '$lib/urls';
-import { FileEvent } from './types';
+import { FileEvent, type Meta, type FileMetaRequest, type Uploadable } from './types';
 import CallbacksHandler from './CallbacksHandler.js';
 
 const MetaCallbacks = () => {
   let callbacks = CallbacksHandler<FileEvent>();
 
-  function onMetaFound(meta) { callbacks.call(FileEvent.MetaFound, meta) }
+  function onMetaFound(meta: Meta) { callbacks.call(FileEvent.MetaFound, meta) }
   function onMetaNotFound() { callbacks.call(FileEvent.MetaNotFound) }
-  function onMetaCreate() { callbacks.call(FileEvent.MetaCreate) }
+  function onMetaCreate(meta: Meta) { callbacks.call(FileEvent.MetaCreate, meta) }
 
   return {
     onMetaFound,
@@ -17,36 +17,35 @@ const MetaCallbacks = () => {
   }
 }
 
-const Meta = (file) => {
-  let meta = null;
+function buildFileMetaRequest(f: Uploadable) : FileMetaRequest {
+  const d = f.data;
+
+  if (f.hash === undefined) {
+    throw "file missing hash";
+  }
+
+  return {
+    name: d.name,
+    type: d.type,
+    path: '?',
+    size: d.size,
+    hash: f.hash
+  }
+}
+
+const fetchFileMeta = (file: Uploadable) => {
+  let meta:Meta;
   let callbacks = MetaCallbacks();
   let xhr = new XMLHttpRequest();
 
   function payload() {
-    const d = file.data;
-
-    let p = {
-      name: d.name,
-      type: d.type,
-      path: d.path,
-      size: d.size,
-      hash: file.hash
-    };
-
-    return JSON.stringify(p);
+    const r = buildFileMetaRequest(file);
+    return JSON.stringify(r);
   }
 
   // actions
-  function get() {
-    return meta;
-  }
-
-  function on(...args) {
-    callbacks.on(...args);
-  }
-
   async function retrieve() {
-    const response = await fetch(URLs.getMetaUrl(file.hash));
+    const response = await fetch(URLs.getMetaUrl(file.hash!));
     const json = await response.json();
 
     if (json.message === 'file not found') {
@@ -63,26 +62,26 @@ const Meta = (file) => {
     xhr.send(payload());
   }
 
-  function onMetaStateChange(e) {
+  function onMetaStateChange(e: Event) {
     if (xhr.readyState !== XMLHttpRequest.DONE) {
       return;
     }
 
-    let text = e.target.responseText;
+    const target = e.target as XMLHttpRequest;
+    const text = target.responseText;
     if (text === undefined || text === '') {
       return;
     }
 
-    meta = JSON.parse(text);
-    callbacks.onMetaCreate();
+    const meta = JSON.parse(text);
+    callbacks.onMetaCreate(meta);
   }
 
   return {
     retrieve,
     create,
-    on,
-    get
+    on: callbacks.on,
   }
 }
 
-export default Meta;
+export default fetchFileMeta;

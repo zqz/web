@@ -1,9 +1,9 @@
 import URLs from '$lib/urls';
 import CallbacksHandler from './CallbacksHandler.js';
-import Meta from './Meta.js';
 import hashFile from '$lib/hash';
 import { FileEvent } from './types.js';
-import type { FileProgress, Uploadable } from './types.js';
+import type { FileProgress, Meta, Uploadable } from './types.js';
+import fetchFileMeta from './Meta.js';
 
 interface UploadHandler {
   onUploadError() : void;
@@ -11,7 +11,7 @@ interface UploadHandler {
   onUploadProgress(e: FileProgress) : void;
   onUploadStart() : void;
   onUploadFinish() : void;
-  onHash() : void;
+  onHash() : void; // start hashing
   onMetaFound() : void;
   onMetaNotFound() : void;
   onMetaCheck() : void;
@@ -23,14 +23,16 @@ function UploadCallbacks(file: Uploadable) : UploadHandler {
 
   function onUploadError() { callbacks.call(FileEvent.Error) }
   function onUploadAbort() { callbacks.call(FileEvent.Abort) }
-  function onUploadFinish(meta) { callbacks.call(FileEvent.Finish, meta) }
+  function onUploadFinish() { callbacks.call(FileEvent.Finish) }
   function onUploadStart() { callbacks.call(FileEvent.Start) }
   function onUploadProgress(e: FileProgress) { callbacks.call(FileEvent.Progress, e) }
   function onHash() { callbacks.call(FileEvent.Hash) }
 
-  function onMetaFound(m) {
+  function onMetaFound(m: Meta) {
+    console.log('found meta');
     file.meta = m;
-    callbacks.call(FileEvent.MetaFound, m)
+    console.log('assigned meta', m);
+    callbacks.call(FileEvent.MetaFound);
   }
 
   function onMetaNotFound() { callbacks.call(FileEvent.MetaNotFound) }
@@ -59,30 +61,38 @@ export const uploadFile = (file: Uploadable) => {
   }
 
   function start() {
+    console.log('starting');
+    // if there is a metadata, we can can start uploading
     if (file.meta !== undefined) {
+      console.log('starting: meta existing');
       upload();
       return;
     }
 
-    let m = Meta(file);
-    m.on(FileEvent.MetaCreate, function() {
-      file.meta = m.get();
-      upload();
+    console.log('starting: creating meta');
+    let m = fetchFileMeta(file);
+    m.on(FileEvent.MetaCreate, (meta: Meta) => {
+      file.meta = meta;
+      console.log('starting: meta created, uploading', meta);
+      upload()
     });
-
     m.create();
   }
 
   function fetchMeta() {
-    let m = Meta(file);
+    console.log('fetching meta');
+    let m = fetchFileMeta(file);
     m.on(FileEvent.MetaFound, callbacks.onMetaFound);
     m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
     m.retrieve();
   }
 
   async function hash() {
+    console.log('hashing file');
     callbacks.onHash();
+
     hashFile(file.data, function(h) {
+      console.log('finished hashing file');
       file.hash = h;
       fetchMeta();
     });
@@ -93,7 +103,7 @@ export const uploadFile = (file: Uploadable) => {
     xhr.upload.addEventListener('error', callbacks.onUploadError);
     xhr.upload.addEventListener('abort', callbacks.onUploadAbort);
     xhr.addEventListener('readystatechange', onStateChange);
-    xhr.open('POST', URLs.postFileUrl(file.hash), true);
+    xhr.open('POST', URLs.postFileUrl(file.hash!), true);
     xhr.send(file.data.slice(getOffset()));
     callbacks.onUploadStart();
   }
@@ -120,11 +130,12 @@ export const uploadFile = (file: Uploadable) => {
     }
 
     const meta = JSON.parse(text);
-    callbacks.onUploadFinish(meta);
+    file.meta = meta;
+    callbacks.onUploadFinish();
   }
 
   function getOffset() {
-    const m = file.meta;
+    const m = file.meta!;
 
     if (m.bytes_received === undefined) {
       return 0;

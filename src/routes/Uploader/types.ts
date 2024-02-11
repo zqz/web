@@ -18,13 +18,13 @@ export interface FileProgress {
 }
 
 export interface Uploadable {
+  internalId: string;
   data: globalThis.File;
-  size: number;
+  meta?: Meta;
   hash?: string;
-  id?: string;
 }
 
-export interface FileMeta {
+export interface Meta {
   bytes_received: number;
   date: string;
   hash: string;
@@ -32,4 +32,15 @@ export interface FileMeta {
   size: number;
   slug: string;
   type: string;
+
+  alias: string;
+  thumbnail: string;
+}
+
+export interface FileMetaRequest {
+  name: string;
+  type: string;
+  path: string;
+  size: number;
+  hash: string;
 }
