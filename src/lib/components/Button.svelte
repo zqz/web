@@ -1,16 +1,18 @@
 <script lang="ts">
-  export let title;
+  export let title: string;
   export let size = '';
 </script>
 
-<div class="button {size}" aria-label={title} on:click>
+<button class="button {size}" aria-label={title} tabindex="0" on:click>
   <slot></slot>
-</div>
+</button>
 
 <style lang="scss">
   @import "$lib/variables.scss";
 
   .button {
+    outline: none;
+    border: none;
     text-decoration: none;
     cursor: pointer;
     background-color: $button-color;
