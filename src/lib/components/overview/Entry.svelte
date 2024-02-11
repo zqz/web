@@ -4,36 +4,25 @@
   import type { Meta } from '$lib/types';
   import Thumbnail from './Thumbnail.svelte';
 
-  export let file;
-  const [registry, name] = file.type.split('/');
+  export let file : Meta;
+  const mediaType = extractMediaType(file);
 
-  function color() {
-    switch(registry) {
-      case 'application': return '#434a54';
-      case 'audio': return '#fcbb42';
-      case 'font': return '#37bc9b';
-      case 'example': return '#da4453';
-      case 'image': return '#4a89dc';
-      case 'message': return '#da4453';
-      case 'multipart': return '#da4453';
-      case 'text': return '#967adc';
-      case 'video': return '#a0d468';
-    }
-
-    return '#434a54';
+  function extractMediaType(file: Meta) {
+    const parts = file.type.split('/');
+    return parts[0];
   }
 
-  function isImage() {
-    return registry === 'image';
+  function isImage() : boolean {
+    return mediaType === 'image';
   }
 
   let thumbVisible = false;
-  let thumbPosX;
-  let thumbPosY;
-  let entry;
+  let thumbPosX : string;
+  let thumbPosY : string;
+  let entry : HTMLElement;
   let renderTop = false;
 
-  function onMouseMove(e) {
+  function onMouseMove(e: MouseEvent) {
     const x = e.pageX;
     const y = e.pageY;
 
@@ -47,10 +36,11 @@
     }
   }
 
-  function showPreview(e) {
+  function showPreview(e: MouseEvent) {
     if (!isImage()) {
       return;
     }
+
     onMouseMove(e);
     thumbVisible = true;
     entry.addEventListener('mousemove', onMouseMove);
@@ -68,11 +58,15 @@
 <div 
   bind:this={entry}
   class="entry"
+  role="tooltip"
   on:mouseover={showPreview}
-  on:mouseout={hidePreview} >
+  on:mouseout={hidePreview}
+  on:focus={()=>{}}
+  on:blur={hidePreview}
+  >
   <div class="row">
     <Thumbnail top={renderTop} visible={thumbVisible} posX={thumbPosX} posY={thumbPosY} file={file}/>
-    <div class="sq" style="background-color: {color()}"></div>
+    <div class="sq" style="background-color: {color(mediaType)}"></div>
     <a
       class="name"
       href={URLs.getFileBySlugUrl(file.slug)}
