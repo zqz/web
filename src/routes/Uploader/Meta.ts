@@ -1,20 +1,19 @@
 import URLs from '$lib/urls';
-
+import { FileEvent } from './types';
 import CallbacksHandler from './CallbacksHandler.js';
 
 const MetaCallbacks = () => {
-  let callbacks = CallbacksHandler();
+  let callbacks = CallbacksHandler<FileEvent>();
 
-  function on(...args) { callbacks.on(...args) }
-  function onMetaFound(meta) { callbacks.call('found', meta) }
-  function onMetaNotFound() { callbacks.call('notfound') }
-  function onMetaCreate() { callbacks.call('create') }
+  function onMetaFound(meta) { callbacks.call(FileEvent.MetaFound, meta) }
+  function onMetaNotFound() { callbacks.call(FileEvent.MetaNotFound) }
+  function onMetaCreate() { callbacks.call(FileEvent.MetaCreate) }
 
   return {
     onMetaFound,
     onMetaNotFound,
     onMetaCreate,
-    on
+    on: callbacks.on
   }
 }
 

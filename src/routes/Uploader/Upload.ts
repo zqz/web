@@ -2,7 +2,8 @@ import URLs from '$lib/urls';
 import CallbacksHandler from './CallbacksHandler.js';
 import Meta from './Meta.js';
 import hashFile from '$lib/hash';
-import type { FileEvent, FileProgress } from './types.js';
+import { FileEvent } from './types.js';
+import type { FileProgress } from './types.js';
 
 interface UploadHandler {
   onUploadError() : void;
@@ -20,20 +21,20 @@ interface UploadHandler {
 function UploadCallbacks(file) : UploadHandler {
   let callbacks = CallbacksHandler<FileEvent>();
 
-  function onUploadError() { callbacks.call('error') }
-  function onUploadAbort() { callbacks.call('abort') }
-  function onUploadFinish(meta) { callbacks.call('finish', meta) }
-  function onUploadStart() { callbacks.call('start') }
-  function onUploadProgress(e: ProgressEvent) { callbacks.call('progress', e) }
-  function onHash() { callbacks.call('hash') }
+  function onUploadError() { callbacks.call(FileEvent.Error) }
+  function onUploadAbort() { callbacks.call(FileEvent.Abort) }
+  function onUploadFinish(meta) { callbacks.call(FileEvent.Finish, meta) }
+  function onUploadStart() { callbacks.call(FileEvent.Start) }
+  function onUploadProgress(e: FileProgress) { callbacks.call(FileEvent.Progress, e) }
+  function onHash() { callbacks.call(FileEvent.Hash) }
 
   function onMetaFound(m) {
     file.meta = m;
-    callbacks.call('meta_found', m)
+    callbacks.call(FileEvent.MetaFound, m)
   }
 
-  function onMetaNotFound() { callbacks.call('meta_notfound') }
-  function onMetaCheck() { callbacks.call('meta_check') }
+  function onMetaNotFound() { callbacks.call(FileEvent.MetaNotFound) }
+  function onMetaCheck() { callbacks.call(FileEvent.MetaCheck) }
 
   return {
     onUploadAbort,
@@ -64,17 +65,18 @@ export const uploadFile = (file) => {
     }
 
     let m = Meta(file);
-    m.on('create', function() {
+    m.on(FileEvent.MetaCreate, function() {
       file.meta = m.get();
       upload();
     });
+
     m.create();
   }
 
   function fetchMeta() {
     let m = Meta(file);
-    m.on('found', callbacks.onMetaFound);
-    m.on('notfound', callbacks.onMetaNotFound);
+    m.on(FileEvent.MetaFound, callbacks.onMetaFound);
+    m.on(FileEvent.MetaNotFound, callbacks.onMetaNotFound);
     m.retrieve();
   }
 

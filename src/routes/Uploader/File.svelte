@@ -3,13 +3,14 @@ import { createEventDispatcher } from 'svelte';
 import URLs from '$lib/urls';
 import { uploadFile } from './Upload';
 import bytes from '$lib/size';
+import { truncate } from '$lib/text';
 
 import Hashing from './Hashing.svelte';
 import Button from '../Button.svelte';
 import LinkButton from '../LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
-import { FileEvent } from './types';
+import { FileEvent, type FileProgress } from './types';
 
 export let file : File
 
@@ -23,7 +24,7 @@ const STATUS_DONE = 'done';
 const dispatch = createEventDispatcher();
 
 let status = STATUS_QUEUE;
-let progressUpdates = [];
+let progressUpdates: Array<FileProgress> = [];
 let percent;
 
 $: {
@@ -36,14 +37,15 @@ $: {
 }
 
 let u = uploadFile(file);
-u.on('start', onUploadStart);
-u.on('finish', onUploadFinish);
-u.on('progress', onUploadProgress);
-u.on('hash', onHash);
-u.on('abort', onUploadAbort);
-u.on('meta_check', onMetaCheck);
-u.on('meta_found', onMetaFound);
-u.on('meta_notfound', onMetaNotFound);
+// maybe handle error here as well
+u.on(FileEvent.Start, onUploadStart);
+u.on(FileEvent.Finish, onUploadFinish);
+u.on(FileEvent.Progress, onUploadProgress);
+u.on(FileEvent.Hash, onHash);
+u.on(FileEvent.Abort, onUploadAbort);
+u.on(FileEvent.MetaCheck, onMetaCheck);
+u.on(FileEvent.MetaFound, onMetaFound);
+u.on(FileEvent.MetaNotFound, onMetaNotFound);
 
 function onHash() {
   status = STATUS_HASHING;
@@ -87,7 +89,7 @@ function onUploadFinish(meta) {
   status = STATUS_DONE;
 }
 
-function onUploadProgress(e) {
+function onUploadProgress(e: FileProgress) {
   progressUpdates = [...progressUpdates, e];
 }
 
@@ -103,14 +105,6 @@ function onMetaCheck() {
 function copyAttributes() {
   file.name = file.data.name;
   file.size = file.data.size;
-}
-
-function truncate(v, len) {
-  if (v.length < len - 3) {
-    return v;
-  }
-
-  return `${v.substr(0, len)}...`;
 }
 
 // immediately request a hash
