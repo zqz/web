@@ -1,13 +1,16 @@
 <script lang="ts">
-  import { URLs } from '$lib/util';
-  export let file;
-  export let visible;
-  export let posX;
-  export let posY;
-  export let top;
-  let imgPath;
-  $: imgPath = URLs.thumbnailUrl(file.slug);
-  $: bgPos = !top ? 'top left' : 'bottom left';
+import type { Meta } from '$lib/types';
+import { URLs } from '$lib/util';
+
+export let file : Meta;
+export let visible : boolean;
+export let posX: string;
+export let posY: string;
+export let top: string;
+let imgPath: string ;
+
+$: imgPath = URLs.thumbnailUrl(file.slug);
+$: bgPos = !top ? 'top left' : 'bottom left';
 </script>
 
 {#if visible}
@@ -19,22 +22,16 @@
 {/if}
 
 <style lang="scss">
-  .preview {
-    position: absolute;
-    display: flex;
-    flex-direction: columns;
-    align-items: flex-end;
-    user-select: none;
-    left: 0;
-    top: 0;
-    width: 300px;
-    height: 300px;
-    background-repeat: no-repeat;
-    img {
-      user-select: none;
-      border-radius: 3px;
-      max-width: 300px;
-      max-height: 300px;
-    }
-  }
+.preview {
+  position: absolute;
+  display: flex;
+  flex-direction: columns;
+  align-items: flex-end;
+  user-select: none;
+  left: 0;
+  top: 0;
+  width: 300px;
+  height: 300px;
+  background-repeat: no-repeat;
+}
 </style>
