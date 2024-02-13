@@ -8,7 +8,7 @@
 </button>
 
 <style lang="scss">
-  @import "$lib/variables.scss";
+  @import "../variables.scss";
 
   .button {
     outline: none;

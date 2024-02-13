@@ -166,7 +166,8 @@ u.hash();
 </div>
 
 <style lang="scss">
-@import "$lib/variables.scss";
+@import "../../variables.scss";
+
 .file {
   display: flex;
   flex-direction: column;

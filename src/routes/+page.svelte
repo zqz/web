@@ -27,7 +27,7 @@ import AddFilesButton from './AddFilesButton.svelte';
 </main>
 
 <style lang="scss">
-@import "$lib/variables.scss";
+@import "../lib/variables.scss";
 
 :global(body) {
   background-color: $white;
