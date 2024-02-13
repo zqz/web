@@ -10,21 +10,17 @@ import AddFilesButton from './AddFilesButton.svelte';
   <meta name="description" content="Svelte demo app" />
 </svelte:head>
 
-<main>
-  <section>
-    <div id="left">
-      <Logo/>
-      <ThemeToggle/>
-    </div>
-    <div id="right">
-      <header>
-        <h1>zqz.ca</h1>
-        <AddFilesButton />
-      </header>
-      <Overview/>
-    </div>
-  </section>
-</main>
+<div id="left">
+  <Logo/>
+  <ThemeToggle/>
+</div>
+<div id="right">
+  <header>
+    <h1>zqz.ca</h1>
+    <AddFilesButton />
+  </header>
+  <Overview/>
+</div>
 
 <style lang="scss">
 @import "../lib/variables.scss";
