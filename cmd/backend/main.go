@@ -18,19 +18,16 @@ func main() {
 		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 	}
 
-	logger.Print("zqz: starting")
-
 	s, err := server.Init(&logger, "./config.json")
 	if err != nil {
 		logger.Fatal().Err(err).Msg("failed to start server")
 	}
 	defer s.Close()
-	logger.Print("zqz: init complete, starting")
 
 	err = s.Run()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("error running server")
 	}
 
-	logger.Print("finished")
+	logger.Info().Msg("ending")
 }

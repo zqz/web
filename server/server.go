@@ -24,17 +24,18 @@ func Init(logger *zerolog.Logger, path string) (Server, error) {
 	s := Server{}
 	s.logger = logger
 
+	s.logger.Info().Msg("initializing")
 	cfg, err := parseConfig(path)
 	if err != nil {
 		return s, err
 	}
-	s.logger.Println("Parsed Config")
+	s.logger.Info().Msg("config loaded")
 
 	db, err := cfg.DBConfig.loadDatabase()
 	if err != nil {
 		return s, err
 	}
-	s.logger.Println("Connected to DB")
+	s.logger.Info().Msg("connected to database")
 
 	s.database = db
 	s.config = cfg
@@ -49,7 +50,7 @@ func (s Server) Close() {
 func (s Server) runInsecure(r http.Handler) error {
 	listenPort := fmt.Sprintf(":%d", s.config.Port)
 
-	s.logger.Println("[server] listening for HTTP traffic on port", listenPort)
+	s.logger.Info().Int("port", s.config.Port).Msg("listening for requests")
 
 	return http.ListenAndServe(listenPort, r)
 }
@@ -65,8 +66,6 @@ func (s Server) Run() error {
 	r := chi.NewRouter()
 	r.Use(loggerMiddleware(s.logger))
 	r.Mount("/api", fdb.Router())
-
-	s.logger.Println("Listening for web traffic")
 
 	return s.run(r)
 }
