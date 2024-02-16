@@ -9,11 +9,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-go@v2
+    - uses: actions/checkout@v4
+    - uses: actions/setup-go@v5
       with:
         go-verison: '1.22.0'
 
+    - run: go version
     - run: |
         go mod download && go build -o upl cmd/backend/main.go
 
