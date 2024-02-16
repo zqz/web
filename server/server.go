@@ -26,6 +26,8 @@ func Init(path string) (Server, error) {
 	s := Server{}
 	s.logger = log.New(os.Stdout, "", log.LstdFlags)
 
+	s.logger.Println("Starting Server")
+
 	cfg, err := parseConfig(path)
 	if err != nil {
 		return s, err
