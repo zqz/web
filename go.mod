@@ -4,7 +4,7 @@ go 1.14
 
 require (
 	github.com/friendsofgo/errors v0.9.2
-	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/go-chi/chi/v5 v5.0.11
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/goware/cors v1.1.1
 	github.com/lib/pq v1.10.9
