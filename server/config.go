@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 type databaseConfig struct {
@@ -54,7 +54,7 @@ func parseConfig(path string) (config, error) {
 		return cfg, errors.New("path is empty")
 	}
 
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 
 	if err != nil {
 		return cfg, err

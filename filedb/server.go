@@ -4,13 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi"
-	"github.com/goware/cors"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/zqz/upl/render"
 )
 
@@ -194,7 +193,7 @@ func (s Server) Router() http.Handler {
 }
 
 func parseMeta(r io.ReadCloser) (*Meta, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
