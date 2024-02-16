@@ -15,8 +15,8 @@ jobs:
         go-verison: '1.22.0'
 
     - run: go version
-    - run: |
-        go mod download && go build -o upl cmd/backend/main.go
+    - run: go mod verify
+    - run: go build -v -o upl cmd/backend/main.go
 
     - name: 'Test and Coverage'
       uses: paambaati/codeclimate-action@v2.5.0
