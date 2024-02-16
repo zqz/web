@@ -1,23 +1,36 @@
 package main
 
 import (
+	"os"
+
 	_ "github.com/lib/pq"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/zqz/upl/server"
 )
 
 func main() {
-	s, err := server.Init("./config.json")
+	var logger zerolog.Logger
+
+	if os.Getenv("ZQZ_ENV") == "production" {
+		logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
+	} else {
+		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
+	}
+
+	logger.Print("zqz: starting")
+
+	s, err := server.Init(&logger, "./config.json")
 	if err != nil {
-		s.Log("failed to start server:", err.Error())
-		return
+		logger.Fatal().Err(err).Msg("failed to start server")
 	}
 	defer s.Close()
-	s.Log("zqz backend: booting")
+	logger.Print("zqz: init complete, starting")
 
 	err = s.Run()
 	if err != nil {
-		s.Log("error running server:", err.Error())
+		logger.Fatal().Err(err).Msg("error running server")
 	}
 
-	s.Log("finished")
+	logger.Print("finished")
 }

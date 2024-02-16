@@ -3,30 +3,26 @@ package server
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog"
 	"github.com/zqz/upl/filedb"
 )
 
 type Server struct {
 	config   config
 	database *sql.DB
-	logger   *log.Logger
+	logger   *zerolog.Logger
 }
 
 func (s Server) Log(x ...interface{}) {
 	s.logger.Println(x...)
 }
 
-func Init(path string) (Server, error) {
+func Init(logger *zerolog.Logger, path string) (Server, error) {
 	s := Server{}
-	s.logger = log.New(os.Stdout, "", log.LstdFlags)
-
-	s.logger.Println("Starting Server")
+	s.logger = logger
 
 	cfg, err := parseConfig(path)
 	if err != nil {
@@ -67,10 +63,7 @@ func (s Server) Run() error {
 	)
 
 	r := chi.NewRouter()
-
-	logger := middleware.RequestLogger(&middleware.DefaultLogFormatter{Logger: s.logger})
-	r.Use(logger)
-
+	r.Use(loggerMiddleware(s.logger))
 	r.Mount("/api", fdb.Router())
 
 	s.logger.Println("Listening for web traffic")
