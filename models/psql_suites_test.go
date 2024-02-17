@@ -3,12 +3,12 @@
 
 package models
 
-var TableNames = struct {
-	Files          string
-	GooseDBVersion string
-	Thumbnails     string
-}{
-	Files:          "files",
-	GooseDBVersion: "goose_db_version",
-	Thumbnails:     "thumbnails",
+import "testing"
+
+func TestUpsert(t *testing.T) {
+	t.Run("Files", testFilesUpsert)
+
+	t.Run("GooseDBVersions", testGooseDBVersionsUpsert)
+
+	t.Run("Thumbnails", testThumbnailsUpsert)
 }
