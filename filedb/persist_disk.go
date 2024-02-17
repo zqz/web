@@ -3,37 +3,51 @@ package filedb
 import (
 	"io"
 	"os"
+	"path/filepath"
 )
 
 type DiskPersistence struct {
+	Path string
 }
 
 var fileFlags int = os.O_APPEND | os.O_CREATE | os.O_WRONLY
 var fileMode os.FileMode = 0600
+var dirMode os.FileMode = 0744
 
-func init() {
-	os.MkdirAll(path(""), 0744)
+func NewDiskPersistence(path string) (DiskPersistence, error) {
+	d := DiskPersistence{Path: path}
+
+	if ok, err := d.init(); !ok {
+		return d, err
+	}
+
+	return d, nil
 }
 
-func path(hash string) string {
-	return "./files/" + hash
-}
-
-func NewDiskPersistence() DiskPersistence {
-	return DiskPersistence{}
-}
-
-func (DiskPersistence) Del(hash string) error {
-	p := path(hash)
+func (d DiskPersistence) Del(hash string) error {
+	p := d.path(hash)
 	return os.Remove(p)
 }
 
-func (DiskPersistence) Put(hash string) (io.WriteCloser, error) {
-	p := path(hash)
+func (d DiskPersistence) Put(hash string) (io.WriteCloser, error) {
+	p := d.path(hash)
 	return os.OpenFile(p, fileFlags, fileMode)
 }
 
-func (DiskPersistence) Get(hash string) (io.ReadCloser, error) {
-	p := path(hash)
+func (d DiskPersistence) Get(hash string) (io.ReadCloser, error) {
+	p := d.path(hash)
 	return os.Open(p)
+}
+
+func (d DiskPersistence) init() (bool, error) {
+	err := os.MkdirAll(d.path(""), dirMode)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (d DiskPersistence) path(hash string) string {
+	return filepath.Join(d.Path, hash)
 }
