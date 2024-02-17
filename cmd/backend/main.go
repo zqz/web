@@ -13,7 +13,7 @@ func main() {
 	env := os.Getenv("ZQZ_ENV")
 	log := logger(env)
 
-	s, err := server.Init(&log, env, "./config.json", "./files")
+	s, err := server.Init(&log, env)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start server")
 	}

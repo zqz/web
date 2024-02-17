@@ -2,7 +2,6 @@ package server
 
 import (
 	"database/sql"
-	"os"
 
 	"github.com/caarlos0/env/v10"
 	"github.com/friendsofgo/errors"
@@ -25,8 +24,8 @@ func (c config) isDevelopment() bool {
 	return len(c.Env) == 0 || c.Env == "development"
 }
 
-func loadConfig() (config, error) {
-	cfgd := config{Env: os.Getenv("ZQZ_ENV")}
+func loadConfig(currentEnv string) (config, error) {
+	cfgd := config{Env: currentEnv}
 
 	if cfgd.isDevelopment() {
 		err := godotenv.Load()

@@ -16,26 +16,15 @@ type Server struct {
 	database *sql.DB
 	logger   *zerolog.Logger
 	env      string
-	filePath string
 }
 
-func (s Server) isDevelopment() bool {
-	return s.env != "production"
-}
-
-func (s Server) Log(x ...interface{}) {
-	s.logger.Println(x...)
-}
-
-func Init(logger *zerolog.Logger, env string, configPath string, path string) (Server, error) {
+func Init(logger *zerolog.Logger, env string) (Server, error) {
 	s := Server{
-		filePath: path,
-		logger:   logger,
-		env:      env,
+		logger: logger,
 	}
 
 	s.logger.Info().Msg("initializing")
-	cfg, err := loadConfig()
+	cfg, err := loadConfig(env)
 	if err != nil {
 		return s, err
 	}
@@ -66,7 +55,7 @@ func (s Server) runInsecure(r http.Handler) error {
 }
 
 func (s Server) Run() error {
-	storage, err := filedb.NewDiskPersistence(s.filePath)
+	storage, err := filedb.NewDiskPersistence(s.config.FilesPath)
 	if err != nil {
 		return err
 	}
@@ -79,7 +68,7 @@ func (s Server) Run() error {
 	)
 
 	r := chi.NewRouter()
-	if s.isDevelopment() {
+	if s.config.isDevelopment() {
 		s.logger.Info().Msg("running in development mode")
 
 		r.Use(cors.New(cors.Options{
