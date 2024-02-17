@@ -37,25 +37,3 @@ func (DiskPersistence) Get(hash string) (io.ReadCloser, error) {
 	p := path(hash)
 	return os.Open(p)
 }
-
-// func (m MemoryMetaStorer) FetchMeta(hash string) (*Meta, error) {
-// 	meta, ok := m.entries[hash]
-
-// 	if !ok {
-// 		return nil, errors.New("file not found")
-// 	}
-
-// 	return meta, nil
-// }
-
-// func (m MemoryMetaStorer) StoreMeta(meta Meta) error {
-// 	_, ok := m.entries[meta.Hash]
-
-// 	if ok {
-// 		return errors.New("file already exists")
-// 	}
-
-// 	m.entries[meta.Hash] = &meta
-
-// 	return nil
-// }
