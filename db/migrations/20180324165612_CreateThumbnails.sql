@@ -1,14 +1,14 @@
 
 -- +goose Up
 CREATE TABLE thumbnails (
-  id serial not null primary key,
-  file_id integer references files(id) not null,
-  width integer not null,
-  height integer not null,
-  hash text not null,
-  created_at timestamp without time zone
+  id SERIAL NOT NULL PRIMARY KEY,
+  file_id INTEGER REFERENCES files(id) NOT NULL,
+  width INTEGER NOT NULL,
+  height INTEGER NOT NULL,
+  hash TEXT NOT NULL,
+  created_at TIMESTAMP WITHOUT TIME ZONE
 );
 
 -- +goose Down
-drop table thumbnails;
+DROP TABLE thumbnails;
 

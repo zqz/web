@@ -1,6 +1,6 @@
 -- +goose Up
-alter table files alter column created_at set default now();
+ALTER TABLE files ALTER COLUMN created_at SET DEFAULT now();
 
 -- +goose Down
-alter table files alter column created_at drop default;
+ALTER TABLE files ALTER COLUMN created_at DROP DEFAULT;
 
