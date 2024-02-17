@@ -33,7 +33,7 @@ jobs:
     - name: 'Setup DB'
       run: |
         go install github.com/pressly/goose/v3/cmd/goose@latest
-        goose postgres "postgres://dylan@localhost:5432/zqz-dev" up
+        goose -dir ./db/migrations postgres "postgres://dylan@localhost:5432/zqz-dev" up
 
     - name: 'Test and Coverage'
       uses: paambaati/codeclimate-action@v5.0.0
