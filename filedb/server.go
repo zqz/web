@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
 	"github.com/zqz/upl/render"
 )
 
@@ -171,15 +170,6 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) Router() http.Handler {
 	r := chi.NewRouter()
-
-	r.Use(cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}).Handler)
 
 	r.Get("/files", s.files)
 	r.Get("/file/by-hash/{hash}", s.getData)
