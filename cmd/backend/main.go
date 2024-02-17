@@ -5,29 +5,32 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	zlog "github.com/rs/zerolog/log"
 	"github.com/zqz/upl/server"
 )
 
 func main() {
-	var logger zerolog.Logger
+	env := os.Getenv("ZQZ_ENV")
+	log := logger(env)
 
-	if os.Getenv("ZQZ_ENV") == "production" {
-		logger = zerolog.New(os.Stdout).With().Timestamp().Logger()
-	} else {
-		logger = log.Output(zerolog.ConsoleWriter{Out: os.Stdout})
-	}
-
-	s, err := server.Init(&logger, "./config.json")
+	s, err := server.Init(&log, env, "./config.json", "./files")
 	if err != nil {
-		logger.Fatal().Err(err).Msg("failed to start server")
+		log.Fatal().Err(err).Msg("failed to start server")
 	}
 	defer s.Close()
 
 	err = s.Run()
 	if err != nil {
-		logger.Fatal().Err(err).Msg("error running server")
+		log.Fatal().Err(err).Msg("error running server")
 	}
 
-	logger.Info().Msg("ending")
+	log.Info().Msg("ending")
+}
+
+func logger(env string) zerolog.Logger {
+	if env == "production" {
+		return zerolog.New(os.Stdout).With().Timestamp().Logger()
+	}
+
+	return zlog.Output(zerolog.ConsoleWriter{Out: os.Stdout})
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/rs/zerolog"
 	"github.com/zqz/upl/filedb"
 )
@@ -14,18 +15,27 @@ type Server struct {
 	config   config
 	database *sql.DB
 	logger   *zerolog.Logger
+	env      string
+	filePath string
+}
+
+func (s Server) isDevelopment() bool {
+	return s.env != "Production"
 }
 
 func (s Server) Log(x ...interface{}) {
 	s.logger.Println(x...)
 }
 
-func Init(logger *zerolog.Logger, path string) (Server, error) {
-	s := Server{}
-	s.logger = logger
+func Init(logger *zerolog.Logger, env string, configPath string, path string) (Server, error) {
+	s := Server{
+		filePath: path,
+		logger:   logger,
+		env:      env,
+	}
 
 	s.logger.Info().Msg("initializing")
-	cfg, err := parseConfig(path)
+	cfg, err := parseConfig(configPath)
 	if err != nil {
 		return s, err
 	}
@@ -56,14 +66,31 @@ func (s Server) runInsecure(r http.Handler) error {
 }
 
 func (s Server) Run() error {
+	storage, err := filedb.NewDiskPersistence(s.filePath)
+	if err != nil {
+		return err
+	}
+
 	fdb := filedb.NewServer(
 		filedb.NewFileDB(
-			filedb.NewDiskPersistence(),
+			storage,
 			filedb.NewDBMetaStorage(s.database),
 		),
 	)
 
 	r := chi.NewRouter()
+	if s.isDevelopment() {
+		s.logger.Info().Msg("running in development mode")
+
+		r.Use(cors.New(cors.Options{
+			AllowedOrigins:   []string{"*"},
+			AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300,
+		}).Handler)
+	}
 	r.Use(loggerMiddleware(s.logger))
 	r.Mount("/api", fdb.Router())
 
