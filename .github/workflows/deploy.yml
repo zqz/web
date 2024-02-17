@@ -43,6 +43,7 @@ jobs:
         cat sqlboiler.toml | sed s/localhost/postgres/g > sqlboiler.toml_
         mv sqlboiler.toml_ sqlboiler.toml
 
+    - run: git config --global --add safe.directory /__w/upl/upl
     - name: 'Test and Coverage'
       uses: paambaati/codeclimate-action@v5.0.0
       env:
