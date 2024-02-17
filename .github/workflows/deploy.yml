@@ -33,7 +33,7 @@ jobs:
     - name: 'Setup DB'
       run: |
         go install github.com/pressly/goose/v3/cmd/goose@latest
-        goose -dir ./db/migrations postgres "postgres://dylan@localhost:5432/zqz-dev" up
+        goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev" up
 
     - name: 'Setup SQLBoiler config'
       run: |
