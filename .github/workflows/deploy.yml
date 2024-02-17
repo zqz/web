@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: 'golang-1.22.0-bookworm'
+    container: 'golang:1.22.0-bookworm'
 
     services:
       postgres:
