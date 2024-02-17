@@ -20,7 +20,7 @@ type Server struct {
 }
 
 func (s Server) isDevelopment() bool {
-	return s.env != "Production"
+	return s.env != "production"
 }
 
 func (s Server) Log(x ...interface{}) {
