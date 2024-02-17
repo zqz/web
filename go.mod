@@ -3,9 +3,11 @@ module github.com/zqz/upl
 go 1.22
 
 require (
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/cors v1.2.1
+	github.com/joho/godotenv v1.5.1
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/lib/pq v1.10.9
 	github.com/rs/zerolog v1.32.0

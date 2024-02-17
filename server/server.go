@@ -35,13 +35,13 @@ func Init(logger *zerolog.Logger, env string, configPath string, path string) (S
 	}
 
 	s.logger.Info().Msg("initializing")
-	cfg, err := parseConfig(configPath)
+	cfg, err := loadConfig()
 	if err != nil {
 		return s, err
 	}
 	s.logger.Info().Msg("config loaded")
 
-	db, err := cfg.DBConfig.loadDatabase()
+	db, err := openDatabase(cfg.DatabaseURL)
 	if err != nil {
 		return s, err
 	}

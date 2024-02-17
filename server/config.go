@@ -2,68 +2,59 @@ package server
 
 import (
 	"database/sql"
-	"encoding/json"
-	"errors"
-	"fmt"
 	"os"
+
+	"github.com/caarlos0/env/v10"
+	"github.com/friendsofgo/errors"
+	"github.com/joho/godotenv"
+	"github.com/lib/pq"
 )
 
-type databaseConfig struct {
-	Host string `json:"host"`
-	Name string `json:"name"`
-	Pass string `json:"pass"`
-	Port int    `json:"port"`
-	User string `json:"user"`
-}
-
 type config struct {
-	Port     int            `json:"port"`
-	DBConfig databaseConfig `json:"database"`
+	Port        int    `env:"PORT" envDefault:"3000"`
+	Env         string `env:"ZQZ_ENV" envDefault:"development"`
+	DatabaseURL string `env:"DATABASE_URL"`
+	FilesPath   string `env:"FILES_PATH" envDefault:"./files"`
 }
 
-func (dc databaseConfig) openstring() string {
-	s := fmt.Sprintf(
-		"host=%s port=%d user=%s dbname=%s sslmode=disable",
-		dc.Host, dc.Port, dc.User, dc.Name,
-	)
+func (c config) isProduction() bool {
+	return c.Env == "production"
+}
 
-	if dc.Pass != "" {
-		s += " password=" + dc.Pass
+func (c config) isDevelopment() bool {
+	return len(c.Env) == 0 || c.Env == "development"
+}
+
+func loadConfig() (config, error) {
+	cfgd := config{Env: os.Getenv("ZQZ_ENV")}
+
+	if cfgd.isDevelopment() {
+		err := godotenv.Load()
+		if err != nil {
+			return cfgd, err
+		}
 	}
 
-	return s
+	if err := env.Parse(&cfgd); err != nil {
+		return cfgd, err
+	}
+
+	return cfgd, nil
 }
 
-func (dc databaseConfig) loadDatabase() (*sql.DB, error) {
-	db, err := sql.Open("postgres", dc.openstring())
+func openDatabase(url string) (*sql.DB, error) {
+	openStr, err := pq.ParseURL(url)
+	if err != nil {
+		return nil, err
+	}
+	db, err := sql.Open("postgres", openStr)
 	if err != nil {
 		return nil, err
 	}
 
 	if err = db.Ping(); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to establish connection to db")
 	}
 
 	return db, nil
-}
-
-func parseConfig(path string) (config, error) {
-	cfg := config{}
-
-	if path == "" {
-		return cfg, errors.New("path is empty")
-	}
-
-	b, err := os.ReadFile(path)
-
-	if err != nil {
-		return cfg, err
-	}
-
-	err = json.Unmarshal(b, &cfg)
-	if err != nil {
-		return cfg, err
-	}
-
-	return cfg, nil
 }
