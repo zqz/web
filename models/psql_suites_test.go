@@ -8,7 +8,5 @@ import "testing"
 func TestUpsert(t *testing.T) {
 	t.Run("Files", testFilesUpsert)
 
-	t.Run("GooseDBVersions", testGooseDBVersionsUpsert)
-
 	t.Run("Thumbnails", testThumbnailsUpsert)
 }
