@@ -1,6 +1,6 @@
 # zqz.ca
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/a75e339ad8a045949fd2d032103f71cd)](https://app.codacy.com/gh/zqz/upl/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
-[![codebeat badge](https://codebeat.co/badges/c2cc652d-7230-4eea-a642-976064865d2d)](https://codebeat.co/projects/github-com-zqz-upl-master)
+[![codebeat badge](https://codebeat.co/badges/d0afb6f1-2490-4ec1-b4a4-213f88800fe4)](https://codebeat.co/projects/github-com-zqz-upl-master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/74bcc076dbf4d07c141d/maintainability)](https://codeclimate.com/github/zqz/upl/maintainability)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zqz/upl)](https://goreportcard.com/report/github.com/zqz/upl)
 ![Deploy to Production](https://github.com/zqz/upl/workflows/Deploy%20to%20Production/badge.svg)
