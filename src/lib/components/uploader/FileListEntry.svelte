@@ -9,6 +9,8 @@ import LinkButton from '$lib/components/LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
 import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
+	import FileSize from '../overview/FileSize.svelte';
+	import FileFinished from './FileFinished.svelte';
 
 export let file: Uploadable;
 
@@ -103,12 +105,15 @@ function onMetaCheck() {
 u.hash();
 </script>
 
-<div class="file {status}">
-  <div class="row">
-    <div class="name">
+{#if status == FileStatus.Done}
+  <FileFinished file={file} on:remove={remove}/>
+{:else}
+<div class="flex flex-col bg-red-900 rounded-md p-2 border-red-50 {status}">
+  <div class="flex flex-row justify-between">
+    <div>
       {truncate(file.data.name, 40)}
     </div>
-    <div class="row">
+    <div>
       {#if status == FileStatus.Ready}
         <Button title="Start uploading" on:click={start}>
           {#if file.meta && file.meta.bytes_received > 0}
@@ -136,11 +141,9 @@ u.hash();
       {/if}
     </div>
   </div>
-  <div class="row">
+  <div class="flex flex-row">
     <div class="stats">
-      <div>
-        {bytes(file.data.size)}
-      </div>
+      <FileSize size={file.data.size}/>
       <div class="monospace">
         {#if status === FileStatus.Hashing}
           <Hashing/>
@@ -164,6 +167,8 @@ u.hash();
     <Progress percent={percent} height={6}/>
   {/if}
 </div>
+{/if}
+
 
 <style lang="scss">
 @import "../../variables.scss";

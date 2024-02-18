@@ -1,23 +1,30 @@
 <script lang="ts">
-	import '$lib/styles.scss';
+import "../app.css";
+	import Logo from "./Logo.svelte";
+	import ThemeToggle from "./ThemeToggle.svelte";
 </script>
 
-<div class="app">
-	<main>
-		<slot />
-	</main>
+<svelte:head>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:400,100,200,300,500,600,700,800,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+</svelte:head>
 
-	<footer>
-	</footer>
+<div class="md:px-4 w-full font-normal">
+  <div class="flex w-full flex-col gap-8 p-8 md:flex-row md:p-16">
+    <div class="md:shrink-0">
+      <Logo/>
+      <ThemeToggle/>
+    </div>
+
+    <div class="gap-8 flex-grow">
+      <slot />
+    </div>
+  </div>
+
+  <footer>
+    <div class="text-center font-small drop-shadow-md">
+      2012 - 2024
+    </div>
+  </footer>
 </div>
-
-<style>
-
-
-
-main {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-</style>

@@ -16,7 +16,9 @@ export const fetchFileMeta = (file: Uploadable) => {
       return;
     }
 
-    cb.emit(FileEvent.MetaFound, json as Meta);
+    json.lols = '1231';
+
+    cb.emit(FileEvent.MetaFound, json);
   }
 
   function create() {

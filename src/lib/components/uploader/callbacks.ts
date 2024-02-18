@@ -2,7 +2,7 @@ export function callbacks<T>() {
   let callbacks = new Map<T, Function>();
 
   function on(eventName: T, func: Function) {
-    callbacks.set(eventName, () => func(eventName));
+    callbacks.set(eventName, func);
   }
 
   function emit(eventName: T, ...args: any[]) {

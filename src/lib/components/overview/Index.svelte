@@ -1,9 +1,8 @@
 <script lang="ts">
   import { URLs } from '$lib/util';
   import Uploader from '$lib/components/uploader/Uploader.svelte';
-  import Entry from './Entry.svelte';
+  import FileList from './FileList.svelte';
   import Button from '$lib/components/Button.svelte';
-  import { onMount } from "svelte";
 
   $: page = 0;
   $: reload = 0;
@@ -38,29 +37,18 @@
   }
 </script>
 
+<Uploader on:file:uploaded={loadFiles}/>
+
 <div>
-  <Uploader on:file:uploaded={loadFiles}/>
-
-  <div class="files-list">
-    {#await fetchFiles(page, reload)}
-      <p>Loading Files...</p>
-    {:then files}
-      {#each files as file (file.hash)}
-        <Entry file={file}/>
-      {/each}
-
-    {:catch error}
-      <p>
-        {timeoutLoadFiles()}
-        There was an error, retrying in {delay}s... {error.message}
-      </p>
-    {/await}
-    <Button title="load more" on:click={loadNext} size="large">load more</Button>
-  </div>
+  {#await fetchFiles(page, reload)}
+    <p>Loading Files...</p>
+  {:then files}
+    <FileList files={files}/>
+  {:catch error}
+    <p>
+      {timeoutLoadFiles()}
+      There was an error, retrying in {delay}s... {error.message}
+    </p>
+  {/await}
+  <Button title="load more" on:click={loadNext} size="large">load more</Button>
 </div>
-
-<style>
-  .files-list {
-    margin-top: 16px;
-  }
-</style>

@@ -1,19 +1,12 @@
 <script lang="ts">
-	import FileListEntry from "./FileListEntry.svelte";
-	import type { Uploadable } from "$lib/types";
+import FileListEntry from "./FileListEntry.svelte";
+import type { Uploadable } from "$lib/types";
 
-  export let files : Array<Uploadable> = [];
+export let files : Array<Uploadable> = [];
 </script>
 
-<div class="file-list">
+<div class="flex flex-col-reverse gap-2">
   {#each files as file (file.internalId)}
     <FileListEntry file={file} on:file:remove on:file:uploaded />
   {/each}
 </div>
-
-<style>
-  .file-list{
-    display: flex;
-    flex-direction: column-reverse;
-  }
-</style>

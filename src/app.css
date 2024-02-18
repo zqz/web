@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply h-screen bg-gradient-to-b from-gray-100 to-slate-50;
+  }
+
+  .btn {
+
+    @apply flex
+    h-4 items-center justify-center rounded-full
+    bg-blue-800
+    p-3 align-middle font-mono text-xs
+    text-blue-100 drop-shadow-md transition hover:bg-blue-50
+    hover:text-blue-700
+    hover:drop-shadow-lg;
+  }
+}
