@@ -31,7 +31,6 @@ u.on(FileEvent.Finish, onUploadFinish);
 u.on(FileEvent.Progress, onUploadProgress);
 u.on(FileEvent.Hash, onHash);
 u.on(FileEvent.Abort, onUploadAbort);
-u.on(FileEvent.MetaCheck, onMetaCheck);
 u.on(FileEvent.MetaFound, onMetaFound);
 u.on(FileEvent.MetaNotFound, onMetaNotFound);
 
@@ -99,11 +98,6 @@ function onUploadAbort() {
   status = FileStatus.Queue;
   u.fetchMeta();
 };
-
-function onMetaCheck() {
-  console.log('upload metadata checked');
-  status = FileStatus.MetaCheck;
-}
 
 // immediately request a hash
 onMount(u.hash);

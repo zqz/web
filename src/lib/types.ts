@@ -6,7 +6,6 @@ export const enum FileEvent {
   Error = "error",
   Abort = "abort",
   MetaCreate = "meta_create",
-  MetaCheck = "meta_check",
   MetaFound = "meta_found",
   MetaNotFound = "meta_notfound"
 }
@@ -14,7 +13,6 @@ export const enum FileEvent {
 export const enum FileStatus {
   Queue = "queued",
   Hashing = "hashing",
-  MetaCheck = "meta_check",
   Ready = "ready",
   InProgress = "in_progress",
   Done = "done",
