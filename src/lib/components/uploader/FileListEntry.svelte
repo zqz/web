@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher } from 'svelte';
+import { createEventDispatcher, onMount } from 'svelte';
 import { uploadFile } from './uploadFile';
 
 import Hashing from './Hashing.svelte';
@@ -87,20 +87,23 @@ function onUploadFinish() {
 }
 
 function onUploadProgress(e: FileProgress) {
+  console.log('upload progress');
   progressUpdates = [...progressUpdates, e];
 }
 
 function onUploadAbort() {
+  console.log('upload aborted');
   status = FileStatus.Queue;
   u.fetchMeta();
 };
 
 function onMetaCheck() {
+  console.log('upload metadata checked');
   status = FileStatus.MetaCheck;
 }
 
 // immediately request a hash
-u.hash();
+onMount(u.hash);
 </script>
 
 {#if status == FileStatus.Done}
