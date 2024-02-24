@@ -11,7 +11,7 @@ export const fetchFileMeta = (file: Uploadable) => {
     const response = await fetch(URLs.getMetaUrl(file.hash!), { mode: "cors" });
     const json = await response.json();
 
-    if (json.message === 'file not found') {
+    if (response.status === 204) {
       cb.emit(FileEvent.MetaNotFound);
       return;
     }
