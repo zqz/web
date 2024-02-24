@@ -1,54 +1,66 @@
 <script lang="ts">
-  import { URLs } from '$lib/util';
-  import Uploader from '$lib/components/uploader/Uploader.svelte';
-  import FileList from './FileList.svelte';
-  import Button from '$lib/components/Button.svelte';
+import { URLs } from '$lib/util';
+import Uploader from '$lib/components/uploader/Uploader.svelte';
+import FileList from './FileList.svelte';
+import Button from '$lib/components/Button.svelte';
+import { onMount } from 'svelte';
+import type { Meta } from '$lib/types';
 
-  $: page = 0;
-  $: reload = 0;
-  let delay = 1;
+$: page = 0;
+let delay = 1;
 
-  function loadNext() {
-    page++;
+function loadNext() {
+  page++;
+}
+
+let files : Array<Meta> = [];
+let error : Error | undefined;
+
+async function fetchFiles(page: number) {
+  const res = await fetch(URLs.getFilesListUrl(page));
+  const json = await res.json();
+
+  if (res.ok) {
+    return json;
+  } else {
+    throw new Error(json);
   }
+}
 
-  async function fetchFiles(page: number, reload: number) {
-    console.log('reload', reload);
-    const res = await fetch(URLs.getFilesListUrl(page));
-    const json = await res.json();
+function loadFiles() {
+  console.log('fetching files');
+  fetchFiles(page).then((newFiles) => {
+    files = [...newFiles];
+    error = undefined;
+  }).catch(e => {
+    error = e;
+    console.log('error', e);
+    timeoutLoadFiles();
+  });
+}
 
-    if (res.ok) {
-      return json;
-    } else {
-      throw new Error(json);
-    }
-  }
+function timeoutLoadFiles() {
+  delay = delay + 1;
+  setTimeout(loadFiles, delay*1000);
+  return '';
+}
 
-  function loadFiles() {
-    console.log('reloading files');
-    reload++;
-    page = 0;
-  }
+onMount(function() {
+  loadFiles();
+});
 
-  function timeoutLoadFiles() {
-    delay = delay + 1;
-    setTimeout(loadFiles, delay*1000);
-    return '';
-  }
 </script>
 
 <Uploader on:file:uploaded={loadFiles}/>
 
 <div>
-  {#await fetchFiles(page, reload)}
-    <p>Loading Files...</p>
-  {:then files}
-    <FileList files={files}/>
-  {:catch error}
+  <FileList files={files}/>
+
+  {#if error}
     <p>
-      {timeoutLoadFiles()}
       There was an error, retrying in {delay}s... {error.message}
     </p>
-  {/await}
-  <Button title="load more" on:click={loadNext} size="large">load more</Button>
+  {/if}
+
+  <Button title="load more" on:click={loadNext}>load more</Button>
 </div>
