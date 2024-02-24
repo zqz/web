@@ -17,46 +17,29 @@ export let file: Uploadable;
 const dispatch = createEventDispatcher();
 
 let status = FileStatus.Queue;
-let progressUpdates: Array<FileProgress> = [];
+let updates: Array<FileProgress> = [];
 let percent: number = 0;
 
 $: {
-  percent = calcPercent(progressUpdates);
+  percent = calcPercent(updates);
 }
 
 let u = uploadFile(file);
-u.on(FileEvent.Error, onUploadError);
-u.on(FileEvent.Start, onUploadStart);
-u.on(FileEvent.Finish, onUploadFinish);
-u.on(FileEvent.Progress, onUploadProgress);
-u.on(FileEvent.Hash, onHash);
-u.on(FileEvent.Abort, onUploadAbort);
-u.on(FileEvent.MetaFound, onMetaFound);
-u.on(FileEvent.MetaNotFound, onMetaNotFound);
+u.on(FileEvent.Error, () => status = FileStatus.Error);
+u.on(FileEvent.Start, () => status = FileStatus.InProgress);
+u.on(FileEvent.Progress, (e: FileProgress) => updates = [...updates, e]);
+u.on(FileEvent.MetaNotFound, () => status = FileStatus.Ready);
+u.on(FileEvent.Hash, () => status = FileStatus.Hashing);
+u.on(FileEvent.Finish, () => {
+  status = FileStatus.Done;
+});
 
-function onHash() {
-  status = FileStatus.Hashing;
-}
+u.on(FileEvent.Abort, () => {
+  status = FileStatus.Queue;
+  u.fetchMeta();
+});
 
-function start() {
-  console.log('user started upload');
-  progressUpdates = []; // clear progress history, if any.
-  u.start();
-}
-
-function cancel() {
-  console.log('user cancelled upload');
-  u.abort();
-}
-
-function remove() {
-  console.log('user removed file');
-  dispatch('file:remove', file);
-}
-
-// meta callbacks
-function onMetaFound() {
-  console.log('meta found');
+u.on(FileEvent.MetaFound, () => {
   const m = file.meta!;
 
   if (m.bytes_received === m.size) {
@@ -64,42 +47,22 @@ function onMetaFound() {
   } else {
     status = FileStatus.Ready;
   }
+});
+
+function start() {
+  updates = [];
+  u.start();
 }
 
-function onMetaNotFound() {
-  console.log('meta not found');
-  status = FileStatus.Ready;
+function cancel() {
+  u.abort();
 }
 
-// upload callbacks
-function onUploadStart() {
-  console.log('upload started');
-  status = FileStatus.InProgress;
+function remove() {
+  dispatch('file:remove', file);
 }
 
-function onUploadError() {
-  console.log('upload error')
-  status = FileStatus.Error;
-}
-
-function onUploadFinish() {
-  console.log('upload finished');
-  dispatch('file:uploaded');
-  status = FileStatus.Done;
-}
-
-function onUploadProgress(e: FileProgress) {
-  console.log('upload progress');
-  progressUpdates = [...progressUpdates, e];
-}
-
-function onUploadAbort() {
-  console.log('upload aborted');
-  status = FileStatus.Queue;
-  u.fetchMeta();
-};
-
-// immediately request a hash
+// request that the file is hashed as soon as the component is mounted.
 onMount(u.hash);
 </script>
 
@@ -144,7 +107,7 @@ onMount(u.hash);
 
     {#if status === FileStatus.InProgress}
       <div>
-        <ProgressStats updates={progressUpdates}/>
+        <ProgressStats updates={updates}/>
         <Progress percent={percent}/>
       </div>
     {/if}
