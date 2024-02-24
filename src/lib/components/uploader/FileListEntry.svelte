@@ -28,7 +28,7 @@ $: {
 }
 
 let u = uploadFile(file);
-// maybe handle error here as well
+u.on(FileEvent.Error, onUploadError);
 u.on(FileEvent.Start, onUploadStart);
 u.on(FileEvent.Finish, onUploadFinish);
 u.on(FileEvent.Progress, onUploadProgress);
@@ -76,6 +76,11 @@ function onMetaNotFound() {
 // upload callbacks
 function onUploadStart() {
   status = FileStatus.InProgress;
+}
+
+function onUploadError() {
+  console.log('upload error')
+  status = FileStatus.Error;
 }
 
 function onUploadFinish() {

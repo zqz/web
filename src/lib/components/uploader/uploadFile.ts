@@ -39,10 +39,15 @@ export const uploadFile = (file: Uploadable) => {
   async function hash() {
     cb.emit(FileEvent.Hash);
 
-    hashFile(file.data, (h: string) => {
-      file.hash = h;
-      fetchMeta();
-    });
+    try {
+      hashFile(file.data, (h: string) => {
+        file.hash = h;
+        fetchMeta();
+      });
+    } catch(e) {
+      console.log('caught error');
+      cb.emit(FileEvent.Error);
+    }
   }
 
   function upload() {

@@ -17,7 +17,8 @@ export const enum FileStatus {
   MetaCheck = "meta_check",
   Ready = "ready",
   InProgress = "in_progress",
-  Done = "done"
+  Done = "done",
+  Error = "error"
 }
 
 export interface FileProgress {
