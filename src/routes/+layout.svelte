@@ -3,13 +3,9 @@ import "../app.css";
 import Logo from "./Logo.svelte";
 import ThemeToggle from "./ThemeToggle.svelte";
 import { version } from '$app/environment'
-
 </script>
 
 <svelte:head>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:400,100,200,300,500,600,700,800,900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
 </svelte:head>
 
 <div class="md:px-4 full font-normal">
