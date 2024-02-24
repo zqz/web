@@ -6,7 +6,7 @@
   export let files : Array<Meta>;
 </script>
 
-<div class="flex flex-col mb-3">
+<div class="flex flex-col mb-3 overflow-hidden">
   {#each files as file (file.hash)}
     <File file={file}/>
   {/each}

@@ -17,7 +17,7 @@ import "../app.css";
       <ThemeToggle/>
     </div>
 
-    <div class="gap-8 flex-grow">
+    <div class="">
       <slot />
     </div>
   </div>
