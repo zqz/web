@@ -1,13 +1,13 @@
 export const enum FileEvent {
-  Start = "start",
-  Finish = "finish",
-  Progress = "progress",
-  Hash = "hash",
-  Error = "error",
-  Abort = "abort",
-  MetaCreate = "meta_create",
-  MetaFound = "meta_found",
-  MetaNotFound = "meta_notfound"
+  Start = "start", // file upload started
+  Finish = "finish", // file upload finished
+  Progress = "progress", // a upload progress event
+  Hash = "hash", // hashing started
+  Error = "error", // any error
+  Abort = "abort", // user aborted file
+  MetaCreate = "meta_create", // file is ready to start uploading
+  MetaFound = "meta_found", // file exists in some form on the server
+  MetaNotFound = "meta_notfound" // file does not exist on the server
 }
 
 export const enum FileStatus {
