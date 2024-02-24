@@ -8,7 +8,7 @@ export const fetchFileMeta = (file: Uploadable) => {
 
   // actions
   async function retrieve() {
-    const response = await fetch(URLs.getMetaUrl(file.hash!));
+    const response = await fetch(URLs.getMetaUrl(file.hash!), { mode: "cors" });
     const json = await response.json();
 
     if (json.message === 'file not found') {
