@@ -39,17 +39,19 @@ function onHash() {
   status = FileStatus.Hashing;
 }
 
-// actions
 function start() {
+  console.log('user started upload');
   progressUpdates = []; // clear progress history, if any.
   u.start();
 }
 
 function cancel() {
+  console.log('user cancelled upload');
   u.abort();
 }
 
 function remove() {
+  console.log('user removed file');
   dispatch('file:remove', file);
 }
 
@@ -72,6 +74,7 @@ function onMetaNotFound() {
 
 // upload callbacks
 function onUploadStart() {
+  console.log('upload started');
   status = FileStatus.InProgress;
 }
 
