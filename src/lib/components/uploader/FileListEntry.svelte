@@ -27,8 +27,6 @@ $: {
   percent = calcPercent(progressUpdates);
 }
 
-const fileUrl = file.meta ? URLs.getFileBySlugUrl(file.meta.slug) : "invalid";
-
 let u = uploadFile(file);
 // maybe handle error here as well
 u.on(FileEvent.Start, onUploadStart);
