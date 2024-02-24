@@ -1,8 +1,8 @@
 <script lang="ts">
-export let title: string;
-export let size = '';
+  export let title: string;
+  export let className: string = '';
 </script>
 
-<button aria-label={title} on:click class="bg-black text-white rounded-sm">
-    <slot></slot>
+<button aria-label={title} title={title} class="btn {className}" on:click>
+  <slot></slot>
 </button>

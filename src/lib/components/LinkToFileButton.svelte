@@ -1,12 +1,14 @@
 <script lang="ts">
 import type { Meta } from "$lib/types";
 import { URLs } from "$lib/urls";
-import Button from "./uploader/Button.svelte";
+import Button from "./Button.svelte";
 
 export let file: Meta;
 const fileUrl = URLs.getFileBySlugUrl(file.slug);
 </script>
 
-<a href={fileUrl} target="_blank">
-  <Button title={file.name}><slot></slot></Button>
+<a class="flex-inline" href={fileUrl} target="_blank">
+  <Button title={file.name}>
+    <slot></slot>
+  </Button>
 </a>

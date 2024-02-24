@@ -29,17 +29,11 @@
   }
 </script>
 
-<div>
-  <div class="row">
+<div class="flex">
+  <div class="basis-1/2">
     {transferred} / {total}
   </div>
-  <div class="row">
+  <div class="basis-1/2 text-right">
     {estimate} @ {speed}
   </div>
 </div>
-
-<style>
-  .row {
-    justify-content: flex-end;
-  }
-</style>

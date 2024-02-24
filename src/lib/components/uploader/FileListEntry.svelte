@@ -9,8 +9,10 @@ import LinkButton from '$lib/components/LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
 import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
-	import FileSize from '../overview/FileSize.svelte';
-	import FileFinished from './FileFinished.svelte';
+import FileSize from '../overview/FileSize.svelte';
+import FileFinished from './FileFinished.svelte';
+import FileContainer from './FileContainer.svelte';
+import Divider from './Divider.svelte';
 
 export let file: Uploadable;
 
@@ -108,12 +110,8 @@ u.hash();
 {#if status == FileStatus.Done}
   <FileFinished file={file} on:remove={remove}/>
 {:else}
-<div class="flex flex-col bg-red-900 rounded-md p-2 border-red-50 {status}">
-  <div class="flex flex-row justify-between">
-    <div>
-      {truncate(file.data.name, 40)}
-    </div>
-    <div>
+  <FileContainer file={file}>
+    <div slot="buttons">
       {#if status == FileStatus.Ready}
         <Button title="Start uploading" on:click={start}>
           {#if file.meta && file.meta.bytes_received > 0}
@@ -122,7 +120,7 @@ u.hash();
             start
           {/if}
         </Button>
-        <Button title="Remove file from queue" size="remove" on:click={remove}>
+        <Button title="Remove file from queue" on:click={remove}>
           x
         </Button>
       {/if}
@@ -131,20 +129,10 @@ u.hash();
           cancel
         </Button>
       {/if}
-      {#if status === FileStatus.Done}
-        <LinkButton title="View file" target="_blank" url={fileUrl}>
-          goto :file
-        </LinkButton>
-        <Button title="Remove uploaded file from list" size="remove" on:click={remove}>
-          x
-        </Button>
-      {/if}
     </div>
-  </div>
-  <div class="flex flex-row">
-    <div class="stats">
-      <FileSize size={file.data.size}/>
-      <div class="monospace">
+    
+    <div class="flex flex-row">
+      <div class="basis-3/4">
         {#if status === FileStatus.Hashing}
           <Hashing/>
         {/if}
@@ -152,52 +140,17 @@ u.hash();
           {file.hash}
         {/if}
       </div>
-    </div>
-    <div class="row">
-      <div class="status">
-        {#if status === FileStatus.InProgress}
-          <ProgressStats updates={progressUpdates}/>
-        {:else}
-          <span class="monospace">{status}</span>
-        {/if}
+      <div class="basis-1/4 text-right">
+        <FileSize size={file.data.size}/>
+        <span class="monospace">{status}</span>
       </div>
     </div>
-  </div>
-  {#if status === FileStatus.InProgress}
-    <Progress percent={percent} height={6}/>
-  {/if}
-</div>
+
+    {#if status === FileStatus.InProgress}
+      <div>
+        <ProgressStats updates={progressUpdates}/>
+        <Progress percent={percent}/>
+      </div>
+    {/if}
+  </FileContainer>
 {/if}
-
-
-<style lang="scss">
-@import "../../variables.scss";
-
-.file {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 8px;
-
-  border-left: solid 8px $link-normal;
-  padding-left: 8px;
-  padding-bottom: 4px;
-
-  &.done {
-    border-color: $file-done;
-  }
-
-  .row {
-    font-size: 0.8rem;
-
-    .status {
-      align-self: flex-end;
-    }
-
-    .name {
-      font-size: 1.3rem;
-      font-weight: 500;
-      padding-bottom: 4px;
-    }
-  }
-}
-</style>

@@ -10,7 +10,7 @@ import "../app.css";
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
 </svelte:head>
 
-<div class="md:px-4 w-full font-normal">
+<div class="md:px-4 full font-normal">
   <div class="flex w-full flex-col gap-8 p-8 md:flex-row md:p-16">
     <div class="md:shrink-0">
       <Logo/>
