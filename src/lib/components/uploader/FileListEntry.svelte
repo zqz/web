@@ -12,6 +12,7 @@ import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/
 import FileSize from '../overview/FileSize.svelte';
 import FileFinished from './FileFinished.svelte';
 import FileContainer from './FileContainer.svelte';
+import { calcPercent } from './percent';
 import Divider from './Divider.svelte';
 
 export let file: Uploadable;
@@ -23,12 +24,7 @@ let progressUpdates: Array<FileProgress> = [];
 let percent: number = 0;
 
 $: {
-  let first = progressUpdates[0];
-  let last = progressUpdates[progressUpdates.length-1];
-
-  if (first != undefined && last != undefined) {
-    percent = last.loaded / last.total;
-  }
+  percent = calcPercent(progressUpdates);
 }
 
 const fileUrl = file.meta ? URLs.getFileBySlugUrl(file.meta.slug) : "invalid";
