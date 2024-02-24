@@ -1,7 +1,7 @@
 import { URLs, hashFile } from '$lib/util';
 import { callbacks } from './callbacks';
 import { FileEvent } from '$lib/types';
-import type { Meta, Uploadable } from '$lib/types';
+import type { FileProgress, Meta, Uploadable } from '$lib/types';
 import { fetchFileMeta } from './fetchMeta';
 
 export const uploadFile = (file: Uploadable) => {
@@ -9,16 +9,20 @@ export const uploadFile = (file: Uploadable) => {
   let cb = callbacks<FileEvent>();
   let m = fetchFileMeta(file);
 
-  m.on(FileEvent.MetaFound, (m: Meta) => {
-    file.meta = m;
+  m.on(FileEvent.MetaFound, (meta: Meta) => {
+    setFileMetadata(meta);
     cb.emit(FileEvent.MetaFound);
   });
 
   m.on(FileEvent.MetaNotFound, () => cb.emit(FileEvent.MetaNotFound))
   m.on(FileEvent.MetaCreate, (meta: Meta) => {
-    file.meta = meta;
+    setFileMetadata(meta);
     upload()
   });
+
+  function setFileMetadata(m: Meta) {
+    file.meta = m;
+  }
 
   function abort() {
     xhr.abort();
@@ -57,18 +61,17 @@ export const uploadFile = (file: Uploadable) => {
 
     xhr.addEventListener('readystatechange', onStateChange);
     xhr.open('POST', URLs.postFileUrl(file.hash!), true);
-    xhr.send(file.data.slice(getOffset()));
+    xhr.send(payloadData());
     cb.emit(FileEvent.Start);
   }
 
-  function onProgress(event: ProgressEvent) {
-    let fileProgress = {
-      loaded: getOffset() + event.loaded,
-      total: file.data.size,
-      time: now()
-    };
+  function payloadData() : Blob {
+    const offset = getMetaOffset(file.meta!);
+    return file.data.slice(offset);
+  }
 
-    cb.emit(FileEvent.Progress, fileProgress);
+  function onProgress(event: ProgressEvent) {
+    cb.emit(FileEvent.Progress, buildProgressEvent(file.meta!, event));
   }
 
   function onStateChange(event: Event) {
@@ -87,16 +90,6 @@ export const uploadFile = (file: Uploadable) => {
     cb.emit(FileEvent.Finish)
   }
 
-  function getOffset() {
-    const m = file.meta!;
-
-    if (m.bytes_received === undefined) {
-      return 0;
-    }
-
-    return m.bytes_received;
-  }
-
   return {
     on: cb.on,
     fetchMeta,
@@ -106,8 +99,26 @@ export const uploadFile = (file: Uploadable) => {
   }
 }
 
+function getMetaOffset(m: Meta) : number {
+  if (m === undefined || m.bytes_received === undefined) {
+    return 0;
+  }
+
+  return m.bytes_received;
+}
+
 function now() {
   const d = new Date();
   return d.getTime();
+}
+
+function buildProgressEvent(m: Meta, e: ProgressEvent) : FileProgress {
+  const offset = getMetaOffset(m);
+
+  return {
+    loaded: offset + e.loaded,
+    total: m.size,
+    time: now()
+  };
 }
 
