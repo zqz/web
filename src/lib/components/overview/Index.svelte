@@ -6,11 +6,12 @@ import Button from '$lib/components/Button.svelte';
 import { onMount } from 'svelte';
 import type { Meta } from '$lib/types';
 
-$: page = 0;
+let page = 0;
 let delay = 1;
 
 function loadNext() {
   page++;
+  loadFiles();
 }
 
 let files : Array<Meta> = [];
@@ -30,11 +31,10 @@ async function fetchFiles(page: number) {
 function loadFiles() {
   console.log('fetching files');
   fetchFiles(page).then((newFiles) => {
-    files = [...newFiles];
+    files = [...files, ...newFiles];
     error = undefined;
   }).catch(e => {
     error = e;
-    console.log('error', e);
     timeoutLoadFiles();
   });
 }
@@ -42,7 +42,6 @@ function loadFiles() {
 function timeoutLoadFiles() {
   delay = delay + 1;
   setTimeout(loadFiles, delay*1000);
-  return '';
 }
 
 onMount(function() {
