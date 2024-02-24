@@ -16,8 +16,6 @@ export const fetchFileMeta = (file: Uploadable) => {
       return;
     }
 
-    json.lols = '1231';
-
     cb.emit(FileEvent.MetaFound, json);
   }
 
