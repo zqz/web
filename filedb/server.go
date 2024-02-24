@@ -80,7 +80,7 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	_, err = s.db.Write(hash, r.Body)
 
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
+		w.WriteHeader(http.StatusInternalServerError)
 		render.Error(w, err.Error())
 		return
 	}

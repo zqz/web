@@ -173,7 +173,7 @@ func TestPostFile(t *testing.T) {
 	post(ts, "/meta", m)
 
 	res := postFile(ts, "/file/"+hash, "byt")
-	assert.Equal(t, 404, res.StatusCode)
+	assert.Equal(t, 500, res.StatusCode)
 	assert.Equal(t, "got partial data", errorMessage(res))
 
 	res = postFile(ts, "/file/"+hash, "es")
