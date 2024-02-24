@@ -1,7 +1,9 @@
 <script lang="ts">
 import "../app.css";
-	import Logo from "./Logo.svelte";
-	import ThemeToggle from "./ThemeToggle.svelte";
+import Logo from "./Logo.svelte";
+import ThemeToggle from "./ThemeToggle.svelte";
+import { version } from '$app/environment'
+
 </script>
 
 <svelte:head>
@@ -24,7 +26,8 @@ import "../app.css";
 
   <footer>
     <div class="text-center font-small drop-shadow-md">
-      2012 - 2024
+      2012 - 2024<br/>
+      {version}
     </div>
   </footer>
 </div>
