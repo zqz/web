@@ -1,11 +1,9 @@
 <script lang="ts">
 import { createEventDispatcher } from 'svelte';
-import { bytes, URLs, truncate } from '$lib/util';
 import { uploadFile } from './uploadFile';
 
 import Hashing from './Hashing.svelte';
 import Button from '$lib/components/Button.svelte';
-import LinkButton from '$lib/components/LinkButton.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
 import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
@@ -13,7 +11,6 @@ import FileSize from '../overview/FileSize.svelte';
 import FileFinished from './FileFinished.svelte';
 import FileContainer from './FileContainer.svelte';
 import { calcPercent } from './percent';
-import Divider from './Divider.svelte';
 
 export let file: Uploadable;
 
