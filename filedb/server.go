@@ -53,8 +53,7 @@ func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 	meta, err := s.db.FetchMeta(hash)
 
 	if err != nil {
-		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 

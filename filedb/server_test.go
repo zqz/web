@@ -101,8 +101,8 @@ func TestGetMetaNotFound(t *testing.T) {
 
 	res := get(ts, "/meta/by-hash/"+hash)
 
-	assert.Equal(t, 404, res.StatusCode)
-	assert.Equal(t, "file not found", errorMessage(res))
+	assert.Equal(t, 204, res.StatusCode)
+	assert.Equal(t, "", errorMessage(res))
 }
 
 func TestGetMetaFound(t *testing.T) {
