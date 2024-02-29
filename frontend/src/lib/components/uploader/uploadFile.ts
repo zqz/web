@@ -1,7 +1,7 @@
+import type { FileProgress, Meta, Uploadable } from '$lib/types';
+import { FileEvent } from '$lib/types';
 import { URLs, hashFile } from '$lib/util';
 import { callbacks } from './callbacks';
-import { FileEvent } from '$lib/types';
-import type { FileProgress, Meta, Uploadable } from '$lib/types';
 import { fetchFileMeta } from './fetchMeta';
 
 export const uploadFile = (file: Uploadable) => {

@@ -3,12 +3,12 @@ import { createEventDispatcher, onMount } from 'svelte';
 import { uploadFile } from './uploadFile';
 
 import Hashing from './Hashing.svelte';
-import Button from '$lib/components/Button.svelte';
 import Progress from './Progress.svelte';
 import ProgressStats from './ProgressStats.svelte';
 import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
 import FileSize from '../overview/FileSize.svelte';
 import FileFinished from './FileFinished.svelte';
+import Button from '$lib/components/Button.svelte';
 import FileContainer from './FileContainer.svelte';
 import { calcPercent } from './percent';
 
