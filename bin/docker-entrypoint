@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+# If running the rails server then create or migrate existing database
+if [ "${*}" == "go run cmd/backend/main.go" ]; then
+  goose -dir ./db/migrations postgres "postgres://postgres@zqz-db:5432/zqz-dev" up
+fi
+
+exec "${@}"
