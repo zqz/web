@@ -1,0 +1,7 @@
+[psql]
+sslmode = "disable"
+dbname = "zqz-dev"
+host = "test"
+port = 5432
+user = "dylan"
+blacklist=["goose_db_version"]

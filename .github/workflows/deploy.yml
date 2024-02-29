@@ -35,11 +35,13 @@ jobs:
     - run: go mod verify
     - name: 'Setup DB'
       run: |
+        cd backend
         go install github.com/pressly/goose/v3/cmd/goose@latest
         goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev" up
 
     - name: 'Setup SQLBoiler config'
       run: |
+        cd backend
         cat sqlboiler.toml | sed s/localhost/postgres/g > sqlboiler.toml_
         mv sqlboiler.toml_ sqlboiler.toml
 
@@ -61,9 +63,9 @@ jobs:
       with:
         go-version: '1.22.0'
 
-    - run: go version
-    - run: go mod verify
-    - run: go build -v -o upl cmd/backend/main.go
+    - run: cd backend && go version
+    - run: cd backend && go mod verify 
+    - run: cd backend && go build -v -o upl cmd/backend/main.go
 
     - name: 'Copy Build to Server'
       uses: appleboy/scp-action@master
@@ -72,7 +74,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
-        source: "upl"
+        source: "backend/upl"
         target: "/home/zqz"
 
     - name: 'Extact Artifact'
@@ -83,6 +85,7 @@ jobs:
         key: ${{ secrets.KEY }}
         port: ${{ secrets.PORT }}
         script: |
+          cd backend
           cp upl upl-$GITHUB_SHA
           sudo systemctl stop zqz
           mv upl-current upl-previous
