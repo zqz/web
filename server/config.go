@@ -28,10 +28,7 @@ func loadConfig(currentEnv string) (config, error) {
 	cfgd := config{Env: currentEnv}
 
 	if cfgd.isDevelopment() {
-		err := godotenv.Load()
-		if err != nil {
-			return cfgd, err
-		}
+		godotenv.Load()
 	}
 
 	if err := env.Parse(&cfgd); err != nil {
