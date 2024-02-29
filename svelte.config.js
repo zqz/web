@@ -2,6 +2,13 @@ import adapter from '@sveltejs/adapter-static';
 import * as child_process from 'node:child_process';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
+let version = 'unknown';
+try {
+  version = child_process.execSync('git rev-parse HEAD').toString().trim()
+} catch (e) {
+ // oh well
+}
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	// Consult https://kit.svelte.dev/docs/integrations#preprocessors
@@ -22,7 +29,7 @@ const config = {
 			strict: true
 		}),
 		version: {
-			name: child_process.execSync('git rev-parse HEAD').toString().trim()
+			name: version
 		}
 	}
 };
