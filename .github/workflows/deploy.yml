@@ -53,7 +53,7 @@ jobs:
       with:
         workingDirectory: backend
         coverageCommand: go test ./... -coverprofile c.out
-        prefix: github.com/zqz/upl
+        prefix: github.com/zqz/web
 
   deploy:
     runs-on: ubuntu-latest
