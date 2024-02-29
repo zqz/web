@@ -51,7 +51,7 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_ID }}
       with:
-        coverageCommand: go test ./... -coverprofile c.out
+        coverageCommand: cd backend && go test ./... -coverprofile c.out
         prefix: github.com/zqz/upl
 
   deploy:
