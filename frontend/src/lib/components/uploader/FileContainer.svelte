@@ -1,7 +1,7 @@
 <script lang="ts">
 import { truncate } from "$lib/text";
 import type { Uploadable } from "$lib/types";
-	import Divider from "./Divider.svelte";
+import Divider from "./Divider.svelte";
 
 export let file: Uploadable | undefined;
 
