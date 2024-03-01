@@ -1,9 +1,10 @@
+name: zqz
 services:
   backend:
     environment:
       - ZQZ_ENV=development
       - DATABASE_URL=postgres://postgres@zqz-db:5432/zqz-dev?sslmode=disable
-      - FILES_PATH="./files"
+      - FILES_PATH=./files
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
@@ -12,8 +13,6 @@ services:
         - action: rebuild
           path: ./backend/
           target: ./app/
-        - action: rebuild
-          path: ./backend/Gemfile
     container_name: zqz-backend
     command: go run cmd/backend/main.go
     volumes:
@@ -44,8 +43,8 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./upl
-          target: ./src
+          path: ./frontend
+          target: ./app
           ignore:
             - node_modules/
         - action: rebuild
