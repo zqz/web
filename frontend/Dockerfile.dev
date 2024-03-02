@@ -27,8 +27,6 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # where the necessary files are copied from the build stage.
 FROM base AS final
 
-RUN apk add git
-
 # Run the application as a non-root user.
 USER node
 
@@ -42,5 +40,4 @@ COPY --from=deps --chown=node:node /cache/node_modules /app/node_modules
 EXPOSE 5173
 
 # Run the application.
-# CMD npm run dev --host 0.0.0.0 --port 5173
 CMD npm run dev --host true
