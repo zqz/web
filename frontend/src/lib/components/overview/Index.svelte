@@ -105,7 +105,6 @@ onMount(function() {
 </script>
 
 <Uploader on:file:uploaded={loadFiles}/>
-
 <div class="h-full flex gap-8 flex-row">
   <div class="basis-1/2">
     <FileList files={files} on:select={selectFileId} selectedFileId={selectedFileId} />
