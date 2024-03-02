@@ -1,4 +1,4 @@
-module github.com/zqz/upl
+module github.com/zqz/web/backend
 
 go 1.22
 

@@ -11,7 +11,7 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/zqz/upl/models"
+	"github.com/zqz/web/backend/models"
 )
 
 type DBMetaStorage struct {

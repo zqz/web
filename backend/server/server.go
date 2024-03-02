@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/rs/zerolog"
-	"github.com/zqz/upl/filedb"
+	"github.com/zqz/web/backend/filedb"
 )
 
 type Server struct {

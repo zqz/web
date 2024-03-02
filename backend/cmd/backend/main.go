@@ -6,7 +6,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
-	"github.com/zqz/upl/server"
+	"github.com/zqz/web/backend/server"
 )
 
 func main() {

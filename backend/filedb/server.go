@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/zqz/upl/render"
+	"github.com/zqz/web/backend/render"
 )
 
 // Server implements an HTTP File Uploading Server.
