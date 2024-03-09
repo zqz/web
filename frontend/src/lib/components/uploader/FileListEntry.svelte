@@ -60,7 +60,6 @@ function remove() {
 onMount(u.hash);
 </script>
 
-<div>{status}</div>
 {#if status == FileStatus.Done}
   <FileFinished file={file} on:remove={remove}/>
 {:else if status == FileStatus.InProgress}
