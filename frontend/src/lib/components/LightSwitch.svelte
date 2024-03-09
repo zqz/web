@@ -1,7 +1,15 @@
 <script lang="ts">
   import Sun from "svelte-radix/Sun.svelte";
   import Moon from "svelte-radix/Moon.svelte";
-  import { toggleMode } from "mode-watcher";
+  import { setMode, mode } from 'mode-watcher';
+
+	function toggleMode() {
+		if ($mode === 'light') {
+			setMode('dark');
+		} else {
+			setMode('light');
+		}
+	}
 </script>
  
 <button on:click={toggleMode}> 

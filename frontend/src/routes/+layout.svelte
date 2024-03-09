@@ -1,11 +1,15 @@
 <script lang="ts">
 import "../app.css";
 import { version } from '$app/environment'
-	import LightSwitch from "$lib/components/LightSwitch.svelte";
+import { ModeWatcher } from 'mode-watcher';
+import LightSwitch from "$lib/components/LightSwitch.svelte";
+
 </script>
 
 <svelte:head>
 </svelte:head>
+
+<ModeWatcher />
 
 <div class="flex flex-col min-w-[500px] h-full font-normal">
   <div class="flex-grow flex flex-col w-full p-8">
