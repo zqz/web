@@ -8,7 +8,7 @@ import ProgressStats from './ProgressStats.svelte';
 import { FileEvent, FileStatus, type FileProgress, type Uploadable } from '$lib/types';
 import FileSize from '../overview/FileSize.svelte';
 import FileFinished from './FileFinished.svelte';
-import Button from '$lib/components/Button.svelte';
+import { Button } from '$lib/components/ui/button';
 import FileContainer from './FileContainer.svelte';
 import { calcPercent } from './percent';
 
@@ -72,20 +72,20 @@ onMount(u.hash);
   <FileContainer file={file}>
     <div slot="buttons">
       {#if status == FileStatus.Ready}
-        <Button title="Start uploading" on:click={start}>
+        <Button title="Start uploading" size="sm" on:click={start}>
           {#if file.meta && file.meta.bytes_received > 0}
-            continue
+            Continue
           {:else}
-            start
+            Start
           {/if}
         </Button>
-        <Button title="Remove file from queue" on:click={remove}>
+        <Button title="Remove file from queue" size="sm" on:click={remove}>
           x
         </Button>
       {/if}
       {#if status === FileStatus.InProgress}
-        <Button title="Cancel file upload" on:click={cancel}>
-          cancel
+        <Button title="Cancel file upload" size="sm" on:click={cancel}>
+          Cancel
         </Button>
       {/if}
     </div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { Uploadable } from "$lib/types";
-import Button from "../Button.svelte";
+import { Button } from "$lib/components/ui/button";
 import FileHash from "../overview/FileHash.svelte";
 import FileSize from "../overview/FileSize.svelte";
 import LinkToFileButton from "../LinkToFileButton.svelte";

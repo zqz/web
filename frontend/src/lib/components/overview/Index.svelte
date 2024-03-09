@@ -2,7 +2,7 @@
 import { URLs } from '$lib/util';
 import Uploader from '$lib/components/uploader/Uploader.svelte';
 import FileList from './FileList.svelte';
-import Button from '$lib/components/Button.svelte';
+import { Button } from '$lib/components/ui/button';
 import { onMount } from 'svelte';
 import type { Meta } from '$lib/types';
 import Preview from './Preview.svelte';
