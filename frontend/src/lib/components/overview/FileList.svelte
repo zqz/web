@@ -25,7 +25,7 @@ function onClick(id: number) {
       </Table.Row>
     </Table.Header>
     <Table.Body class="max-h-full">
-    {#each files as file, i (file.slug)}
+    {#each files as file, i (file.hash)}
       <Table.Row data-state={selectedFileId === i ? "selected" : ""}
         on:click={() => onClick(i)}>
         <Table.Cell>

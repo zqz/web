@@ -25,6 +25,7 @@ u.on(FileEvent.MetaNotFound, () => status = FileStatus.Ready);
 u.on(FileEvent.Hash, () => status = FileStatus.Hashing);
 u.on(FileEvent.Finish, () => {
   status = FileStatus.Done;
+  dispatch('file:uploaded', file);
 });
 
 u.on(FileEvent.Abort, () => {

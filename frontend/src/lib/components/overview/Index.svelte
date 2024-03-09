@@ -6,8 +6,8 @@ import { Button } from '$lib/components/ui/button';
 import { onMount } from 'svelte';
 import type { Meta } from '$lib/types';
 import Preview from './Preview.svelte';
-import FileContainer from '../uploader/FileContainer.svelte';
 import * as Card from "$lib/components/ui/card";
+import { toast } from 'svelte-sonner';
 
 let page = 0;
 let delay = 1;
@@ -64,11 +64,26 @@ onMount(function() {
 
 function loadNext() {
   page++;
-  loadFiles();
+  loadFiles(true);
 }
 
 let files : Array<Meta> = [];
 let error : Error | undefined;
+const seenHashes = new Set<string>();
+
+function addFiles(newFiles: Array<Meta>) {
+  const filesToAdd : Array<Meta> = [];
+  newFiles.forEach(f => {
+    if (seenHashes.has(f.hash)) {
+      return;
+    }
+
+    seenHashes.add(f.hash);
+    filesToAdd.push(f);
+  });
+
+  files = [...filesToAdd, ...files];
+}
 
 async function fetchFiles(page: number) {
   const res = await fetch(URLs.getFilesListUrl(page));
@@ -81,15 +96,19 @@ async function fetchFiles(page: number) {
   }
 }
 
-function loadFiles() {
+function loadFiles(showToast: boolean) {
   console.log('fetching files');
   fetchFiles(page).then((newFiles) => {
-    files = [...files,  ...newFiles];
+    addFiles(newFiles);
     error = undefined;
+
+    if(showToast) {
+      toast("Loaded more files");
+    }
   }).catch(e => {
-      error = e;
-      timeoutLoadFiles();
-    });
+    error = e;
+    timeoutLoadFiles();
+  });
 }
 
 function timeoutLoadFiles() {
@@ -107,12 +126,18 @@ $: {
 }
 
 onMount(function() {
-  loadFiles();
+  loadFiles(false);
 });
+
+function onFileUploaded(event: CustomEvent) {
+  const f = event.detail.data as Meta;
+  toast(`${f.name} was uploaded successfully`)
+  loadFiles(false);
+}
 
 </script>
 
-<Uploader on:file:uploaded={loadFiles}/>
+<Uploader on:file:uploaded={onFileUploaded}/>
 <div class="h-full flex gap-8 flex-column xl:flex-row">
   <Card.Root class="w-full lg:basis-1/2">
 

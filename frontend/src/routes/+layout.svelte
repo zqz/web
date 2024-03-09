@@ -3,6 +3,7 @@ import "../app.css";
 import { version } from '$app/environment'
 import { ModeWatcher } from 'mode-watcher';
 import LightSwitch from "$lib/components/LightSwitch.svelte";
+import { Toaster } from "$lib/components/ui/sonner";
 
 </script>
 
@@ -10,6 +11,7 @@ import LightSwitch from "$lib/components/LightSwitch.svelte";
 </svelte:head>
 
 <ModeWatcher />
+<Toaster/>
 
 <div class="flex flex-col min-w-[500px] h-full font-normal">
   <div class="flex-grow flex flex-col w-full p-8">
