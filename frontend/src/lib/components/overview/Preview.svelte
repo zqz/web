@@ -4,19 +4,14 @@ import { URLs } from "$lib/util";
 import LinkToFileButton from "../LinkToFileButton.svelte";
 import FileHash from "./FileHash.svelte";
 import FileSize from "./FileSize.svelte";
-export let files : Array<Meta> = [];
-export let selectedFileId : number | null;
+export let file : Meta | null;
 
-let hasFile = false;
-let file : Meta;
 let imgPath = "";
 
+$: hasFile = file !== null;
 $: {
-  file = files[selectedFileId!]
-  hasFile = file !== undefined;
-
   if (hasFile) {
-    imgPath = URLs.thumbnailUrl(file.slug);
+    imgPath = URLs.thumbnailUrl(file!.slug);
   }
 }
 
@@ -25,7 +20,7 @@ $: {
 <div class={"transition duration-500 ease-in-out " + (hasFile ? "opacity-100" : "opacity-0")}>
   <div class="opacity-100 p-8 rounded-md bg-white h-full drop-shadow-lg duration-200 ">
     <div class="h-full justify-between flex flex-col">
-      {#if hasFile}
+      {#if file !== null}
         <div>
           <img src={imgPath} alt={file.name} class="rounded-md shadow-md"/>
           <div class="text-xl font-light pt-4 pb-4">{file.name}</div>

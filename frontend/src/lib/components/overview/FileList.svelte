@@ -15,7 +15,7 @@ function onClick(id: number) {
 </script>
 
 <div class="flex flex-col mb-3 overflow-hidden">
-  {#each files as file, i (file.hash)}
+  {#each files as file, i (file.slug)}
     <a on:click={() => onClick(i)}>
     <File file={file} selected={i == selectedFileId}/>
     </a>

@@ -10,6 +10,7 @@ import Preview from './Preview.svelte';
 let page = 0;
 let delay = 1;
 let selectedFileId : number | null = null;
+let selectedFile : Meta | null = null;
 
 function navigateUp() {
   console.log('up');
@@ -97,6 +98,11 @@ function timeoutLoadFiles() {
 function selectFileId(e: CustomEvent) {
   selectedFileId = e.detail;
 }
+$: {
+  if (selectedFileId != null) {
+    selectedFile = files[selectedFileId];
+  }
+}
 
 onMount(function() {
   loadFiles();
@@ -116,6 +122,6 @@ onMount(function() {
     <Button title="load more" on:click={loadNext}>load more</Button>
   </div>
   <div class="basis-1/2">
-    <Preview files={files} selectedFileId={selectedFileId} />
+    <Preview file={selectedFile}/>
   </div>
 </div>
