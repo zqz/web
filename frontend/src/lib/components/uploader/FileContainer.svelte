@@ -1,7 +1,6 @@
 <script lang="ts">
 import { truncate } from "$lib/text";
 import type { Uploadable } from "$lib/types";
-import Divider from "./Divider.svelte";
 import * as Card from "$lib/components/ui/card";
 
 export let file: Uploadable | undefined;

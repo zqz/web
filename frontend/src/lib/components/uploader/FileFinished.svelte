@@ -6,6 +6,7 @@ import FileSize from "../overview/FileSize.svelte";
 import LinkToFileButton from "../LinkToFileButton.svelte";
 import { createEventDispatcher } from 'svelte';
 import FileContainer from "./FileContainer.svelte";
+import Close from "$lib/components/Close.svelte";
 
 const dispatch = createEventDispatcher();
 
@@ -18,9 +19,11 @@ function remove() {
 </script>
 
 <FileContainer file={file}>
-  <div slot="buttons">
-    <LinkToFileButton file={meta}>view file</LinkToFileButton>
-    <Button title="Remove uploaded file from list" on:click={remove}>x</Button>
+  <div class="flex justify-end gap-1" slot="buttons">
+    <LinkToFileButton file={meta}>View file</LinkToFileButton>
+    <Button title="Remove uploaded file from list" size="sm" on:click={remove}>
+      <Close/>
+    </Button>
   </div>
   <div>
     <FileHash hash={meta.hash}/>

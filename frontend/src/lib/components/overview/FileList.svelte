@@ -1,12 +1,9 @@
 <script lang="ts">
 import type { Meta } from '$lib/types';
-import File from './File.svelte';
 import { createEventDispatcher } from 'svelte';
 
 import * as Table from "$lib/components/ui/table";
-	import { Size } from 'svelte-radix';
-	import FileSize from './FileSize.svelte';
-
+import FileSize from './FileSize.svelte';
 
 export let files : Array<Meta>;
 export let selectedFileId : number | null;
@@ -14,7 +11,6 @@ export let selectedFileId : number | null;
 const dispatch = createEventDispatcher();
 
 function onClick(id: number) {
-  console.log('on click', id);
   dispatch('select', id);
 }
 </script>

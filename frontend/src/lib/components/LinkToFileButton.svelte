@@ -7,8 +7,8 @@ export let file: Meta;
 $: fileUrl = URLs.getFileBySlugUrl(file.slug);
 </script>
 
-<a class="flex-inline" href={fileUrl} target="_blank">
-  <Button title={file.name}>
+<a class="flex" href={fileUrl} target="_blank">
+  <Button size="sm" title={file.name}>
     <slot></slot>
   </Button>
 </a>
