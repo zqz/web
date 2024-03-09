@@ -4,6 +4,7 @@ import { createEventDispatcher } from 'svelte';
 
 import * as Table from "$lib/components/ui/table";
 import FileSize from './FileSize.svelte';
+import FileIcon from './FileIcon.svelte';
 
 export let files : Array<Meta>;
 export let selectedFileId : number | null;
@@ -28,7 +29,7 @@ function onClick(id: number) {
       <Table.Row data-state={selectedFileId === i ? "selected" : ""}
         on:click={() => onClick(i)}>
         <Table.Cell>
-          {file.name}
+          <FileIcon file={file}/> {file.name}
         </Table.Cell>
         <Table.Cell>
           <FileSize size={file.size}/>
