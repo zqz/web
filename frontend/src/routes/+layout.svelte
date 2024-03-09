@@ -1,6 +1,7 @@
 <script lang="ts">
 import "../app.css";
 import { version } from '$app/environment'
+	import LightSwitch from "$lib/components/LightSwitch.svelte";
 </script>
 
 <svelte:head>
@@ -12,6 +13,8 @@ import { version } from '$app/environment'
   </div>
 
   <footer class="p-8 text-sm text-center text-slate-500 font-small drop-shadow-md">
-    2012 - 2024 # {version}
+    <p>2012 - 2024</p>
+    <p>{version}</p>
+    <LightSwitch/>
   </footer>
 </div>
