@@ -1,5 +1,5 @@
 <script lang="ts">
-  import Button from '$lib/components/Button.svelte';
+  import { Button } from '$lib/components/ui/button';
 
   function onClick() {
     var e = new Event('selectFiles');
@@ -7,6 +7,6 @@
   }
 </script>
 
-<Button title="Add file to upload queue" className="" on:click={onClick}>
-  add files
+<Button title="Add file to upload queue" size="sm" on:click={onClick}>
+  Add files
 </Button>
