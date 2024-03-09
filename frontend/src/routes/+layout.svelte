@@ -6,7 +6,7 @@ import { version } from '$app/environment'
 <svelte:head>
 </svelte:head>
 
-<div class="flex flex-col md:px-4 h-full font-normal">
+<div class="flex flex-col min-w-[500px] h-full font-normal">
   <div class="flex-grow flex flex-col w-full p-8">
     <slot />
   </div>

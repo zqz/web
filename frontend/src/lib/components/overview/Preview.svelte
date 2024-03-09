@@ -4,6 +4,7 @@ import { URLs } from "$lib/util";
 import LinkToFileButton from "../LinkToFileButton.svelte";
 import FileHash from "./FileHash.svelte";
 import FileSize from "./FileSize.svelte";
+import * as Card from "$lib/components/ui/card";
 export let file : Meta | null;
 
 let imgPath = "";
@@ -17,21 +18,28 @@ $: {
 
 </script>
 
-<div class={"transition duration-500 ease-in-out " + (hasFile ? "opacity-100" : "opacity-0")}>
-  <div class="opacity-100 p-8 rounded-md bg-white h-full drop-shadow-lg duration-200 ">
-    <div class="h-full justify-between flex flex-col">
-      {#if file !== null}
-        <div>
-          <img src={imgPath} alt={file.name} class="rounded-md shadow-md"/>
-          <div class="text-xl font-light pt-4 pb-4">{file.name}</div>
-          <div>
-            Size: <FileSize size={file.size}/><br/>
-            SHA: <FileHash hash={file.hash}/>
-            Date: {file.date}<br>
-          </div>
+
+{#if file !== null}
+  <Card.Root class="w-full lg:basis-1/2">
+    <Card.Header>
+      <div class="flex flex-row justify-between">
+        <div class="text-xl font-bold">
+          {file.name}
         </div>
-        <LinkToFileButton file={file}>Download</LinkToFileButton>
-      {/if}
-    </div>
-  </div>
-</div>
+      </div>
+    </Card.Header>
+
+    <Card.Content>
+      <div>
+        <img src={imgPath} alt={file.name} class="rounded-md shadow-md
+          max-h-[600px]"/>
+        <div class="pt-4 pb-4">
+          Size: <FileSize size={file.size}/><br/>
+          SHA: <FileHash hash={file.hash}/>
+          Date: {file.date}<br>
+        </div>
+      </div>
+      <LinkToFileButton file={file}>Download</LinkToFileButton>
+    </Card.Content>
+  </Card.Root>
+{/if}

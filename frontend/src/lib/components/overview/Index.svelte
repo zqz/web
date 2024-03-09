@@ -6,6 +6,8 @@ import { Button } from '$lib/components/ui/button';
 import { onMount } from 'svelte';
 import type { Meta } from '$lib/types';
 import Preview from './Preview.svelte';
+import FileContainer from '../uploader/FileContainer.svelte';
+import * as Card from "$lib/components/ui/card";
 
 let page = 0;
 let delay = 1;
@@ -82,12 +84,12 @@ async function fetchFiles(page: number) {
 function loadFiles() {
   console.log('fetching files');
   fetchFiles(page).then((newFiles) => {
-    files = [...files, ...newFiles];
+    files = [...files,  ...newFiles];
     error = undefined;
   }).catch(e => {
-    error = e;
-    timeoutLoadFiles();
-  });
+      error = e;
+      timeoutLoadFiles();
+    });
 }
 
 function timeoutLoadFiles() {
@@ -111,17 +113,30 @@ onMount(function() {
 </script>
 
 <Uploader on:file:uploaded={loadFiles}/>
-<div class="h-full flex gap-8 flex-row">
-  <div class="basis-1/2">
-    <FileList files={files} on:select={selectFileId} selectedFileId={selectedFileId} />
-    {#if error}
-      <p>
-        There was an error, retrying in {delay}s... {error.message}
-      </p>
-    {/if}
-    <Button title="load more" on:click={loadNext}>load more</Button>
-  </div>
-  <div class="basis-1/2">
+<div class="h-full flex gap-8 flex-column xl:flex-row">
+  <Card.Root class="w-full lg:basis-1/2">
+
+    <Card.Header>
+      <div class="flex flex-row justify-between">
+        <div class="basis-3/4 text-xl font-bold">
+          files
+        </div>
+        <div class="basis-1/4 text-right">
+        </div>
+      </div>
+    </Card.Header>
+
+    <Card.Content>
+      <FileList files={files} on:select={selectFileId} selectedFileId={selectedFileId} />
+      {#if error}
+        <p>
+          There was an error, retrying in {delay}s... {error.message}
+        </p>
+      {/if}
+      <Button title="load more" on:click={loadNext}>load more</Button>
+    </Card.Content>
+  </Card.Root>
+  <div class="opacity-0 hidden lg:block lg:basis-1/2 lg:opacity-100 transition duration-500 ease-in-out">
     <Preview file={selectedFile}/>
   </div>
 </div>
