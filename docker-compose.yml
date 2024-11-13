@@ -8,14 +8,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
-    develop:
-      watch:
-        - action: rebuild
-          path: ./backend/
-          target: ./app/
     container_name: zqz-backend
     command: go run cmd/backend/main.go
     volumes:
+      - ./backend:/app
       - zqz_data:/app/files
     depends_on:
       - db
@@ -40,15 +36,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    develop:
-      watch:
-        - action: sync
-          path: ./frontend
-          target: ./app
-          ignore:
-            - node_modules/
-        - action: rebuild
-          path: ./frontend/package.json
+    volumes:
+      - ./frontend:/app
+      - node_modules:/app/node_modules
 
     ports:
       - 5173:5173
@@ -56,6 +46,7 @@ services:
 volumes:
   postgres_data: {}
   zqz_data: {}
+  node_modules: {}
 
 networks:
   default:
