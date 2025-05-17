@@ -9,4 +9,6 @@ func TestUpsert(t *testing.T) {
 	t.Run("Files", testFilesUpsert)
 
 	t.Run("Thumbnails", testThumbnailsUpsert)
+
+	t.Run("Users", testUsersUpsert)
 }

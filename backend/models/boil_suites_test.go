@@ -14,56 +14,67 @@ import "testing"
 func TestParent(t *testing.T) {
 	t.Run("Files", testFiles)
 	t.Run("Thumbnails", testThumbnails)
+	t.Run("Users", testUsers)
 }
 
 func TestDelete(t *testing.T) {
 	t.Run("Files", testFilesDelete)
 	t.Run("Thumbnails", testThumbnailsDelete)
+	t.Run("Users", testUsersDelete)
 }
 
 func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Files", testFilesQueryDeleteAll)
 	t.Run("Thumbnails", testThumbnailsQueryDeleteAll)
+	t.Run("Users", testUsersQueryDeleteAll)
 }
 
 func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Files", testFilesSliceDeleteAll)
 	t.Run("Thumbnails", testThumbnailsSliceDeleteAll)
+	t.Run("Users", testUsersSliceDeleteAll)
 }
 
 func TestExists(t *testing.T) {
 	t.Run("Files", testFilesExists)
 	t.Run("Thumbnails", testThumbnailsExists)
+	t.Run("Users", testUsersExists)
 }
 
 func TestFind(t *testing.T) {
 	t.Run("Files", testFilesFind)
 	t.Run("Thumbnails", testThumbnailsFind)
+	t.Run("Users", testUsersFind)
 }
 
 func TestBind(t *testing.T) {
 	t.Run("Files", testFilesBind)
 	t.Run("Thumbnails", testThumbnailsBind)
+	t.Run("Users", testUsersBind)
 }
 
 func TestOne(t *testing.T) {
 	t.Run("Files", testFilesOne)
 	t.Run("Thumbnails", testThumbnailsOne)
+	t.Run("Users", testUsersOne)
 }
 
 func TestAll(t *testing.T) {
 	t.Run("Files", testFilesAll)
 	t.Run("Thumbnails", testThumbnailsAll)
+	t.Run("Users", testUsersAll)
 }
 
 func TestCount(t *testing.T) {
 	t.Run("Files", testFilesCount)
 	t.Run("Thumbnails", testThumbnailsCount)
+	t.Run("Users", testUsersCount)
 }
 
 func TestHooks(t *testing.T) {
 	t.Run("Files", testFilesHooks)
 	t.Run("Thumbnails", testThumbnailsHooks)
+	t.Run("Users", testUsersHooks)
 }
 
 func TestInsert(t *testing.T) {
@@ -71,29 +82,36 @@ func TestInsert(t *testing.T) {
 	t.Run("Files", testFilesInsertWhitelist)
 	t.Run("Thumbnails", testThumbnailsInsert)
 	t.Run("Thumbnails", testThumbnailsInsertWhitelist)
+	t.Run("Users", testUsersInsert)
+	t.Run("Users", testUsersInsertWhitelist)
 }
 
 func TestReload(t *testing.T) {
 	t.Run("Files", testFilesReload)
 	t.Run("Thumbnails", testThumbnailsReload)
+	t.Run("Users", testUsersReload)
 }
 
 func TestReloadAll(t *testing.T) {
 	t.Run("Files", testFilesReloadAll)
 	t.Run("Thumbnails", testThumbnailsReloadAll)
+	t.Run("Users", testUsersReloadAll)
 }
 
 func TestSelect(t *testing.T) {
 	t.Run("Files", testFilesSelect)
 	t.Run("Thumbnails", testThumbnailsSelect)
+	t.Run("Users", testUsersSelect)
 }
 
 func TestUpdate(t *testing.T) {
 	t.Run("Files", testFilesUpdate)
 	t.Run("Thumbnails", testThumbnailsUpdate)
+	t.Run("Users", testUsersUpdate)
 }
 
 func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Files", testFilesSliceUpdateAll)
 	t.Run("Thumbnails", testThumbnailsSliceUpdateAll)
+	t.Run("Users", testUsersSliceUpdateAll)
 }
