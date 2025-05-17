@@ -5,3 +5,4 @@ serv
 upl
 config.json
 files
+.env
