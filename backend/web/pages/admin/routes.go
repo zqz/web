@@ -37,10 +37,10 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		PageFile(f).Render(r.Context(), w)
 	})
 
-	r.Get("/files/{slug}/delete", func(w http.ResponseWriter, r *http.Request) {
+	r.Delete("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
 		helper.AddFlash(w, r, "file was deleted")
 
-		http.Redirect(w, r, "/admin/files", http.StatusTemporaryRedirect)
+		w.Write([]byte("DELETED"))
 	})
 
 	return r

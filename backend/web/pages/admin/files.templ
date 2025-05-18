@@ -9,10 +9,9 @@ templ PageFiles(db *filedb.FileDB) {
 		<div>
 			for _, i := range files {
 				{{ url := "/admin/files/" + i.Slug }}
-				{{ deleteUrl := "/admin/files/" + i.Slug + "/delete" }}
 				<div>
 					<a href={ templ.URL(url) }>{ i.Name }</a>
-					<a href={ templ.URL(deleteUrl) }>delete</a>
+					<a hx-delete={ templ.URL(url) } hx-swap="outerHTML">delete</a>
 				</div>
 			}
 		</div>

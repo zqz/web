@@ -84,7 +84,10 @@ func (s Server) Run() error {
 			MaxAge:           300,
 		}).Handler)
 	}
+
 	r.Use(loggerMiddleware(s.logger))
+
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	r.Mount("/api", fsrv.Router())
 	r.Mount("/", pages.Router(&userDB, &fdb))
 
