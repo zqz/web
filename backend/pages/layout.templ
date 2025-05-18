@@ -1,0 +1,33 @@
+// layout.templ
+package pages
+
+templ header() {
+	{{ u := getUserFromContext(ctx) }}
+	<div>
+		if u != nil {
+			<div>{ u.Email } - <a href="/logout">logout</a></div>
+		} else {
+			<div>notlogged in</div>
+		}
+	</div>
+}
+
+templ footer() {
+	<div>footer</div>
+}
+
+templ layout(title string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+		</head>
+		<body>
+			@header()
+			{ children... }
+			@footer()
+		</body>
+	</html>
+}

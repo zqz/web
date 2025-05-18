@@ -1,0 +1,11 @@
+package pages
+
+import "github.com/zqz/web/backend/filedb"
+
+templ File(f *filedb.Meta) {
+	@layout("👋 Hello World!") {
+		<div>
+			{ f.Name }
+		</div>
+	}
+}

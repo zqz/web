@@ -1,0 +1,18 @@
+package pages
+
+templ Home() {
+	@layout("👋 Hello World!") {
+		<div>
+			Haello World
+			<ul>
+				<li>
+					<a href="/admin/files">files</a>
+				</li>
+				<li>
+					<a href="/admin/users">users</a>
+				</li>
+			</ul>
+			<a href="/auth?provider=google">login with google</a>
+		</div>
+	}
+}

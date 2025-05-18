@@ -9,6 +9,8 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/rs/zerolog"
 	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/pages"
+	"github.com/zqz/web/backend/userdb"
 )
 
 type Server struct {
@@ -55,17 +57,19 @@ func (s Server) runInsecure(r http.Handler) error {
 }
 
 func (s Server) Run() error {
+	userStorage := userdb.NewDBUserStorage(s.database)
+	userDB := userdb.NewUserDB(userStorage)
+
 	storage, err := filedb.NewDiskPersistence(s.config.FilesPath)
 	if err != nil {
 		return err
 	}
 
-	fdb := filedb.NewServer(
-		filedb.NewFileDB(
-			storage,
-			filedb.NewDBMetaStorage(s.database),
-		),
+	fdb := filedb.NewFileDB(
+		storage,
+		filedb.NewDBMetaStorage(s.database),
 	)
+	fsrv := filedb.NewServer(fdb)
 
 	r := chi.NewRouter()
 	if s.config.isDevelopment() {
@@ -81,7 +85,8 @@ func (s Server) Run() error {
 		}).Handler)
 	}
 	r.Use(loggerMiddleware(s.logger))
-	r.Mount("/api", fdb.Router())
+	r.Mount("/api", fsrv.Router())
+	r.Mount("/", pages.Router(&userDB, &fdb))
 
 	return s.run(r)
 }

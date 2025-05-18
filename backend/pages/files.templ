@@ -1,0 +1,17 @@
+package pages
+
+import "github.com/zqz/web/backend/filedb"
+
+templ Files(db *filedb.FileDB) {
+	@layout("👋 Hello World!") {
+		{{ files, _ := db.List(0) }}
+		<div>
+			for _, i := range files {
+				{{ url := "/files/" + i.Slug }}
+				<div>
+					<a href={ templ.URL(url) }>{ i.Name }</a>
+				</div>
+			}
+		</div>
+	}
+}
