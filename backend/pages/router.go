@@ -16,10 +16,11 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
 	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/models"
 	"github.com/zqz/web/backend/userdb"
 )
 
-func isAdmin(u *userdb.User) bool {
+func isAdmin(u *models.User) bool {
 	return u != nil && u.Email == "dylan@johnston.ca"
 }
 
@@ -56,8 +57,8 @@ func Auth(db *userdb.UserDB) func(next http.Handler) http.Handler {
 	}
 }
 
-func getUserFromContext(ctx context.Context) *userdb.User {
-	user, ok := ctx.Value("user").(*userdb.User)
+func getUserFromContext(ctx context.Context) *models.User {
+	user, ok := ctx.Value("user").(*models.User)
 
 	if ok {
 		return user
@@ -66,7 +67,7 @@ func getUserFromContext(ctx context.Context) *userdb.User {
 	return nil
 }
 
-func getUser(r *http.Request) *userdb.User {
+func getUser(r *http.Request) *models.User {
 	return getUserFromContext(r.Context())
 }
 
@@ -119,7 +120,7 @@ func Router(udb *userdb.UserDB, db *filedb.FileDB) *chi.Mux {
 			return
 		}
 
-		dbu := &userdb.User{
+		dbu := &models.User{
 			Name:       user.Name,
 			Email:      user.Email,
 			Provider:   "google",

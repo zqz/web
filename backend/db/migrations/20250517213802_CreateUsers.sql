@@ -7,8 +7,8 @@ CREATE TABLE users (
   provider text NOT NULL,
   provider_id text NOT NULL,
   role text NOT NULL default 'member',
-  created_at TIMESTAMP WITHOUT TIME ZONE,
-  updated_at TIMESTAMP WITHOUT TIME ZONE
+  created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
 
 -- +goose StatementEnd

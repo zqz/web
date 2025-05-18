@@ -19,6 +19,7 @@ templ Users(db *userdb.UserDB) {
 					{ i.ID }
 					{ i.Provider }
 					{ i.ProviderID }
+					{ i.CreatedAt.String() }
 					<a href={ templ.URL(url) }>{ i.Email }</a>
 				</div>
 			}

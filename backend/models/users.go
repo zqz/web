@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
-	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -30,8 +29,8 @@ type User struct {
 	Provider   string    `boil:"provider" json:"provider" toml:"provider" yaml:"provider"`
 	ProviderID string    `boil:"provider_id" json:"provider_id" toml:"provider_id" yaml:"provider_id"`
 	Role       string    `boil:"role" json:"role" toml:"role" yaml:"role"`
-	CreatedAt  null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt  null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt  time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -79,6 +78,27 @@ var UserTableColumns = struct {
 
 // Generated where
 
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var UserWhere = struct {
 	ID         whereHelperint
 	Name       whereHelperstring
@@ -86,8 +106,8 @@ var UserWhere = struct {
 	Provider   whereHelperstring
 	ProviderID whereHelperstring
 	Role       whereHelperstring
-	CreatedAt  whereHelpernull_Time
-	UpdatedAt  whereHelpernull_Time
+	CreatedAt  whereHelpertime_Time
+	UpdatedAt  whereHelpertime_Time
 }{
 	ID:         whereHelperint{field: "\"users\".\"id\""},
 	Name:       whereHelperstring{field: "\"users\".\"name\""},
@@ -95,8 +115,8 @@ var UserWhere = struct {
 	Provider:   whereHelperstring{field: "\"users\".\"provider\""},
 	ProviderID: whereHelperstring{field: "\"users\".\"provider_id\""},
 	Role:       whereHelperstring{field: "\"users\".\"role\""},
-	CreatedAt:  whereHelpernull_Time{field: "\"users\".\"created_at\""},
-	UpdatedAt:  whereHelpernull_Time{field: "\"users\".\"updated_at\""},
+	CreatedAt:  whereHelpertime_Time{field: "\"users\".\"created_at\""},
+	UpdatedAt:  whereHelpertime_Time{field: "\"users\".\"updated_at\""},
 }
 
 // UserRels is where relationship names are stored.
@@ -117,8 +137,8 @@ type userL struct{}
 
 var (
 	userAllColumns            = []string{"id", "name", "email", "provider", "provider_id", "role", "created_at", "updated_at"}
-	userColumnsWithoutDefault = []string{"name", "email", "provider", "provider_id"}
-	userColumnsWithDefault    = []string{"id", "role", "created_at", "updated_at"}
+	userColumnsWithoutDefault = []string{"name", "email", "provider", "provider_id", "created_at", "updated_at"}
+	userColumnsWithDefault    = []string{"id", "role"}
 	userPrimaryKeyColumns     = []string{"id"}
 	userGeneratedColumns      = []string{}
 )
@@ -480,11 +500,11 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		if queries.MustTime(o.UpdatedAt).IsZero() {
-			queries.SetScanner(&o.UpdatedAt, currTime)
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
 		}
 	}
 
@@ -565,7 +585,7 @@ func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	var err error
@@ -701,10 +721,10 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnCo
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
-		if queries.MustTime(o.CreatedAt).IsZero() {
-			queries.SetScanner(&o.CreatedAt, currTime)
+		if o.CreatedAt.IsZero() {
+			o.CreatedAt = currTime
 		}
-		queries.SetScanner(&o.UpdatedAt, currTime)
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
