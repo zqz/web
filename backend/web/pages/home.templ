@@ -1,9 +1,11 @@
 package pages
 
+import "github.com/zqz/web/backend/web/layout"
+
 templ Home() {
-	@layout("👋 Hello World!") {
+	@layout.Main("👋 Hello World!") {
 		<div>
-			Haello World
+			Hello World!
 			<ul>
 				<li>
 					<a href="/admin/files">files</a>

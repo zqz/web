@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -15,63 +14,16 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/markbates/goth/providers/google"
+
 	"github.com/zqz/web/backend/filedb"
 	"github.com/zqz/web/backend/models"
 	"github.com/zqz/web/backend/userdb"
+	"github.com/zqz/web/backend/web/helper"
+	"github.com/zqz/web/backend/web/middleware"
+	"github.com/zqz/web/backend/web/pages/admin"
 )
 
-func isAdmin(u *models.User) bool {
-	return u != nil && u.Email == "dylan@johnston.ca"
-}
-
-func AdminOnly(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		u := getUserFromContext(r.Context())
-		if isAdmin(u) {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		w.Write([]byte("not admin"))
-	})
-}
-
-func Auth(db *userdb.UserDB) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			userId, err := gothic.GetFromSession("user_id", r)
-			if err != nil {
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			u, err := db.FindUserById(userId)
-			if u == nil {
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			ctx := context.WithValue(r.Context(), "user", u)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	}
-}
-
-func getUserFromContext(ctx context.Context) *models.User {
-	user, ok := ctx.Value("user").(*models.User)
-
-	if ok {
-		return user
-	}
-
-	return nil
-}
-
-func getUser(r *http.Request) *models.User {
-	return getUserFromContext(r.Context())
-}
-
-func Router(udb *userdb.UserDB, db *filedb.FileDB) *chi.Mux {
+func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 	key := "xyz"         // Replace with your SESSION_SECRET or similar
 	maxAge := 86400 * 30 // 30 days
 	isProd := false      // Set to true when serving over https
@@ -92,10 +44,9 @@ func Router(udb *userdb.UserDB, db *filedb.FileDB) *chi.Mux {
 	)
 	r := chi.NewRouter()
 
-	r.Use(Auth(udb))
-
+	r.Use(middleware.Auth(users))
 	r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {
-		u := getUser(r)
+		u := helper.GetUser(r)
 		if u != nil {
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 			return
@@ -112,7 +63,7 @@ func Router(udb *userdb.UserDB, db *filedb.FileDB) *chi.Mux {
 
 		providerId := user.UserID
 
-		u, _ := udb.FindUserByProviderId(providerId)
+		u, _ := users.FindByProviderId(providerId)
 
 		if u != nil {
 			gothic.StoreInSession("user_id", strconv.Itoa(u.ID), r, w)
@@ -120,45 +71,37 @@ func Router(udb *userdb.UserDB, db *filedb.FileDB) *chi.Mux {
 			return
 		}
 
-		dbu := &models.User{
+		u = &models.User{
 			Name:       user.Name,
 			Email:      user.Email,
 			Provider:   "google",
 			ProviderID: providerId,
 		}
 
-		err = udb.CreateUser(dbu)
+		err = users.Create(u)
 		if err != nil {
 			spew.Dump(err)
 			w.Write([]byte("failed to create user"))
 			return
 		}
 
-		spew.Dump(dbu)
-
-		data := fmt.Sprintf("%vv", user)
-		w.Write([]byte("looks good" + data))
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
 	r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {
 		gothic.Logout(w, r)
-		w.Write([]byte("logged out"))
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
 	r.Get("/", templ.Handler(Home()).ServeHTTP)
-	r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
-		f, _ := db.FetchMetaWithSlug(slug)
-		File(f).Render(r.Context(), w)
-	})
 
-	admin := chi.NewRouter()
-	admin.Use(Auth(udb))
-	admin.Use(AdminOnly)
-	admin.Get("/users", templ.Handler(Users(udb)).ServeHTTP)
-	admin.Get("/files", templ.Handler(Files(db)).ServeHTTP)
-
-	r.Mount("/admin", admin)
+	// r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
+	// 	slug := chi.URLParam(r, "slug")
+	// 	f, _ := db.FetchMetaWithSlug(slug)
+	// 	admin.PageAdminFile(f).Render(r.Context(), w)
+	// })
+	//
+	r.Mount("/admin", admin.Router(users, db))
 
 	return r
 }

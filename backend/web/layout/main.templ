@@ -1,13 +1,16 @@
 // layout.templ
-package pages
+package layout
+
+import "github.com/zqz/web/backend/web/helper"
 
 templ header() {
-	{{ u := getUserFromContext(ctx) }}
+	{{ u := helper.GetUserFromContext(ctx) }}
 	<div>
+		<a href="/">zqz.ca</a>
 		if u != nil {
 			<div>{ u.Email } - <a href="/logout">logout</a></div>
 		} else {
-			<div>notlogged in</div>
+			<div>not logged in</div>
 		}
 	</div>
 }
@@ -16,7 +19,18 @@ templ footer() {
 	<div>footer</div>
 }
 
-templ layout(title string) {
+templ notices() {
+	{{ notices, ok := helper.Flash(ctx) }}
+	if ok {
+		<div>
+			for _, notice := range notices {
+				<div>{ notice } </div>
+			}
+		</div>
+	}
+}
+
+templ Main(title string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -26,6 +40,7 @@ templ layout(title string) {
 		</head>
 		<body>
 			@header()
+			@notices()
 			{ children... }
 			@footer()
 		</body>

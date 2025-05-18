@@ -9,8 +9,8 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/rs/zerolog"
 	"github.com/zqz/web/backend/filedb"
-	"github.com/zqz/web/backend/pages"
 	"github.com/zqz/web/backend/userdb"
+	"github.com/zqz/web/backend/web/pages"
 )
 
 type Server struct {
@@ -58,7 +58,7 @@ func (s Server) runInsecure(r http.Handler) error {
 
 func (s Server) Run() error {
 	userStorage := userdb.NewDBUserStorage(s.database)
-	userDB := userdb.NewUserDB(userStorage)
+	userDB := userdb.NewDB(userStorage)
 
 	storage, err := filedb.NewDiskPersistence(s.config.FilesPath)
 	if err != nil {

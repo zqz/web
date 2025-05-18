@@ -15,7 +15,7 @@ type DBUserStorage struct {
 	users []*models.User
 }
 
-func (s *DBUserStorage) CreateUser(u *models.User) error {
+func (s *DBUserStorage) Create(u *models.User) error {
 	dbu := models.User{
 		Name:       u.Name,
 		Email:      u.Email,
@@ -32,7 +32,7 @@ func (s *DBUserStorage) CreateUser(u *models.User) error {
 	return nil
 }
 
-func (s *DBUserStorage) FindUserById(id string) (*models.User, error) {
+func (s *DBUserStorage) FindById(id string) (*models.User, error) {
 	user, err := models.Users(qm.Where("id=?", id)).One(context.Background(), s.db)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (s *DBUserStorage) FindUserById(id string) (*models.User, error) {
 	return user, nil
 }
 
-func (s *DBUserStorage) FindUserByProviderId(id string) (*models.User, error) {
+func (s *DBUserStorage) FindByProviderId(id string) (*models.User, error) {
 	user, err := models.Users(qm.Where("provider_id=?", id)).One(context.Background(), s.db)
 	if err != nil {
 		return nil, err
@@ -65,24 +65,24 @@ func (s *DBUserStorage) List() ([]models.User, error) {
 	return users, err
 }
 
-func (s *DBUserStorage) UpdateUser(id int, u models.User) (models.User, bool, error) {
+func (s *DBUserStorage) Update(id int, u models.User) (models.User, bool, error) {
 	return models.User{}, true, nil
 }
 
-type UserDB struct {
+type DB struct {
 	p persister
 }
 
 type persister interface {
-	CreateUser(*models.User) error
-	FindUserByProviderId(string) (*models.User, error)
-	FindUserById(string) (*models.User, error)
-	UpdateUser(int, models.User) (models.User, bool, error)
+	Create(*models.User) error
+	FindByProviderId(string) (*models.User, error)
+	FindById(string) (*models.User, error)
+	Update(int, models.User) (models.User, bool, error)
 	List() ([]models.User, error)
 }
 
-func NewUserDB(p persister) UserDB {
-	return UserDB{
+func NewDB(p persister) DB {
+	return DB{
 		p: p,
 	}
 }
@@ -94,18 +94,18 @@ func NewDBUserStorage(db *sql.DB) *DBUserStorage {
 	}
 }
 
-func (db UserDB) FindUserByProviderId(id string) (*models.User, error) {
-	return db.p.FindUserByProviderId(id)
+func (db DB) FindByProviderId(id string) (*models.User, error) {
+	return db.p.FindByProviderId(id)
 }
 
-func (db UserDB) FindUserById(id string) (*models.User, error) {
-	return db.p.FindUserById(id)
+func (db DB) FindById(id string) (*models.User, error) {
+	return db.p.FindById(id)
 }
 
-func (db UserDB) CreateUser(u *models.User) error {
-	return db.p.CreateUser(u)
+func (db DB) Create(u *models.User) error {
+	return db.p.Create(u)
 }
 
-func (db UserDB) List() ([]models.User, error) {
+func (db DB) List() ([]models.User, error) {
 	return db.p.List()
 }

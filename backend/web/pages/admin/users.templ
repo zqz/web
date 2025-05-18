@@ -1,11 +1,12 @@
-package pages
+package admin
 
 import "strconv"
 import "github.com/zqz/web/backend/userdb"
+import "github.com/zqz/web/backend/web/layout"
 
-templ Users(db *userdb.UserDB) {
-	@layout("👋 Hello World!") {
-		{{ users, err := db.List() }}
+templ PageUsers(users *userdb.DB) {
+	@layout.Main("Admin - All Users") {
+		{{ users, err := users.List() }}
 		<div>
 			if err != nil {
 				<div>{ err.Error() }</div>

@@ -1,0 +1,18 @@
+package admin
+
+import "github.com/zqz/web/backend/filedb"
+import "github.com/zqz/web/backend/web/layout"
+
+templ PageFile(f *filedb.Meta) {
+	@layout.Main("Admin | File") {
+		<div>
+			<b>File</b>
+			<hr/>
+			<p>
+				{ f.Name }
+				{ f.Hash }
+				{ f.Size }
+			</p>
+		</div>
+	}
+}

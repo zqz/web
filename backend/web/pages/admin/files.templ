@@ -1,0 +1,20 @@
+package admin
+
+import "github.com/zqz/web/backend/filedb"
+import "github.com/zqz/web/backend/web/layout"
+
+templ PageFiles(db *filedb.FileDB) {
+	@layout.Main("Admin | All Files") {
+		{{ files, _ := db.List(0) }}
+		<div>
+			for _, i := range files {
+				{{ url := "/admin/files/" + i.Slug }}
+				{{ deleteUrl := "/admin/files/" + i.Slug + "/delete" }}
+				<div>
+					<a href={ templ.URL(url) }>{ i.Name }</a>
+					<a href={ templ.URL(deleteUrl) }>delete</a>
+				</div>
+			}
+		</div>
+	}
+}

@@ -1,0 +1,18 @@
+package admin
+
+import "github.com/zqz/web/backend/models"
+import "github.com/zqz/web/backend/web/layout"
+
+templ PageUser(u *models.User) {
+	@layout.Main("Admin | User") {
+		<div>
+			<b>User</b>
+			<hr/>
+			<p>
+				{ u.Email }
+				{ u.ID }
+				{ u.Provider } - { u.ProviderID }
+			</p>
+		</div>
+	}
+}
