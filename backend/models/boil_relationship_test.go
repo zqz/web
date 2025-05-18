@@ -8,6 +8,7 @@ import "testing"
 // TestToOne tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOne(t *testing.T) {
+	t.Run("FileToUserUsingUser", testFileToOneUserUsingUser)
 	t.Run("ThumbnailToFileUsingFile", testThumbnailToOneFileUsingFile)
 }
 
@@ -19,17 +20,21 @@ func TestOneToOne(t *testing.T) {}
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
 	t.Run("FileToThumbnails", testFileToManyThumbnails)
+	t.Run("UserToFiles", testUserToManyFiles)
 }
 
 // TestToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToOneSet(t *testing.T) {
+	t.Run("FileToUserUsingFiles", testFileToOneSetOpUserUsingUser)
 	t.Run("ThumbnailToFileUsingThumbnails", testThumbnailToOneSetOpFileUsingFile)
 }
 
 // TestToOneRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToOneRemove(t *testing.T) {}
+func TestToOneRemove(t *testing.T) {
+	t.Run("FileToUserUsingFiles", testFileToOneRemoveOpUserUsingUser)
+}
 
 // TestOneToOneSet tests cannot be run in parallel
 // or deadlocks can occur.
@@ -43,12 +48,17 @@ func TestOneToOneRemove(t *testing.T) {}
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
 	t.Run("FileToThumbnails", testFileToManyAddOpThumbnails)
+	t.Run("UserToFiles", testUserToManyAddOpFiles)
 }
 
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManySet(t *testing.T) {}
+func TestToManySet(t *testing.T) {
+	t.Run("UserToFiles", testUserToManySetOpFiles)
+}
 
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
-func TestToManyRemove(t *testing.T) {}
+func TestToManyRemove(t *testing.T) {
+	t.Run("UserToFiles", testUserToManyRemoveOpFiles)
+}

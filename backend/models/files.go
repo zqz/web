@@ -24,15 +24,18 @@ import (
 
 // File is an object representing the database table.
 type File struct {
-	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Size        int       `boil:"size" json:"size" toml:"size" yaml:"size"`
-	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Alias       string    `boil:"alias" json:"alias" toml:"alias" yaml:"alias"`
-	Hash        string    `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
-	Slug        string    `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
-	ContentType string    `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
-	CreatedAt   null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt   null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Size        int         `boil:"size" json:"size" toml:"size" yaml:"size"`
+	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Alias       string      `boil:"alias" json:"alias" toml:"alias" yaml:"alias"`
+	Hash        string      `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
+	Slug        string      `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
+	ContentType string      `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	CreatedAt   null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt   null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	UserID      null.Int    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
+	Private     null.Bool   `boil:"private" json:"private,omitempty" toml:"private" yaml:"private,omitempty"`
+	Comment     null.String `boil:"comment" json:"comment,omitempty" toml:"comment" yaml:"comment,omitempty"`
 
 	R *fileR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L fileL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -48,6 +51,9 @@ var FileColumns = struct {
 	ContentType string
 	CreatedAt   string
 	UpdatedAt   string
+	UserID      string
+	Private     string
+	Comment     string
 }{
 	ID:          "id",
 	Size:        "size",
@@ -58,6 +64,9 @@ var FileColumns = struct {
 	ContentType: "content_type",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
+	UserID:      "user_id",
+	Private:     "private",
+	Comment:     "comment",
 }
 
 var FileTableColumns = struct {
@@ -70,6 +79,9 @@ var FileTableColumns = struct {
 	ContentType string
 	CreatedAt   string
 	UpdatedAt   string
+	UserID      string
+	Private     string
+	Comment     string
 }{
 	ID:          "files.id",
 	Size:        "files.size",
@@ -80,6 +92,9 @@ var FileTableColumns = struct {
 	ContentType: "files.content_type",
 	CreatedAt:   "files.created_at",
 	UpdatedAt:   "files.updated_at",
+	UserID:      "files.user_id",
+	Private:     "files.private",
+	Comment:     "files.comment",
 }
 
 // Generated where
@@ -158,6 +173,118 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 func (w whereHelpernull_Time) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Time) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
+type whereHelpernull_Int struct{ field string }
+
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
+type whereHelpernull_Bool struct{ field string }
+
+func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" LIKE ?", x)
+}
+func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT LIKE ?", x)
+}
+func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" ILIKE ?", x)
+}
+func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
+	return qm.Where(w.field+" NOT ILIKE ?", x)
+}
+func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+
 var FileWhere = struct {
 	ID          whereHelperint
 	Size        whereHelperint
@@ -168,6 +295,9 @@ var FileWhere = struct {
 	ContentType whereHelperstring
 	CreatedAt   whereHelpernull_Time
 	UpdatedAt   whereHelpernull_Time
+	UserID      whereHelpernull_Int
+	Private     whereHelpernull_Bool
+	Comment     whereHelpernull_String
 }{
 	ID:          whereHelperint{field: "\"files\".\"id\""},
 	Size:        whereHelperint{field: "\"files\".\"size\""},
@@ -178,23 +308,36 @@ var FileWhere = struct {
 	ContentType: whereHelperstring{field: "\"files\".\"content_type\""},
 	CreatedAt:   whereHelpernull_Time{field: "\"files\".\"created_at\""},
 	UpdatedAt:   whereHelpernull_Time{field: "\"files\".\"updated_at\""},
+	UserID:      whereHelpernull_Int{field: "\"files\".\"user_id\""},
+	Private:     whereHelpernull_Bool{field: "\"files\".\"private\""},
+	Comment:     whereHelpernull_String{field: "\"files\".\"comment\""},
 }
 
 // FileRels is where relationship names are stored.
 var FileRels = struct {
+	User       string
 	Thumbnails string
 }{
+	User:       "User",
 	Thumbnails: "Thumbnails",
 }
 
 // fileR is where relationships are stored.
 type fileR struct {
+	User       *User          `boil:"User" json:"User" toml:"User" yaml:"User"`
 	Thumbnails ThumbnailSlice `boil:"Thumbnails" json:"Thumbnails" toml:"Thumbnails" yaml:"Thumbnails"`
 }
 
 // NewStruct creates a new relationship struct
 func (*fileR) NewStruct() *fileR {
 	return &fileR{}
+}
+
+func (r *fileR) GetUser() *User {
+	if r == nil {
+		return nil
+	}
+	return r.User
 }
 
 func (r *fileR) GetThumbnails() ThumbnailSlice {
@@ -208,9 +351,9 @@ func (r *fileR) GetThumbnails() ThumbnailSlice {
 type fileL struct{}
 
 var (
-	fileAllColumns            = []string{"id", "size", "name", "alias", "hash", "slug", "content_type", "created_at", "updated_at"}
+	fileAllColumns            = []string{"id", "size", "name", "alias", "hash", "slug", "content_type", "created_at", "updated_at", "user_id", "private", "comment"}
 	fileColumnsWithoutDefault = []string{"size", "name", "alias", "hash", "slug", "content_type"}
-	fileColumnsWithDefault    = []string{"id", "created_at", "updated_at"}
+	fileColumnsWithDefault    = []string{"id", "created_at", "updated_at", "user_id", "private", "comment"}
 	filePrimaryKeyColumns     = []string{"id"}
 	fileGeneratedColumns      = []string{}
 )
@@ -520,6 +663,17 @@ func (q fileQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
+// User pointed to by the foreign key.
+func (o *File) User(mods ...qm.QueryMod) userQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"id\" = ?", o.UserID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	return Users(queryMods...)
+}
+
 // Thumbnails retrieves all the thumbnail's Thumbnails with an executor.
 func (o *File) Thumbnails(mods ...qm.QueryMod) thumbnailQuery {
 	var queryMods []qm.QueryMod
@@ -532,6 +686,130 @@ func (o *File) Thumbnails(mods ...qm.QueryMod) thumbnailQuery {
 	)
 
 	return Thumbnails(queryMods...)
+}
+
+// LoadUser allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (fileL) LoadUser(ctx context.Context, e boil.ContextExecutor, singular bool, maybeFile interface{}, mods queries.Applicator) error {
+	var slice []*File
+	var object *File
+
+	if singular {
+		var ok bool
+		object, ok = maybeFile.(*File)
+		if !ok {
+			object = new(File)
+			ok = queries.SetFromEmbeddedStruct(&object, &maybeFile)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", object, maybeFile))
+			}
+		}
+	} else {
+		s, ok := maybeFile.(*[]*File)
+		if ok {
+			slice = *s
+		} else {
+			ok = queries.SetFromEmbeddedStruct(&slice, maybeFile)
+			if !ok {
+				return errors.New(fmt.Sprintf("failed to set %T from embedded struct %T", slice, maybeFile))
+			}
+		}
+	}
+
+	args := make(map[interface{}]struct{})
+	if singular {
+		if object.R == nil {
+			object.R = &fileR{}
+		}
+		if !queries.IsNil(object.UserID) {
+			args[object.UserID] = struct{}{}
+		}
+
+	} else {
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &fileR{}
+			}
+
+			if !queries.IsNil(obj.UserID) {
+				args[obj.UserID] = struct{}{}
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	argsSlice := make([]interface{}, len(args))
+	i := 0
+	for arg := range args {
+		argsSlice[i] = arg
+		i++
+	}
+
+	query := NewQuery(
+		qm.From(`users`),
+		qm.WhereIn(`users.id in ?`, argsSlice...),
+	)
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load User")
+	}
+
+	var resultSlice []*User
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice User")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for users")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for users")
+	}
+
+	if len(userAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.User = foreign
+		if foreign.R == nil {
+			foreign.R = &userR{}
+		}
+		foreign.R.Files = append(foreign.R.Files, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.UserID, foreign.ID) {
+				local.R.User = foreign
+				if foreign.R == nil {
+					foreign.R = &userR{}
+				}
+				foreign.R.Files = append(foreign.R.Files, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadThumbnails allows an eager lookup of values, cached into the
@@ -644,6 +922,86 @@ func (fileL) LoadThumbnails(ctx context.Context, e boil.ContextExecutor, singula
 		}
 	}
 
+	return nil
+}
+
+// SetUser of the file to the related item.
+// Sets o.R.User to related.
+// Adds o to related.R.Files.
+func (o *File) SetUser(ctx context.Context, exec boil.ContextExecutor, insert bool, related *User) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"files\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"user_id"}),
+		strmangle.WhereClause("\"", "\"", 2, filePrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.IsDebug(ctx) {
+		writer := boil.DebugWriterFrom(ctx)
+		fmt.Fprintln(writer, updateQuery)
+		fmt.Fprintln(writer, values)
+	}
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.UserID, related.ID)
+	if o.R == nil {
+		o.R = &fileR{
+			User: related,
+		}
+	} else {
+		o.R.User = related
+	}
+
+	if related.R == nil {
+		related.R = &userR{
+			Files: FileSlice{o},
+		}
+	} else {
+		related.R.Files = append(related.R.Files, o)
+	}
+
+	return nil
+}
+
+// RemoveUser relationship.
+// Sets o.R.User to nil.
+// Removes o from all passed in related items' relationships struct.
+func (o *File) RemoveUser(ctx context.Context, exec boil.ContextExecutor, related *User) error {
+	var err error
+
+	queries.SetScanner(&o.UserID, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("user_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	if o.R != nil {
+		o.R.User = nil
+	}
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.Files {
+		if queries.Equal(o.UserID, ri.UserID) {
+			continue
+		}
+
+		ln := len(related.R.Files)
+		if ln > 1 && i < ln-1 {
+			related.R.Files[i] = related.R.Files[ln-1]
+		}
+		related.R.Files = related.R.Files[:ln-1]
+		break
+	}
 	return nil
 }
 
