@@ -2,6 +2,7 @@ package admin
 
 import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/layout"
+import "github.com/zqz/web/backend/web/helper"
 
 templ PageFiles(db *filedb.FileDB) {
 	@layout.Main("Admin | All Files") {
@@ -9,14 +10,12 @@ templ PageFiles(db *filedb.FileDB) {
 		<div>
 			<table border="1">
 				for _, i := range files {
-					{{ url := "/admin/files/" + i.Slug }}
-					{{ editUrl := "/admin/files/" + i.Slug + "/edit" }}
 					<tr>
 						<td>
 							{ i.ID }
 						</td>
 						<td>
-							<a href={ templ.URL(url) }>{ i.Name }</a>
+							<a href={ helper.URLViewFile(i) }>{ i.Name }</a>
 						</td>
 						<td>
 							{ i.Slug }
@@ -25,10 +24,10 @@ templ PageFiles(db *filedb.FileDB) {
 							{ i.Size }
 						</td>
 						<td>
-							<a href={ templ.URL(editUrl) }>Edit</a>
+							<a href={ helper.URLEditFile(i) }>Edit</a>
 						</td>
 						<td>
-							<a hx-delete={ templ.URL(url) } hx-swap="outerHTML">Delete</a>
+							<a hx-delete={ helper.URLViewFile(i) } hx-swap="outerHTML">Delete</a>
 						</td>
 					</tr>
 				}

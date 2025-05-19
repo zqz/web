@@ -2,9 +2,10 @@ package admin
 
 import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/layout"
+import "github.com/zqz/web/backend/web/helper"
 
 templ PageEditFile(f *filedb.Meta) {
-	@layout.Main("Admin | File | Edit") {
+	@layout.Main(helper.TitleAdminEditFile(f)) {
 		<div>
 			<b>File | { f.Name } [{ f.ID }]</b>
 			<hr/>
