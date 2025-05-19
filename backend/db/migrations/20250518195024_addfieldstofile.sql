@@ -1,8 +1,8 @@
 -- +goose Up
 -- +goose StatementBegin
 ALTER TABLE files ADD COLUMN user_id INTEGER REFERENCES users(id);
-ALTER TABLE files ADD COLUMN private BOOLEAN DEFAULT FALSE;
-ALTER TABLE files ADD COLUMN comment TEXT;
+ALTER TABLE files ADD COLUMN private BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE files ADD COLUMN comment TEXT NOT NULL DEFAULT '';
 -- +goose StatementEnd
 
 -- +goose Down

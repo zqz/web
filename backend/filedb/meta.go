@@ -13,6 +13,8 @@ type Meta struct {
 	Size          int       `json:"size"`
 	Date          time.Time `json:"date"`
 	BytesReceived int       `json:"bytes_received,omitempty"`
+	Private       bool      `json:"private"`
+	Comment       string    `json:"comment"`
 
 	Thumbnail string `json:"thumbnail,omitempty"`
 }

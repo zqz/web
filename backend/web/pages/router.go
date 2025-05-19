@@ -16,7 +16,6 @@ import (
 	"github.com/markbates/goth/providers/google"
 
 	"github.com/zqz/web/backend/filedb"
-	"github.com/zqz/web/backend/models"
 	"github.com/zqz/web/backend/userdb"
 	"github.com/zqz/web/backend/web/helper"
 	"github.com/zqz/web/backend/web/middleware"
@@ -71,12 +70,11 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 			return
 		}
 
-		u = &models.User{
-			Name:       user.Name,
-			Email:      user.Email,
-			Provider:   "google",
-			ProviderID: providerId,
-		}
+		u = &userdb.User{}
+		u.Name = user.Name
+		u.Email = user.Email
+		u.Provider = "google"
+		u.ProviderID = providerId
 
 		err = users.Create(u)
 		if err != nil {

@@ -3,70 +3,65 @@ package userdb
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
+	"strings"
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 	"github.com/zqz/web/backend/models"
 )
 
-type DBUserStorage struct {
-	db    *sql.DB
-	users []*models.User
+type User struct {
+	models.User
 }
 
-func (s *DBUserStorage) Create(u *models.User) error {
-	dbu := models.User{
-		Name:       u.Name,
-		Email:      u.Email,
-		Provider:   u.Provider,
-		ProviderID: u.ProviderID,
-	}
+type DBUserStorage struct {
+	db *sql.DB
+}
 
-	if err := dbu.Insert(context.Background(), s.db, boil.Infer()); err != nil {
-		fmt.Println("error", err.Error())
-		u.ID = dbu.ID
+func (s *DBUserStorage) Create(u *User) error {
+	if err := u.Insert(context.Background(), s.db, boil.Infer()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *DBUserStorage) FindById(id string) (*models.User, error) {
+func (s *DBUserStorage) FindById(id string) (*User, error) {
 	user, err := models.Users(qm.Where("id=?", id)).One(context.Background(), s.db)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &User{*user}, nil
 }
 
-func (s *DBUserStorage) FindByProviderId(id string) (*models.User, error) {
+func (s *DBUserStorage) FindByProviderId(id string) (*User, error) {
 	user, err := models.Users(qm.Where("provider_id=?", id)).One(context.Background(), s.db)
 	if err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return &User{*user}, nil
 }
 
-func (s *DBUserStorage) List() ([]models.User, error) {
+func (s *DBUserStorage) List() ([]*User, error) {
 	dbUsers, err := models.Users().All(context.Background(), s.db)
 
 	if err != nil {
 		return nil, err
 	}
 
-	users := make([]models.User, 0, len(dbUsers)+1)
+	users := make([]*User, 0)
 	for _, u := range dbUsers {
-		users = append(users, *u)
+		users = append(users, &User{*u})
 	}
 
 	return users, err
 }
 
-func (s *DBUserStorage) Update(id int, u models.User) (models.User, bool, error) {
-	return models.User{}, true, nil
+func (s *DBUserStorage) Update(id int, u User) (User, bool, error) {
+	return User{}, true, nil
 }
 
 type DB struct {
@@ -74,11 +69,11 @@ type DB struct {
 }
 
 type persister interface {
-	Create(*models.User) error
-	FindByProviderId(string) (*models.User, error)
-	FindById(string) (*models.User, error)
-	Update(int, models.User) (models.User, bool, error)
-	List() ([]models.User, error)
+	Create(*User) error
+	FindByProviderId(string) (*User, error)
+	FindById(string) (*User, error)
+	Update(int, User) (User, bool, error)
+	List() ([]*User, error)
 }
 
 func NewDB(p persister) DB {
@@ -89,23 +84,44 @@ func NewDB(p persister) DB {
 
 func NewDBUserStorage(db *sql.DB) *DBUserStorage {
 	return &DBUserStorage{
-		users: make([]*models.User, 0),
-		db:    db,
+		db: db,
 	}
 }
 
-func (db DB) FindByProviderId(id string) (*models.User, error) {
+func (db DB) FindByProviderId(id string) (*User, error) {
 	return db.p.FindByProviderId(id)
 }
 
-func (db DB) FindById(id string) (*models.User, error) {
+func (db DB) FindById(id string) (*User, error) {
 	return db.p.FindById(id)
 }
 
-func (db DB) Create(u *models.User) error {
+func (db DB) Create(u *User) error {
+	if u == nil {
+		return errors.New("a user is required")
+	}
+
+	if issues, ok := validUser(u); !ok {
+		return errors.New(strings.Join(issues, ", "))
+	}
+
 	return db.p.Create(u)
 }
 
-func (db DB) List() ([]models.User, error) {
+func (db DB) List() ([]*User, error) {
 	return db.p.List()
+}
+
+func validUser(u *User) ([]string, bool) {
+	issues := make([]string, 0)
+
+	if len(u.Email) < 4 {
+		issues = append(issues, "email invalid")
+	}
+
+	if len(u.ProviderID) < 1 {
+		issues = append(issues, "a provider id is required")
+	}
+
+	return issues, len(issues) == 0
 }

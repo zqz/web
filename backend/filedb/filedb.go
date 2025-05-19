@@ -18,6 +18,7 @@ type metaStorer interface {
 	FetchMetaWithSlug(string) (*Meta, error)
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(*Meta) error
+	UpdateMeta(*Meta) error
 	ListPage(int) ([]*Meta, error)
 }
 
@@ -125,6 +126,10 @@ func (db FileDB) StoreMeta(meta Meta) error {
 
 func (db FileDB) FetchMeta(h string) (*Meta, error) {
 	return db.fetch(h)
+}
+
+func (db FileDB) UpdateMeta(m *Meta) error {
+	return db.m.UpdateMeta(m)
 }
 
 func (db FileDB) fetch(hash string) (*Meta, error) {

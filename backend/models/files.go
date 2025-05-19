@@ -24,18 +24,18 @@ import (
 
 // File is an object representing the database table.
 type File struct {
-	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Size        int         `boil:"size" json:"size" toml:"size" yaml:"size"`
-	Name        string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Alias       string      `boil:"alias" json:"alias" toml:"alias" yaml:"alias"`
-	Hash        string      `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
-	Slug        string      `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
-	ContentType string      `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
-	CreatedAt   null.Time   `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
-	UpdatedAt   null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	UserID      null.Int    `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
-	Private     null.Bool   `boil:"private" json:"private,omitempty" toml:"private" yaml:"private,omitempty"`
-	Comment     null.String `boil:"comment" json:"comment,omitempty" toml:"comment" yaml:"comment,omitempty"`
+	ID          int       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Size        int       `boil:"size" json:"size" toml:"size" yaml:"size"`
+	Name        string    `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Alias       string    `boil:"alias" json:"alias" toml:"alias" yaml:"alias"`
+	Hash        string    `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
+	Slug        string    `boil:"slug" json:"slug" toml:"slug" yaml:"slug"`
+	ContentType string    `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	CreatedAt   null.Time `boil:"created_at" json:"created_at,omitempty" toml:"created_at" yaml:"created_at,omitempty"`
+	UpdatedAt   null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	UserID      null.Int  `boil:"user_id" json:"user_id,omitempty" toml:"user_id" yaml:"user_id,omitempty"`
+	Private     bool      `boil:"private" json:"private" toml:"private" yaml:"private"`
+	Comment     string    `boil:"comment" json:"comment" toml:"comment" yaml:"comment"`
 
 	R *fileR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L fileL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -211,79 +211,14 @@ func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
 func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
 func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
-type whereHelpernull_Bool struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-func (w whereHelpernull_String) LIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" LIKE ?", x)
-}
-func (w whereHelpernull_String) NLIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT LIKE ?", x)
-}
-func (w whereHelpernull_String) ILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" ILIKE ?", x)
-}
-func (w whereHelpernull_String) NILIKE(x null.String) qm.QueryMod {
-	return qm.Where(w.field+" NOT ILIKE ?", x)
-}
-func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
-}
-
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var FileWhere = struct {
 	ID          whereHelperint
@@ -296,8 +231,8 @@ var FileWhere = struct {
 	CreatedAt   whereHelpernull_Time
 	UpdatedAt   whereHelpernull_Time
 	UserID      whereHelpernull_Int
-	Private     whereHelpernull_Bool
-	Comment     whereHelpernull_String
+	Private     whereHelperbool
+	Comment     whereHelperstring
 }{
 	ID:          whereHelperint{field: "\"files\".\"id\""},
 	Size:        whereHelperint{field: "\"files\".\"size\""},
@@ -309,8 +244,8 @@ var FileWhere = struct {
 	CreatedAt:   whereHelpernull_Time{field: "\"files\".\"created_at\""},
 	UpdatedAt:   whereHelpernull_Time{field: "\"files\".\"updated_at\""},
 	UserID:      whereHelpernull_Int{field: "\"files\".\"user_id\""},
-	Private:     whereHelpernull_Bool{field: "\"files\".\"private\""},
-	Comment:     whereHelpernull_String{field: "\"files\".\"comment\""},
+	Private:     whereHelperbool{field: "\"files\".\"private\""},
+	Comment:     whereHelperstring{field: "\"files\".\"comment\""},
 }
 
 // FileRels is where relationship names are stored.

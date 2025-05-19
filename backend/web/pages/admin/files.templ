@@ -7,13 +7,32 @@ templ PageFiles(db *filedb.FileDB) {
 	@layout.Main("Admin | All Files") {
 		{{ files, _ := db.List(0) }}
 		<div>
-			for _, i := range files {
-				{{ url := "/admin/files/" + i.Slug }}
-				<div>
-					<a href={ templ.URL(url) }>{ i.Name }</a>
-					<a hx-delete={ templ.URL(url) } hx-swap="outerHTML">delete</a>
-				</div>
-			}
+			<table border="1">
+				for _, i := range files {
+					{{ url := "/admin/files/" + i.Slug }}
+					{{ editUrl := "/admin/files/" + i.Slug + "/edit" }}
+					<tr>
+						<td>
+							{ i.ID }
+						</td>
+						<td>
+							<a href={ templ.URL(url) }>{ i.Name }</a>
+						</td>
+						<td>
+							{ i.Slug }
+						</td>
+						<td>
+							{ i.Size }
+						</td>
+						<td>
+							<a href={ templ.URL(editUrl) }>Edit</a>
+						</td>
+						<td>
+							<a hx-delete={ templ.URL(url) } hx-swap="outerHTML">Delete</a>
+						</td>
+					</tr>
+				}
+			</table>
 		</div>
 	}
 }

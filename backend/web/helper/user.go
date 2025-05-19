@@ -4,11 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/zqz/web/backend/models"
+	"github.com/zqz/web/backend/userdb"
 )
 
-func GetUserFromContext(ctx context.Context) *models.User {
-	user, ok := ctx.Value("user").(*models.User)
+func GetUserFromContext(ctx context.Context) *userdb.User {
+	user, ok := ctx.Value("user").(*userdb.User)
 
 	if ok {
 		return user
@@ -17,6 +17,6 @@ func GetUserFromContext(ctx context.Context) *models.User {
 	return nil
 }
 
-func GetUser(r *http.Request) *models.User {
+func GetUser(r *http.Request) *userdb.User {
 	return GetUserFromContext(r.Context())
 }

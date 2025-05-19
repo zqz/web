@@ -9,9 +9,22 @@ templ PageFile(f *filedb.Meta) {
 			<b>File</b>
 			<hr/>
 			<p>
-				{ f.Name }
-				{ f.Hash }
-				{ f.Size }
+				ID: { f.ID }
+				<br/>
+				Slug: { f.Slug }
+				<br/>
+				Name: { f.Name }
+				<br/>
+				Hash: { f.Hash }
+				<br/>
+				Size: { f.Size }
+				<br/>
+				Content Type: { f.ContentType }
+				<br/>
+				Comment: { f.Comment }
+				<br/>
+				Private: { f.Private }
+				<br/>
 			</p>
 		</div>
 	}

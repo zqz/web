@@ -1,7 +1,7 @@
 package helper
 
-import "github.com/zqz/web/backend/models"
+import "github.com/zqz/web/backend/userdb"
 
-func IsAdmin(u *models.User) bool {
+func IsAdmin(u *userdb.User) bool {
 	return u != nil && u.Email == "dylan@johnston.ca"
 }

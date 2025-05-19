@@ -1,0 +1,44 @@
+package admin
+
+import "github.com/zqz/web/backend/filedb"
+import "github.com/zqz/web/backend/web/layout"
+
+templ PageEditFile(f *filedb.Meta) {
+	@layout.Main("Admin | File | Edit") {
+		<div>
+			<b>File | { f.Name } [{ f.ID }]</b>
+			<hr/>
+			{{ action := "/admin/files/" + f.Slug }}
+			<form action={ templ.URL(action) } method="post">
+				<b>Slug</b>
+				<input name="slug" type="text" value={ f.Slug }/>
+				<br/>
+				<b>Name</b>
+				<input name="name" type="text" value={ f.Name }/>
+				<br/>
+				<b>Hash</b>:
+				{ f.Hash }
+				<br/>
+				<b>Size</b>:
+				{ f.Size }
+				<br/>
+				<b>Content Type:</b>:
+				{ f.ContentType }
+				<br/>
+				<b>Comment:</b>
+				<input name="comment" type="text" value={ f.Comment }/>
+				<br/>
+				<b>Private:</b>
+				<input
+					name="private"
+					type="checkbox"
+					if f.Private {
+						checked
+					}
+				/>
+				<br/>
+				<input type="submit"/>
+			</form>
+		</div>
+	}
+}

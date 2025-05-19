@@ -31,6 +31,8 @@ func file2meta(f *models.File) Meta {
 		Hash:          f.Hash,
 		ContentType:   f.ContentType,
 		Date:          f.CreatedAt.Time,
+		Comment:       f.Comment,
+		Private:       f.Private,
 	}
 
 	return m
@@ -38,18 +40,21 @@ func file2meta(f *models.File) Meta {
 
 func meta2file(m *Meta) *models.File {
 	return &models.File{
+		ID:          m.ID,
 		Name:        m.Name,
 		Alias:       m.Name,
 		Size:        m.Size,
 		Slug:        m.Slug,
 		Hash:        m.Hash,
 		ContentType: m.ContentType,
+		Private:     m.Private,
+		Comment:     m.Comment,
 	}
 }
 
 const paginationSQL = `
 	SELECT
-	f.id, f.hash, f.name, f.slug, f.content_type, f.created_at, f.size
+	f.id, f.hash, f.name, f.slug, f.content_type, f.created_at, f.size, f.private, f.comment
 	FROM files AS f
 	ORDER BY f.created_at DESC
 	OFFSET $1
@@ -77,11 +82,13 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 			Slug        null.String
 			ContentType null.String
 			Date        null.Time
+			Private     bool
+			Comment     string
 			Size        int
 		}
 
 		err = rows.Scan(
-			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.ContentType, &e.Date, &e.Size,
+			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.ContentType, &e.Date, &e.Size, &e.Private, &e.Comment,
 		)
 
 		if err != nil {
@@ -112,6 +119,8 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 			x.Date = e.Date.Time
 		}
 		x.Size = e.Size
+		x.Private = e.Private
+		x.Comment = e.Comment
 
 		entries = append(entries, &x)
 	}
@@ -181,6 +190,17 @@ func (s *DBMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	s.entriesMutex.Unlock()
 
 	return &m, nil
+}
+
+func (s *DBMetaStorage) UpdateMeta(m *Meta) error {
+	s.entriesMutex.Lock()
+	s.entries[m.Hash] = m
+	s.entriesMutex.Unlock()
+
+	f := meta2file(m)
+	_, err := f.Update(s.ctx, s.db, boil.Infer())
+
+	return err
 }
 
 func (s *DBMetaStorage) StoreMeta(m *Meta) error {

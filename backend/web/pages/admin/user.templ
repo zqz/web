@@ -1,9 +1,9 @@
 package admin
 
-import "github.com/zqz/web/backend/models"
+import "github.com/zqz/web/backend/userdb"
 import "github.com/zqz/web/backend/web/layout"
 
-templ PageUser(u *models.User) {
+templ PageUser(u *userdb.User) {
 	@layout.Main("Admin | User") {
 		<div>
 			<b>User</b>
@@ -12,6 +12,7 @@ templ PageUser(u *models.User) {
 				{ u.Email }
 				{ u.ID }
 				{ u.Provider } - { u.ProviderID }
+				{ u.CreatedAt.String() }
 			</p>
 		</div>
 	}
