@@ -48,7 +48,6 @@ func Flashes(w http.ResponseWriter, r *http.Request) []any {
 		return nil
 	}
 
-	fmt.Println("accessing flash")
 	flashes := session.Flashes()
 	session.Save(r, w)
 	return flashes

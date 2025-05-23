@@ -1,20 +1,44 @@
 package pages
 
 import "github.com/zqz/web/backend/web/layout"
+import "github.com/zqz/web/backend/filedb"
+import "github.com/zqz/web/backend/web/helper"
 
-templ Home() {
-	@layout.Main("👋 Hello World!") {
+templ fileInfo(f *filedb.Meta) {
+	<div
+		class="
+    h-[48px] w-[48px]
+    max-w-[48px] grow cursor-pointer overflow-hidden bg-black p-2
+    text-green-900
+    hover:outline-[6px] hover:outline-green-600
+    "
+		onhover="hover(this);"
+	>
+		[{ f.Thumbnail }]
+		{ f.Name }
+	</div>
+}
+
+templ Home(files []*filedb.Meta) {
+	{{ u := helper.GetUserFromContext(ctx) }}
+	@layout.Main("zqz.ca") {
 		<div>
-			Hello World!
-			<ul>
-				<li>
+			<div class="flex flex-wrap gap-2">
+				for _, f := range files {
+					@fileInfo(f)
+				}
+			</div>
+			if helper.IsAdmin(u) {
+				<div
+					class="flex flex-row justify-items-start gap-2 px-2 
+        bg-green-600 text-green-100
+        "
+				>
+					<span class="font-bold">admin:</span>
 					<a href="/admin/files">files</a>
-				</li>
-				<li>
 					<a href="/admin/users">users</a>
-				</li>
-			</ul>
-			<a href="/auth?provider=google">login with google</a>
+				</div>
+			}
 		</div>
 	}
 }

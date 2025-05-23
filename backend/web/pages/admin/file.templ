@@ -3,24 +3,32 @@ package admin
 import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/layout"
 import "github.com/zqz/web/backend/web/helper"
+import "github.com/zqz/web/backend/web/icons"
+
+import "github.com/dustin/go-humanize"
 
 templ PageFile(f *filedb.Meta) {
 	@layout.Main(helper.TitleAdminFile(f)) {
 		<div>
-			<b>File</b> <a href={ helper.URLEditFile(f) }>Edit</a>
+			<div class="flex flex-row justify-between">
+				<div>
+					<b>File</b>: { f.Name } ({ f.ID })
+				</div>
+				<a href={ helper.URLEditFile(f) }>
+					@icons.Edit(15)
+				</a>
+			</div>
 			<hr/>
 			<p>
-				ID: { f.ID }
-				<br/>
 				Slug: { f.Slug }
-				<br/>
-				Name: { f.Name }
 				<br/>
 				Hash: { f.Hash }
 				<br/>
-				Size: { f.Size }
+				Size: { humanize.Bytes(uint64(f.Size)) }
 				<br/>
 				Content Type: { f.ContentType }
+				<br/>
+				Age: { humanize.Time(f.Date) }
 				<br/>
 				Comment: { f.Comment }
 				<br/>

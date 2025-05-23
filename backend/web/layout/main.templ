@@ -3,15 +3,21 @@ package layout
 
 import "github.com/zqz/web/backend/web/helper"
 
+var helloHandle = templ.NewOnceHandle()
+
 templ header() {
 	{{ u := helper.GetUserFromContext(ctx) }}
-	<div>
-		<a href="/">zqz.ca</a>
-		if u != nil {
-			<div>{ u.Email } - <a href="/logout">logout</a></div>
-		} else {
-			<div>not logged in</div>
-		}
+	<div class="flex flex-row justify-between pb-2">
+		<a href="/" class="font-bold">zqz.ca</a>
+		<div>
+			if u != nil {
+				<div>{ u.Email } - <a href="/logout">logout</a></div>
+			} else {
+				<div>
+					<a href="/auth?provider=google">login</a>
+				</div>
+			}
+		</div>
 	</div>
 }
 
@@ -32,18 +38,28 @@ templ notices() {
 
 templ Main(title string) {
 	<!DOCTYPE html>
-	<html lang="en">
+	<html class="h-full" lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link link rel="stylesheet" href="/static/output.css"/>
 			<script src="/static/htmx.min.js"></script>
+			<!--
+			<script type="module" src="http://localhost:5173/src/widget.ts"></script>
+      -->
 			<title>{ title }</title>
 		</head>
-		<body>
-			@header()
-			@notices()
-			{ children... }
-			@footer()
+		<body class="h-full">
+			<div class="h-full flex flex-col justify-items-start bg-green-900 max-w-[600px] p-2">
+				@header()
+				<div id="app"></div>
+				<div class="grow">
+					@notices()
+					{ children... }
+				</div>
+				@footer()
+			</div>
+			<script src="http://localhost:5173/dist/widget.umd.js"></script>
 		</body>
 	</html>
 }

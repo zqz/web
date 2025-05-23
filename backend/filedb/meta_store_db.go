@@ -147,17 +147,29 @@ func (s *DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
 		return Meta{}, err
 	}
 
-	return file2meta(f), nil
+	m := file2meta(f)
+
+	t, err := f.Thumbnails().One(s.ctx, s.db)
+	if err != nil {
+		return m, nil
+	}
+
+	m.Thumbnail = t.Hash
+	return m, nil
 }
 
 func (s *DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 	f, err := models.Files(qm.Where("slug=?", slug)).One(s.ctx, s.db)
+	m := file2meta(f)
 
+	t, err := f.Thumbnails().One(s.ctx, s.db)
 	if err != nil {
-		return Meta{}, err
+		return m, nil
 	}
 
-	return file2meta(f), nil
+	m.Thumbnail = t.Hash
+	return m, nil
+
 }
 
 func (s *DBMetaStorage) FetchMeta(h string) (*Meta, error) {

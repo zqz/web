@@ -7,7 +7,6 @@ import (
 
 	"os"
 
-	"github.com/a-h/templ"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/sessions"
@@ -91,7 +90,12 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 	})
 
-	r.Get("/", templ.Handler(Home()).ServeHTTP)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		f, _ := db.List(0)
+
+		//		f1 := f[0]
+		Home(f).Render(r.Context(), w)
+	})
 
 	// r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
 	// 	slug := chi.URLParam(r, "slug")

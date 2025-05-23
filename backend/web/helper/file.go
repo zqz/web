@@ -20,3 +20,7 @@ func URLEditFile(f *filedb.Meta) templ.SafeURL {
 func URLViewFile(f *filedb.Meta) templ.SafeURL {
 	return templ.URL("/admin/files/" + f.Slug)
 }
+
+func URLFileData(f *filedb.Meta) templ.SafeURL {
+	return templ.URL("/api/file/by-hash/" + f.Hash)
+}

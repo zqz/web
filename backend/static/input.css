@@ -1,0 +1,26 @@
+@import "tailwindcss";
+
+@theme {
+	--font-sans: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif;
+
+	--color-green-50: #a6f8ad;
+	--color-green-100: #3ce956;
+	--color-green-200: #35cc4c;
+	--color-green-300: #2eb141;
+	--color-green-400: #279637;
+	--color-green-500: #207b2e;
+	--color-green-600: #1a6224;
+	--color-green-700: #134a1c;
+	--color-green-800: #0d3313;
+	--color-green-900: #081e0b; 
+}
+
+html, body {
+	background-color: var(--color-green-950);
+	color: var(--color-green-50);
+	font-size: 12px;
+}
+
+input[type=text] {
+	padding: --var(--p-2)
+}
