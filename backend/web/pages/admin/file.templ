@@ -1,6 +1,7 @@
 package admin
 
 import "github.com/zqz/web/backend/filedb"
+import "github.com/zqz/web/backend/userdb"
 import "github.com/zqz/web/backend/web/layout"
 import "github.com/zqz/web/backend/web/helper"
 import "github.com/zqz/web/backend/web/icons"
@@ -23,12 +24,15 @@ templ FilePreview(f *filedb.Meta) {
 	}
 }
 
-templ PageFile(f *filedb.Meta) {
+templ PageFile(f *filedb.Meta, u *userdb.User) {
 	@layout.Main(helper.TitleAdminFile(f)) {
 		<div>
 			<div class="flex flex-row justify-between">
 				<div>
-					<b>File</b>: { f.Name } ({ f.ID })
+					<b>File</b>: { f.Name }
+					if u != nil {
+						| <a href={ helper.URLViewUser(u) }>{ u.Email } </a>
+					}
 				</div>
 				<a href={ helper.URLEditFile(f) }>
 					@icons.Edit(15)

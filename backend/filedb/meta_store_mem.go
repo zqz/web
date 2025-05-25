@@ -16,7 +16,7 @@ func (m *MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 	metas = make([]*Meta, 0, len(m.entries))
 
 	for _, m := range m.entries {
-		if !m.finished() {
+		if !m.Finished() {
 			continue
 		}
 		metas = append(metas, m)

@@ -24,6 +24,7 @@ type DBMetaStorage struct {
 func file2meta(f *models.File) Meta {
 	m := Meta{
 		ID:            f.ID,
+		UserID:        f.UserID.Int,
 		Name:          f.Name,
 		Size:          f.Size,
 		BytesReceived: f.Size,
@@ -49,6 +50,7 @@ func meta2file(m *Meta) *models.File {
 		ContentType: m.ContentType,
 		Private:     m.Private,
 		Comment:     m.Comment,
+		UserID:      null.IntFrom(m.UserID),
 	}
 }
 
@@ -61,6 +63,43 @@ const paginationSQL = `
 	OFFSET $1
 	LIMIT $2
 `
+
+func (m *DBMetaStorage) ListFilesByUserId(userID, page int) ([]*Meta, error) {
+	var err error
+
+	//	var perPage int = 50
+	// offset := perPage * page
+
+	files, err := models.Files(
+		qm.Load(models.FileRels.Thumbnails),
+		qm.Where("user_id=?", userID),
+	).All(m.ctx, m.db)
+
+	if err != nil {
+		return nil, err
+	}
+
+	metas := make([]*Meta, 0)
+
+	for _, f := range files {
+		thumbs := f.R.Thumbnails
+		thumbHash := ""
+		if len(thumbs) > 0 {
+			thumbHash = thumbs[0].Hash
+		}
+
+		metas = append(metas, &Meta{
+			ID:        f.ID,
+			Name:      f.Name,
+			Slug:      f.Slug,
+			Hash:      f.Hash,
+			Size:      f.Size,
+			Thumbnail: thumbHash,
+		})
+	}
+
+	return metas, nil
+}
 
 func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 	entries := make([]*Meta, 0)
@@ -252,7 +291,7 @@ func (s *DBMetaStorage) StoreMeta(m *Meta) error {
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
 
-	if m.finished() {
+	if m.Finished() {
 		f := meta2file(m)
 		if err := f.Insert(s.ctx, s.db, boil.Infer()); err != nil {
 			fmt.Println("error", err.Error())

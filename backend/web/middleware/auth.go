@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/markbates/goth/gothic"
 	"github.com/zqz/web/backend/userdb"
@@ -11,12 +13,18 @@ import (
 func Auth(users *userdb.DB) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.Contains(r.URL.Path, "static") || strings.Contains(r.URL.Path, "favicon") {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			userId, err := gothic.GetFromSession("user_id", r)
 			if err != nil {
 				next.ServeHTTP(w, r)
 				return
 			}
 
+			fmt.Println("fetching user")
 			u, err := users.FindById(userId)
 			if u == nil {
 				next.ServeHTTP(w, r)

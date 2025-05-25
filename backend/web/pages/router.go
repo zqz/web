@@ -17,7 +17,6 @@ import (
 	"github.com/zqz/web/backend/filedb"
 	"github.com/zqz/web/backend/userdb"
 	"github.com/zqz/web/backend/web/helper"
-	"github.com/zqz/web/backend/web/middleware"
 	"github.com/zqz/web/backend/web/pages/admin"
 )
 
@@ -42,7 +41,6 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 	)
 	r := chi.NewRouter()
 
-	r.Use(middleware.Auth(users))
 	r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {
 		u := helper.GetUser(r)
 		if u != nil {

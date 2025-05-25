@@ -1,8 +1,9 @@
 package admin
 
-import "strconv"
 import "github.com/zqz/web/backend/userdb"
 import "github.com/zqz/web/backend/web/layout"
+import "github.com/dustin/go-humanize"
+import "github.com/zqz/web/backend/web/helper"
 
 templ PageUsers(users *userdb.DB) {
 	@layout.Main("Admin - All Users") {
@@ -10,20 +11,31 @@ templ PageUsers(users *userdb.DB) {
 		<div>
 			if err != nil {
 				<div>{ err.Error() }</div>
-			} else {
-				<div>no error</div>
-			}
-			for _, i := range users {
-				{{ userId := strconv.Itoa(i.ID) }}
-				{{ url := "/admin/users/" + userId }}
-				<div>
-					{ i.ID }
-					{ i.Provider }
-					{ i.ProviderID }
-					{ i.CreatedAt.String() }
-					<a href={ templ.URL(url) }>{ i.Email }</a>
-				</div>
 			}
 		</div>
+		<table class="w-full table-fixed" border="1">
+			<thead>
+				<tr>
+					<th class="text-left w-[7%]">ID</th>
+					<th class="text-left w-full">Email</th>
+					<th class="text-left w-[20%]">Age</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, u := range users {
+					<tr>
+						<td>
+							{ u.ID }
+						</td>
+						<td>
+							<a href={ helper.URLViewUser(u) }>{ u.Email } </a>
+						</td>
+						<td>
+							{ humanize.Time(u.CreatedAt) }
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
 	}
 }

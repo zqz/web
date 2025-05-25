@@ -23,6 +23,7 @@ templ fileInfo(f *filedb.Meta) {
 
 templ Home(files []*filedb.Meta) {
 	@layout.Main("zqz.ca") {
+		<div id="app"></div>
 		<div>
 			<div class="flex flex-wrap gap-2">
 				for _, f := range files {
@@ -30,5 +31,6 @@ templ Home(files []*filedb.Meta) {
 				}
 			</div>
 		</div>
+		<script type="module" src="http://localhost:5173/src/widget.ts"></script>
 	}
 }

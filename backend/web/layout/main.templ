@@ -57,22 +57,20 @@ templ Main(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<link link rel="stylesheet" href="/static/output.css"/>
 			<script src="/static/htmx.min.js"></script>
-			<!--
-			<script type="module" src="http://localhost:5173/src/widget.ts"></script>
-      -->
 			<title>{ title }</title>
 		</head>
 		<body class="h-full">
 			<div class="flex h-full max-w-[600px] flex-col justify-items-start bg-green-900 p-2">
 				@header()
-				<div id="app"></div>
 				<div class="grow">
 					@notices()
 					{ children... }
 				</div>
 				@footer()
 			</div>
+			<!--
 			<script src="http://localhost:5173/dist/widget.umd.js"></script>
+      -->
 		</body>
 	</html>
 }

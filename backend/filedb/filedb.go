@@ -28,6 +28,7 @@ type metaStorer interface {
 	RemoveThumbnails(*Meta) error
 	UpdateMeta(*Meta) error
 	ListPage(int) ([]*Meta, error)
+	ListFilesByUserId(int, int) ([]*Meta, error)
 }
 
 type processor interface {
@@ -43,6 +44,10 @@ type FileDB struct {
 
 type ThumbnailProcessor struct {
 	size int
+}
+
+func (db *FileDB) ListFilesByUserId(uID, offset int) ([]*Meta, error) {
+	return db.m.ListFilesByUserId(uID, offset)
 }
 
 func (db *FileDB) AddProcessor(p processor) {
@@ -170,7 +175,7 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 		return err
 	}
 
-	if !m.finished() {
+	if !m.Finished() {
 		return errors.New("file incomplete")
 	}
 
@@ -300,6 +305,10 @@ func validateMeta(meta *Meta) error {
 	return nil
 }
 
+func (db FileDB) GetData(h string) (io.ReadCloser, error) {
+	return db.p.Get(h)
+}
+
 func (db FileDB) finish(m *Meta) error {
 	w, err := db.p.Get(m.Hash)
 	if err != nil {
@@ -349,7 +358,7 @@ func (db FileDB) Path(s string) string {
 }
 
 func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
-	if m.finished() {
+	if m.Finished() {
 		return errors.New("file already uploaded")
 	}
 
@@ -361,7 +370,7 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 	n, _ := io.Copy(writer, rc)
 	m.BytesReceived += int(n)
 
-	if m.finished() {
+	if m.Finished() {
 		m.Slug = randStr(5)
 	}
 
@@ -369,7 +378,7 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 		return err
 	}
 
-	if !m.finished() {
+	if !m.Finished() {
 		return errors.New("got partial data")
 	}
 

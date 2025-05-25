@@ -1,8 +1,11 @@
 package helper
 
 import (
+	"strconv"
+
 	"github.com/a-h/templ"
 	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/userdb"
 )
 
 func StyleFileBG(f *filedb.Meta) templ.SafeCSS {
@@ -40,4 +43,8 @@ func URLThumbnailData(f *filedb.Meta) templ.SafeURL {
 
 func URLProcessFile(f *filedb.Meta) templ.SafeURL {
 	return templ.URL("/admin/files/" + f.Slug + "/process")
+}
+
+func URLViewUser(u *userdb.User) templ.SafeURL {
+	return templ.URL("/admin/users/" + strconv.Itoa(u.ID))
 }

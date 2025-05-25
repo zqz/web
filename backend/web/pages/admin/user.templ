@@ -1,19 +1,30 @@
 package admin
 
 import "github.com/zqz/web/backend/userdb"
+import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/layout"
+import "github.com/dustin/go-humanize"
 
-templ PageUser(u *userdb.User) {
+templ PageUser(u *userdb.User, db *filedb.FileDB) {
 	@layout.Main("Admin | User") {
 		<div>
+			{{ files, _ := db.ListFilesByUserId(u.ID, 0) }}
 			<b>User</b>
 			<hr/>
-			<p>
-				{ u.Email }
-				{ u.ID }
-				{ u.Provider } - { u.ProviderID }
-				{ u.CreatedAt.String() }
-			</p>
+			<b>Email:</b>{ u.Email }
+			<br/>
+			<b>ID</b>: { u.ID }
+			<br/>
+			<b>Provider</b>: { u.Provider }
+			<br/>
+			<b>Provider ID</b>: { u.ProviderID }
+			<br/>
+			<b>Created</b>: { humanize.Time(u.CreatedAt) }
+		</div>
+		<div>
+			<b>Files - { len(files) }</b>
+			<hr/>
+			@FileList(files)
 		</div>
 	}
 }

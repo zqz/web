@@ -15,10 +15,11 @@ type Meta struct {
 	BytesReceived int       `json:"bytes_received,omitempty"`
 	Private       bool      `json:"private"`
 	Comment       string    `json:"comment"`
+	UserID        int       `json:"-"`
 
 	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
-func (m Meta) finished() bool {
+func (m Meta) Finished() bool {
 	return m.Size == m.BytesReceived
 }

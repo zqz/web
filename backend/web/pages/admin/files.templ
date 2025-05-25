@@ -2,106 +2,10 @@ package admin
 
 import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/layout"
-import "github.com/zqz/web/backend/web/helper"
-import "github.com/zqz/web/backend/web/icons"
-import "github.com/dustin/go-humanize"
 
 templ PageFiles(db *filedb.FileDB) {
-	{{ iconSize := 15 }}
 	@layout.Main("Admin | All Files") {
 		{{ files, _ := db.List(0) }}
-		<script>
-      function onClick(element) {
-        const imgUrl = element.getAttribute("data-file-url");
-        // Find the closest tr parent
-        const parentTr = element.closest("tr");
-
-        // Check if we already inserted an image row after this one
-        const nextTr = parentTr.nextElementSibling;
-        if (nextTr && nextTr.classList.contains("image-row")) {
-          nextTr.remove();
-          // Image row already exists, don't add another one
-          return;
-        }
-
-        // Create a new table row with the image
-        const newTr = document.createElement("tr");
-        newTr.classList.add("image-row"); // Add a class to identify it
-
-        // Create a table cell for the image
-        const newTd = document.createElement("td");
-        newTd.colSpan = parentTr.cells.length; // Make it span across all columns
-
-        // Create the image
-        const img = document.createElement("img");
-        img.src = imgUrl;
-
-        // Add the image to the cell, cell to the row, and row after the parent
-        newTd.appendChild(img);
-        newTr.appendChild(newTd);
-        parentTr.insertAdjacentElement("afterend", newTr);
-      }
-    </script>
-		<div>
-			<table class="w-full table-fixed" border="1">
-				<thead>
-					<tr>
-						<th class="text-left w-[7%]">ID</th>
-						<th class="text-left w-full">Name</th>
-						<th class="text-left w-[20%]">Size</th>
-						<th class="text-right w-[13%]">Options</th>
-					</tr>
-				</thead>
-				<tbody>
-					for _, i := range files {
-						<tr>
-							<td>
-								{ i.ID }
-							</td>
-							<td>
-								<span
-									class="cursor-pointer flex flex-row gap-2 align-middle"
-									onclick="onClick(this)"
-									data-file-url={ helper.URLFileData(i) }
-								>
-									<div
-										class="w-4 h-4 bg-red-900 self-center bg-center bg-cover"
-										style={ helper.StyleFileBG(i) }
-									></div>
-									{ i.Name }
-									if i.Private {
-										<span class="text-red-500">
-											@icons.Lock(iconSize)
-										</span>
-									}
-								</span>
-							</td>
-							<td>
-								{ humanize.Bytes(uint64(i.Size)) }
-							</td>
-							<td>
-								<div class="flex flex-row justify-end">
-									<a hx-post={ helper.URLProcessFile(i) }>
-										@icons.Refresh(iconSize)
-									</a>
-									<a href={ helper.URLViewFile(i) }>
-										@icons.Search(iconSize)
-									</a>
-									<a href={ helper.URLEditFile(i) }>
-										@icons.Edit(iconSize)
-									</a>
-									<a
-										hx-delete={ helper.URLViewFile(i) }
-										hx-swap="outerHTML"
-									>
-										@icons.Delete(iconSize)
-									</a>
-								</div>
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-		</div>
+		@FileList(files)
 	}
 }

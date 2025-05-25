@@ -6,14 +6,16 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
-	"github.com/zqz/web/backend/server"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/zqz/web/backend/web"
 )
 
 func main() {
+	boil.DebugMode = true
 	env := os.Getenv("ZQZ_ENV")
 	log := logger(env)
 
-	s, err := server.Init(&log, env)
+	s, err := web.Init(&log, env)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start server")
 	}
