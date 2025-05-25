@@ -91,7 +91,6 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		f, _ := db.List(0)
 
-		//		f1 := f[0]
 		Home(f).Render(r.Context(), w)
 	})
 
@@ -111,12 +110,6 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		PageFile(f, u).Render(r.Context(), w)
 	})
 
-	// r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-	// 	slug := chi.URLParam(r, "slug")
-	// 	f, _ := db.FetchMetaWithSlug(slug)
-	// 	admin.PageAdminFile(f).Render(r.Context(), w)
-	// })
-	//
 	r.Mount("/admin", admin.Router(users, db))
 
 	return r
