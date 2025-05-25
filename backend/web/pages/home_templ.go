@@ -127,7 +127,7 @@ func Home(files []*filedb.Meta) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><script type=\"module\" src=\"http://localhost:5173/src/widget.ts\"></script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><!--<script type=\"module\"\n    src=\"http://localhost:5173/src/widget.ts\"></script>-->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

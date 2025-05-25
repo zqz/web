@@ -106,8 +106,7 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		slug := chi.URLParam(r, "slug")
 		f, _ := db.FetchMetaWithSlug(slug)
 
-		userId := strconv.Itoa(f.UserID)
-		u, _ := users.FindById(userId)
+		u, _ := users.FindById(f.UserID)
 
 		PageFile(f, u).Render(r.Context(), w)
 	})

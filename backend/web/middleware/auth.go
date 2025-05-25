@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/markbates/goth/gothic"
@@ -18,13 +18,18 @@ func Auth(users *userdb.DB) func(next http.Handler) http.Handler {
 				return
 			}
 
-			userId, err := gothic.GetFromSession("user_id", r)
+			userIdStr, err := gothic.GetFromSession("user_id", r)
 			if err != nil {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			fmt.Println("fetching user")
+			userId, err := strconv.Atoi(userIdStr)
+			if err != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			u, err := users.FindById(userId)
 			if u == nil {
 				next.ServeHTTP(w, r)

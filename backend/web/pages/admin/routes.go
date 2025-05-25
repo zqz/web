@@ -2,6 +2,7 @@ package admin
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/a-h/templ"
 	"github.com/davecgh/go-spew/spew"
@@ -20,9 +21,14 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 	r.Get("/users", templ.Handler(PageUsers(users)).ServeHTTP)
 
 	r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-		userId := chi.URLParam(r, "id")
-		u, _ := users.FindById(userId)
+		userIdStr := chi.URLParam(r, "id")
+		userId, err := strconv.Atoi(userIdStr)
+		if err != nil {
+			PageError(err).Render(r.Context(), w)
+			return
+		}
 
+		u, _ := users.FindById(userId)
 		PageUser(u, db).Render(r.Context(), w)
 	})
 
