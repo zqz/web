@@ -7,6 +7,22 @@ import "github.com/zqz/web/backend/web/icons"
 
 import "github.com/dustin/go-humanize"
 
+templ ThumbnailPreview(f *filedb.Meta) {
+	if f.ContentType == "image/jpeg" {
+		<div>
+			<img src={ helper.URLThumbnailData(f) }/>
+		</div>
+	}
+}
+
+templ FilePreview(f *filedb.Meta) {
+	if f.ContentType == "image/jpeg" {
+		<div>
+			<img src={ helper.URLFileData(f) }/>
+		</div>
+	}
+}
+
 templ PageFile(f *filedb.Meta) {
 	@layout.Main(helper.TitleAdminFile(f)) {
 		<div>
@@ -19,6 +35,11 @@ templ PageFile(f *filedb.Meta) {
 				</a>
 			</div>
 			<hr/>
+			<p>
+				<a hx-post={ helper.URLProcessFile(f) }>Process</a>
+			</p>
+			@FilePreview(f)
+			@ThumbnailPreview(f)
 			<p>
 				Slug: { f.Slug }
 				<br/>

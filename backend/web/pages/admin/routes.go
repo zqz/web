@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi/v5"
 	"github.com/zqz/web/backend/filedb"
 	"github.com/zqz/web/backend/userdb"
@@ -44,6 +45,15 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		PageFile(f).Render(r.Context(), w)
 	})
 
+	r.Post("/files/{slug}/process", func(w http.ResponseWriter, r *http.Request) {
+		slug := chi.URLParam(r, "slug")
+		f, _ := db.FetchMetaWithSlug(slug)
+		spew.Dump(f)
+
+		w.Write([]byte("file was re-processed"))
+		db.Process(f)
+	})
+
 	r.Post("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
 		f, _ := db.FetchMetaWithSlug(slug)
@@ -65,9 +75,16 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 	})
 
 	r.Delete("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-		helper.AddFlash(w, r, "file was deleted")
+		slug := chi.URLParam(r, "slug")
 
-		w.Write([]byte("DELETED"))
+		err := db.DeleteMetaWithSlug(slug)
+		if err != nil {
+			w.Write([]byte("failed to delete " + err.Error()))
+			return
+		}
+
+		helper.AddFlash(w, r, "file was deleted")
+		w.Write([]byte("Deleted"))
 	})
 
 	return r

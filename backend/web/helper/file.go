@@ -5,6 +5,15 @@ import (
 	"github.com/zqz/web/backend/filedb"
 )
 
+func StyleFileBG(f *filedb.Meta) templ.SafeCSS {
+	if len(f.Thumbnail) == 0 {
+		return templ.SafeCSS("")
+	}
+
+	url := URLThumbnailData(f)
+	return templ.SafeCSS("background-image: url(" + url + ");")
+}
+
 func TitleAdminFile(f *filedb.Meta) string {
 	return "a | file | " + f.Name
 }
@@ -23,4 +32,12 @@ func URLViewFile(f *filedb.Meta) templ.SafeURL {
 
 func URLFileData(f *filedb.Meta) templ.SafeURL {
 	return templ.URL("/api/file/by-hash/" + f.Hash)
+}
+
+func URLThumbnailData(f *filedb.Meta) templ.SafeURL {
+	return templ.URL("/api/file/by-slug/" + f.Slug + "/thumbnail")
+}
+
+func URLProcessFile(f *filedb.Meta) templ.SafeURL {
+	return templ.URL("/admin/files/" + f.Slug + "/process")
 }

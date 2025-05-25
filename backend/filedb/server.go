@@ -133,10 +133,30 @@ func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, rr)
 }
 
-func (s Server) download(meta *Meta, w http.ResponseWriter, r *http.Request) {
+func (s Server) downloadThumbnail(meta *Meta, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", meta.ContentType)
+	w.Header().Set("Content-Disposition", "inline; filename=thumb_"+meta.Name)
+	s.sendfile(meta.Thumbnail, w, r)
+}
+
+func (s Server) downloadFile(meta *Meta, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
 	s.sendfile(meta.Hash, w, r)
+}
+
+func (s Server) getThumbnailDataWithSlug(w http.ResponseWriter, r *http.Request) {
+	slug := chi.URLParam(r, "slug")
+
+	meta, err := s.db.FetchMetaWithSlug(slug)
+
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		render.Error(w, err.Error())
+		return
+	}
+
+	s.downloadThumbnail(meta, w, r)
 }
 
 func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +170,7 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.download(meta, w, r)
+	s.downloadFile(meta, w, r)
 }
 
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
@@ -164,7 +184,7 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.download(meta, w, r)
+	s.downloadFile(meta, w, r)
 }
 
 func (s Server) Router() http.Handler {
@@ -173,6 +193,7 @@ func (s Server) Router() http.Handler {
 	r.Get("/files", s.files)
 	r.Get("/file/by-hash/{hash}", s.getData)
 	r.Get("/file/by-slug/{slug}", s.getDataWithSlug)
+	r.Get("/file/by-slug/{slug}/thumbnail", s.getThumbnailDataWithSlug)
 	r.Post("/file/{hash}", s.postData)
 
 	r.Get("/meta/by-hash/{hash}", s.getMeta)

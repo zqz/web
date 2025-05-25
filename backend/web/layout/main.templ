@@ -22,7 +22,20 @@ templ header() {
 }
 
 templ footer() {
-	<div>footer</div>
+	{{ u := helper.GetUserFromContext(ctx) }}
+	<div>
+		if helper.IsAdmin(u) {
+			<div
+				class="flex flex-row justify-items-start gap-2 rounded-sm bg-green-600 
+        px-2 text-green-100
+        "
+			>
+				<span class="font-bold">admin:</span>
+				<a href="/admin/files">files</a>
+				<a href="/admin/users">users</a>
+			</div>
+		}
+	</div>
 }
 
 templ notices() {
@@ -50,7 +63,7 @@ templ Main(title string) {
 			<title>{ title }</title>
 		</head>
 		<body class="h-full">
-			<div class="h-full flex flex-col justify-items-start bg-green-900 max-w-[600px] p-2">
+			<div class="flex h-full max-w-[600px] flex-col justify-items-start bg-green-900 p-2">
 				@header()
 				<div id="app"></div>
 				<div class="grow">

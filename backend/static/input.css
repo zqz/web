@@ -24,3 +24,7 @@ html, body {
 input[type=text] {
 	padding: --var(--p-2)
 }
+
+a:hover {
+  color: var(--color-green-500) !important;
+}

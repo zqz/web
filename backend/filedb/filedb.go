@@ -6,34 +6,123 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
+
+	"github.com/HugoSmits86/nativewebp"
+	"github.com/disintegration/imaging"
 )
 
 type persister interface {
 	Del(string) error
 	Put(string) (io.WriteCloser, error)
 	Get(string) (io.ReadCloser, error)
+	Path(string) string
 }
 
 type metaStorer interface {
+	DeleteMetaById(int) error
 	FetchMetaWithSlug(string) (*Meta, error)
 	FetchMeta(string) (*Meta, error)
 	StoreMeta(*Meta) error
+	StoreThumbnail(string, int, *Meta) error
+	RemoveThumbnails(*Meta) error
 	UpdateMeta(*Meta) error
 	ListPage(int) ([]*Meta, error)
 }
 
+type processor interface {
+	Process(FileDB, *Meta) error
+}
+
 // FileDB implements a upload server.
 type FileDB struct {
-	p persister
-	m metaStorer
+	p  persister
+	m  metaStorer
+	px []processor
+}
+
+type ThumbnailProcessor struct {
+	size int
+}
+
+func (db *FileDB) AddProcessor(p processor) {
+	db.px = append(db.px, p)
+}
+
+func NewThumbnailProcessor(size int) ThumbnailProcessor {
+	return ThumbnailProcessor{
+		size: size,
+	}
+}
+
+type writeCounter int64
+
+func (w writeCounter) Write(b []byte) (int, error) {
+	w += writeCounter(len(b))
+
+	return len(b), nil
+}
+
+func (t ThumbnailProcessor) Process(db FileDB, m *Meta) error {
+	fmt.Println("thumb process", t.size)
+	r, err := db.p.Get(m.Hash)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	x, err := imaging.Decode(r)
+	if err != nil {
+		return err
+	}
+
+	x = imaging.Thumbnail(x, t.size, t.size, imaging.Lanczos)
+	// x = imaging.CropAnchor(x, t.size, t.size, imaging.Center)
+
+	tmpFile, err := os.CreateTemp("./files/tmp", "myapp-*.txt")
+	if err != nil {
+		return err
+	}
+	defer tmpFile.Close()
+
+	h := sha1.New()
+	var wc writeCounter
+	mw := io.MultiWriter(tmpFile, h, wc)
+
+	// err = imaging.Encode(mw, x, imaging.JPEG, imaging.JPEGQuality(90))
+	// if err != nil {
+	// 	return err
+	// }
+
+	err = nativewebp.Encode(mw, x, nil)
+	if err != nil {
+		return err
+	}
+
+	hash := fmt.Sprintf("%x", h.Sum(nil))
+	fmt.Println("moving", tmpFile.Name(), "to", db.Path(hash))
+	err = os.Rename(tmpFile.Name(), db.Path(hash))
+	if err != nil {
+		return err
+	}
+
+	db.m.StoreThumbnail(hash, 123, m)
+
+	return nil
 }
 
 // NewFileDB returns an instance of a FileDB.
 func NewFileDB(p persister, m metaStorer) FileDB {
 	return FileDB{
-		m: m,
-		p: p,
+		m:  m,
+		p:  p,
+		px: make([]processor, 0),
 	}
+}
+
+func (db FileDB) Process(m *Meta) error {
+	err := db.process(m)
+	return err
 }
 
 func (db FileDB) List(page int) ([]*Meta, error) {
@@ -121,6 +210,7 @@ func (db FileDB) StoreMeta(meta Meta) error {
 		// have not saved any bytes. Delete the file.
 		db.p.Del(meta.Hash)
 	}
+
 	return db.m.StoreMeta(&meta)
 }
 
@@ -154,6 +244,32 @@ func (db FileDB) FetchMetaWithSlug(slug string) (*Meta, error) {
 	}
 
 	return db.m.FetchMetaWithSlug(slug)
+}
+
+func (db FileDB) DeleteMetaWithSlug(slug string) error {
+	m, err := db.m.FetchMetaWithSlug(slug)
+	if err != nil {
+		fmt.Println("failed to fetch meta")
+		return err
+	}
+
+	err = db.p.Del(m.Thumbnail)
+	if err != nil {
+		fmt.Println("failed to remove thumbnail")
+	}
+
+	err = db.p.Del(m.Hash)
+	if err != nil {
+		fmt.Println("failed to remove file")
+	}
+
+	err = db.m.RemoveThumbnails(m)
+	if err != nil {
+		fmt.Println("failed to delete thumbnail records")
+		return err
+	}
+
+	return db.m.DeleteMetaById(m.ID)
 }
 
 func (db FileDB) validate() error {
@@ -202,7 +318,6 @@ func (db FileDB) finish(m *Meta) error {
 
 	err = db.process(m)
 	if err != nil {
-		// fmt.Println("error processing:", err.Error())
 		return nil
 	}
 
@@ -218,7 +333,19 @@ func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
 }
 
 func (db FileDB) process(m *Meta) error {
+	fmt.Println("processing")
+	for i, p := range db.px {
+		fmt.Println("processing", i)
+		err := p.Process(db, m)
+		if err != nil {
+			fmt.Println("processing error", err)
+		}
+	}
 	return nil
+}
+
+func (db FileDB) Path(s string) string {
+	return db.p.Path(s)
 }
 
 func (db FileDB) store(m *Meta, rc io.ReadCloser) error {

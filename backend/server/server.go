@@ -69,6 +69,8 @@ func (s Server) Run() error {
 		storage,
 		filedb.NewDBMetaStorage(s.database),
 	)
+
+	fdb.AddProcessor(filedb.NewThumbnailProcessor(128))
 	fsrv := filedb.NewServer(fdb)
 
 	r := chi.NewRouter()

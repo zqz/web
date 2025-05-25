@@ -54,8 +54,9 @@ func meta2file(m *Meta) *models.File {
 
 const paginationSQL = `
 	SELECT
-	f.id, f.hash, f.name, f.slug, f.content_type, f.created_at, f.size, f.private, f.comment
+	f.id, f.hash, f.name, f.slug, f.content_type, f.created_at, f.size, f.private, f.comment, t.hash as thash
 	FROM files AS f
+	LEFT JOIN thumbnails t ON t.file_id = f.id
 	ORDER BY f.created_at DESC
 	OFFSET $1
 	LIMIT $2
@@ -76,19 +77,20 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 
 	for rows.Next() {
 		var e struct {
-			ID          int
-			Hash        null.String
-			Name        null.String
-			Slug        null.String
-			ContentType null.String
-			Date        null.Time
-			Private     bool
-			Comment     string
-			Size        int
+			ID            int
+			Hash          null.String
+			Name          null.String
+			Slug          null.String
+			ContentType   null.String
+			Date          null.Time
+			Private       bool
+			Comment       string
+			Size          int
+			ThumbnailHash null.String
 		}
 
 		err = rows.Scan(
-			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.ContentType, &e.Date, &e.Size, &e.Private, &e.Comment,
+			&e.ID, &e.Hash, &e.Name, &e.Slug, &e.ContentType, &e.Date, &e.Size, &e.Private, &e.Comment, &e.ThumbnailHash,
 		)
 
 		if err != nil {
@@ -118,6 +120,11 @@ func (m *DBMetaStorage) ListPage(page int) ([]*Meta, error) {
 		if e.Date.Valid {
 			x.Date = e.Date.Time
 		}
+
+		if e.ThumbnailHash.Valid {
+			x.Thumbnail = e.ThumbnailHash.String
+		}
+
 		x.Size = e.Size
 		x.Private = e.Private
 		x.Comment = e.Comment
@@ -169,7 +176,32 @@ func (s *DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 
 	m.Thumbnail = t.Hash
 	return m, nil
+}
 
+func (s *DBMetaStorage) RemoveThumbnails(m *Meta) error {
+	_, err := models.Thumbnails(qm.Where("file_id=?", m.ID)).DeleteAll(s.ctx, s.db)
+	return err
+}
+
+func (s *DBMetaStorage) StoreThumbnail(h string, size int, m *Meta) error {
+	err := s.RemoveThumbnails(m)
+	if err != nil {
+		return err
+	}
+
+	t := models.Thumbnail{
+		Hash:   h,
+		Width:  size,
+		Height: size,
+		FileID: m.ID,
+	}
+
+	err = t.Insert(s.ctx, s.db, boil.Infer())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *DBMetaStorage) FetchMeta(h string) (*Meta, error) {
@@ -231,4 +263,15 @@ func (s *DBMetaStorage) StoreMeta(m *Meta) error {
 	}
 
 	return nil
+}
+
+func (s *DBMetaStorage) DeleteMetaById(id int) error {
+	f, err := models.Files(qm.Where("id=?", id)).One(s.ctx, s.db)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Delete(s.ctx, s.db)
+
+	return err
 }
