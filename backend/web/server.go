@@ -59,7 +59,7 @@ func (s Server) runInsecure(r http.Handler) error {
 }
 
 func (s Server) Run() error {
-	userStorage := userdb.NewDBUserStorage(s.database)
+	userStorage := userdb.NewDBStorage(s.database)
 	userDB := userdb.NewDB(userStorage)
 
 	storage, err := filedb.NewDiskPersistence(s.config.FilesPath)
