@@ -28,7 +28,7 @@ templ PageUsers(users *userdb.DB) {
 							{ u.ID }
 						</td>
 						<td>
-							<a href={ helper.URLViewUser(u) }>{ u.Email } </a>
+							<a href={ helper.URLUserView(u) }>{ u.Email } </a>
 						</td>
 						<td>
 							{ humanize.Time(u.CreatedAt) }

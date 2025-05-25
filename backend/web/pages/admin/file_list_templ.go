@@ -128,7 +128,7 @@ func FileList(files []*filedb.Meta) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLProcessFile(i))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLFileProcess(i))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/pages/admin/file_list.templ`, Line: 81, Col: 45}
 			}
@@ -148,7 +148,7 @@ func FileList(files []*filedb.Meta) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 templ.SafeURL = helper.URLViewFile(i)
+			var templ_7745c5c3_Var8 templ.SafeURL = helper.URLFileView(i)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -165,7 +165,7 @@ func FileList(files []*filedb.Meta) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 templ.SafeURL = helper.URLEditFile(i)
+			var templ_7745c5c3_Var9 templ.SafeURL = helper.URLFileEdit(i)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var9)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -183,7 +183,7 @@ func FileList(files []*filedb.Meta) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLViewFile(i))
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLFileView(i))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/pages/admin/file_list.templ`, Line: 91, Col: 42}
 			}

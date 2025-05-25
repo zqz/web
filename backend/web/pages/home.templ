@@ -5,7 +5,7 @@ import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/helper"
 
 templ fileInfo(f *filedb.Meta) {
-	<a href={ helper.URLViewFile(f) }>
+	<a href={ helper.URLFileView(f) }>
 		<div
 			class=" h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden
     bg-black p-2 text-green-900 text-white

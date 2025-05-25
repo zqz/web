@@ -78,17 +78,17 @@ templ FileList(files []*filedb.Meta) {
 						</td>
 						<td>
 							<div class="flex flex-row justify-end">
-								<a hx-post={ helper.URLProcessFile(i) }>
+								<a hx-post={ helper.URLFileProcess(i) }>
 									@icons.Refresh(iconSize)
 								</a>
-								<a href={ helper.URLViewFile(i) }>
+								<a href={ helper.URLFileView(i) }>
 									@icons.Search(iconSize)
 								</a>
-								<a href={ helper.URLEditFile(i) }>
+								<a href={ helper.URLFileEdit(i) }>
 									@icons.Edit(iconSize)
 								</a>
 								<a
-									hx-delete={ helper.URLViewFile(i) }
+									hx-delete={ helper.URLFileView(i) }
 									hx-swap="outerHTML"
 								>
 									@icons.Delete(iconSize)

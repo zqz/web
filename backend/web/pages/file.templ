@@ -25,17 +25,17 @@ templ PageFile(f *filedb.Meta, u *userdb.User) {
 				<div>
 					<b>File</b>: { f.Name }
 					if isAdmin && u != nil {
-						| <a href={ helper.URLViewUser(u) }>{ u.Email } </a>
+						| <a href={ helper.URLUserView(u) }>{ u.Email } </a>
 					}
 				</div>
-				<a href={ helper.URLEditFile(f) }>
+				<a href={ helper.URLFileEdit(f) }>
 					@icons.Edit(15)
 				</a>
 			</div>
 			<hr/>
 			if isAdmin {
 				<p>
-					<a hx-post={ helper.URLProcessFile(f) }>Process</a>
+					<a hx-post={ helper.URLFileProcess(f) }>Process</a>
 				</p>
 			}
 			@FilePreview(f)

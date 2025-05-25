@@ -117,7 +117,7 @@ func PageFile(f *filedb.Meta, u *userdb.User) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				var templ_7745c5c3_Var6 templ.SafeURL = helper.URLViewUser(u)
+				var templ_7745c5c3_Var6 templ.SafeURL = helper.URLUserView(u)
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var6)))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -144,7 +144,7 @@ func PageFile(f *filedb.Meta, u *userdb.User) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var8 templ.SafeURL = helper.URLEditFile(f)
+			var templ_7745c5c3_Var8 templ.SafeURL = helper.URLFileEdit(f)
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var8)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -167,7 +167,7 @@ func PageFile(f *filedb.Meta, u *userdb.User) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var9 string
-				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLProcessFile(f))
+				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(helper.URLFileProcess(f))
 				if templ_7745c5c3_Err != nil {
 					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/pages/file.templ`, Line: 38, Col: 42}
 				}

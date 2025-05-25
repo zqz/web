@@ -1,11 +1,8 @@
 package helper
 
 import (
-	"strconv"
-
 	"github.com/a-h/templ"
 	"github.com/zqz/web/backend/filedb"
-	"github.com/zqz/web/backend/userdb"
 )
 
 func StyleFileBG(f *filedb.Meta) templ.SafeCSS {
@@ -23,28 +20,4 @@ func TitleAdminFile(f *filedb.Meta) string {
 
 func TitleAdminEditFile(f *filedb.Meta) string {
 	return "a | edit file | " + f.Name
-}
-
-func URLEditFile(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/admin/files/" + f.Slug + "/edit")
-}
-
-func URLViewFile(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/files/" + f.Slug)
-}
-
-func URLFileData(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/api/file/by-hash/" + f.Hash)
-}
-
-func URLThumbnailData(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/api/file/by-slug/" + f.Slug + "/thumbnail")
-}
-
-func URLProcessFile(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/admin/files/" + f.Slug + "/process")
-}
-
-func URLViewUser(u *userdb.User) templ.SafeURL {
-	return templ.URL("/admin/users/" + strconv.Itoa(u.ID))
 }
