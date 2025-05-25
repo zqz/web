@@ -2,7 +2,6 @@ package admin
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/a-h/templ"
 	"github.com/davecgh/go-spew/spew"
@@ -36,16 +35,6 @@ func Router(users *userdb.DB, db *filedb.FileDB) *chi.Mux {
 		f, _ := db.FetchMetaWithSlug(slug)
 
 		PageEditFile(f).Render(r.Context(), w)
-	})
-
-	r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
-		f, _ := db.FetchMetaWithSlug(slug)
-
-		userId := strconv.Itoa(f.UserID)
-		u, _ := users.FindById(userId)
-
-		PageFile(f, u).Render(r.Context(), w)
 	})
 
 	r.Post("/files/{slug}/process", func(w http.ResponseWriter, r *http.Request) {

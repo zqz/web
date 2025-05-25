@@ -30,7 +30,7 @@ func URLEditFile(f *filedb.Meta) templ.SafeURL {
 }
 
 func URLViewFile(f *filedb.Meta) templ.SafeURL {
-	return templ.URL("/admin/files/" + f.Slug)
+	return templ.URL("/files/" + f.Slug)
 }
 
 func URLFileData(f *filedb.Meta) templ.SafeURL {

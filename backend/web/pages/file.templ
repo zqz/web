@@ -1,4 +1,4 @@
-package admin
+package pages
 
 import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/userdb"
@@ -16,21 +16,15 @@ templ ThumbnailPreview(f *filedb.Meta) {
 	}
 }
 
-templ FilePreview(f *filedb.Meta) {
-	if f.ContentType == "image/jpeg" {
-		<div>
-			<img src={ helper.URLFileData(f) }/>
-		</div>
-	}
-}
-
 templ PageFile(f *filedb.Meta, u *userdb.User) {
+	{{ u := helper.GetUserFromContext(ctx) }}
+	{{ isAdmin := helper.IsAdmin(u) }}
 	@layout.Main(helper.TitleAdminFile(f)) {
 		<div>
 			<div class="flex flex-row justify-between">
 				<div>
 					<b>File</b>: { f.Name }
-					if u != nil {
+					if isAdmin && u != nil {
 						| <a href={ helper.URLViewUser(u) }>{ u.Email } </a>
 					}
 				</div>
@@ -39,14 +33,16 @@ templ PageFile(f *filedb.Meta, u *userdb.User) {
 				</a>
 			</div>
 			<hr/>
-			<p>
-				<a hx-post={ helper.URLProcessFile(f) }>Process</a>
-			</p>
+			if isAdmin {
+				<p>
+					<a hx-post={ helper.URLProcessFile(f) }>Process</a>
+				</p>
+			}
 			@FilePreview(f)
-			@ThumbnailPreview(f)
+			if isAdmin {
+				@ThumbnailPreview(f)
+			}
 			<p>
-				Slug: { f.Slug }
-				<br/>
 				Hash: { f.Hash }
 				<br/>
 				Size: { humanize.Bytes(uint64(f.Size)) }
@@ -55,10 +51,14 @@ templ PageFile(f *filedb.Meta, u *userdb.User) {
 				<br/>
 				Age: { humanize.Time(f.Date) }
 				<br/>
-				Comment: { f.Comment }
-				<br/>
-				Private: { f.Private }
-				<br/>
+				if isAdmin {
+					Slug: { f.Slug }
+					<br/>
+					Comment: { f.Comment }
+					<br/>
+					Private: { f.Private }
+					<br/>
+				}
 			</p>
 		</div>
 	}

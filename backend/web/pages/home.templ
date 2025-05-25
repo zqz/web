@@ -5,20 +5,22 @@ import "github.com/zqz/web/backend/filedb"
 import "github.com/zqz/web/backend/web/helper"
 
 templ fileInfo(f *filedb.Meta) {
-	<div
-		class=" h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden
+	<a href={ helper.URLViewFile(f) }>
+		<div
+			class=" h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden
     bg-black p-2 text-green-900 text-white
     hover:outline-[6px] hover:outline-green-600"
-		onhover="hover(this);"
-		if len(f.Thumbnail)>0 {
-			style={ "background-position: center center; background-size: 120%",
+			onhover="hover(this);"
+			if len(f.Thumbnail)>0 {
+				style={ "background-position: center center; background-size: 120%",
 				helper.StyleFileBG(f) }
-		}
-	>
-		if len(f.Thumbnail) == 0 {
-			NO THUM
-		}
-	</div>
+			}
+		>
+			if len(f.Thumbnail) == 0 {
+				NO THUM
+			}
+		</div>
+	</a>
 }
 
 templ Home(files []*filedb.Meta) {
