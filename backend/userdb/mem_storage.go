@@ -19,7 +19,7 @@ func (s *MemoryStorage) Create(u *User) error {
 	return nil
 }
 
-func (s *MemoryStorage) FindById(id string) (*User, error) {
+func (s *MemoryStorage) FindById(id int) (*User, error) {
 	return nil, nil
 }
 

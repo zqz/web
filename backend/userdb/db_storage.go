@@ -21,7 +21,7 @@ func (s *DBStorage) Create(u *User) error {
 	return nil
 }
 
-func (s *DBStorage) FindById(id string) (*User, error) {
+func (s *DBStorage) FindById(id int) (*User, error) {
 	user, err := models.Users(qm.Where("id=?", id)).One(context.Background(), s.db)
 	if err != nil {
 		return nil, err

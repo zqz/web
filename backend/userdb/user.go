@@ -18,7 +18,7 @@ type DB struct {
 type persister interface {
 	Create(*User) error
 	FindByProviderId(string) (*User, error)
-	FindById(string) (*User, error)
+	FindById(int) (*User, error)
 	Update(int, User) (User, bool, error)
 	List() ([]*User, error)
 }
@@ -33,7 +33,7 @@ func (db DB) FindByProviderId(id string) (*User, error) {
 	return db.p.FindByProviderId(id)
 }
 
-func (db DB) FindById(id string) (*User, error) {
+func (db DB) FindById(id int) (*User, error) {
 	return db.p.FindById(id)
 }
 
