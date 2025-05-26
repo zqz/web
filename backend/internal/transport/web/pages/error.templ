@@ -1,0 +1,9 @@
+package pages
+
+templ PageError(err error) {
+	<div>
+		<b>Error</b>:
+		<br/>
+		<p>{ err.Error() }</p>
+	</div>
+}

@@ -8,9 +8,11 @@ package pages
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/zqz/web/backend/web/layout"
-import "github.com/zqz/web/backend/filedb"
-import "github.com/zqz/web/backend/web/helper"
+import (
+	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/web/helper"
+	"github.com/zqz/web/backend/web/layout"
+)
 
 func fileInfo(f *filedb.Meta) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -55,7 +57,7 @@ func fileInfo(f *filedb.Meta) templ.Component {
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("background-position: center center; background-size: 120%",
 				helper.StyleFileBG(f))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/pages/home.templ`, Line: 16, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/pages/home.templ`, Line: 18, Col: 25}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {

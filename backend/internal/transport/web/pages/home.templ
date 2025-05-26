@@ -1,8 +1,10 @@
 package pages
 
-import "github.com/zqz/web/backend/web/layout"
-import "github.com/zqz/web/backend/filedb"
-import "github.com/zqz/web/backend/web/helper"
+import (
+	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/web/helper"
+	"github.com/zqz/web/backend/web/layout"
+)
 
 templ fileInfo(f *filedb.Meta) {
 	<a href={ helper.URLFileView(f) }>
