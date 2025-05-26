@@ -6,3 +6,4 @@ upl
 config.json
 files
 .env
+node_modules
