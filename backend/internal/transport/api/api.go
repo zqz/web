@@ -10,20 +10,20 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi/v5"
-	"github.com/zqz/web/backend/filedb"
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/domain/user"
+	"github.com/zqz/web/backend/internal/transport/shared/helper"
 	"github.com/zqz/web/backend/render"
-	"github.com/zqz/web/backend/userdb"
-	"github.com/zqz/web/backend/web/helper"
 )
 
 // Server implements an HTTP File Uploading Server.
 type Server struct {
-	db  filedb.FileDB
-	udb userdb.DB
+	db  file.FileDB
+	udb user.DB
 }
 
 // NewServer returns a new Server.
-func NewServer(db filedb.FileDB, udb userdb.DB) Server {
+func NewServer(db file.FileDB, udb user.DB) Server {
 	return Server{
 		db:  db,
 		udb: udb,
@@ -31,7 +31,7 @@ func NewServer(db filedb.FileDB, udb userdb.DB) Server {
 }
 
 func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
-	var m *filedb.Meta
+	var m *file.Meta
 	var err error
 
 	u := helper.GetUserFromContext(r.Context())
@@ -146,13 +146,13 @@ func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, rr)
 }
 
-func (s Server) downloadThumbnail(meta *filedb.Meta, w http.ResponseWriter, r *http.Request) {
+func (s Server) downloadThumbnail(meta *file.Meta, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Content-Disposition", "inline; filename=thumb_"+meta.Name)
 	s.sendfile(meta.Thumbnail, w, r)
 }
 
-func (s Server) downloadFile(meta *filedb.Meta, w http.ResponseWriter, r *http.Request) {
+func (s Server) downloadFile(meta *file.Meta, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
 	s.sendfile(meta.Hash, w, r)
@@ -215,7 +215,7 @@ func (s Server) Router() http.Handler {
 	return r
 }
 
-func parseMeta(r io.ReadCloser) (*filedb.Meta, error) {
+func parseMeta(r io.ReadCloser) (*file.Meta, error) {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -223,7 +223,7 @@ func parseMeta(r io.ReadCloser) (*filedb.Meta, error) {
 
 	defer r.Close()
 
-	m := filedb.Meta{}
+	m := file.Meta{}
 	if err = json.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}

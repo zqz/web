@@ -1,0 +1,32 @@
+package admin
+
+import (
+	"github.com/dustin/go-humanize"
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/domain/user"
+	"github.com/zqz/web/backend/templates/layouts"
+)
+
+templ PageUser(u *user.User, db *file.FileDB) {
+	@layouts.Main("Admin | User") {
+		<div>
+			{{ files, _ := db.ListFilesByUserId(u.ID, 0) }}
+			<b>User</b>
+			<hr/>
+			<b>Email:</b>{ u.Email }
+			<br/>
+			<b>ID</b>: { u.ID }
+			<br/>
+			<b>Provider</b>: { u.Provider }
+			<br/>
+			<b>Provider ID</b>: { u.ProviderID }
+			<br/>
+			<b>Created</b>: { humanize.Time(u.CreatedAt) }
+		</div>
+		<div>
+			<b>Files - { len(files) }</b>
+			<hr/>
+			@FileList(files)
+		</div>
+	}
+}

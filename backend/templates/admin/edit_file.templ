@@ -1,0 +1,72 @@
+package admin
+
+import (
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/transport/shared/helper"
+	"github.com/zqz/web/backend/templates/layouts"
+)
+
+const input_base_style = "rounded-md border border-gray-800 bg-gray-800 px-2 py-1 text-gray-200"
+
+templ form_button(text string) {
+	<input
+		type="submit"
+		class={ input_base_style + " hover: border-r-gray-500" }
+	/>
+}
+
+templ form_text(label, name, value string) {
+	<div class="flex flex-col">
+		<label
+			for={ "form_" + name }
+			class="text-sm font-bold uppercase"
+		>{ label }</label>
+		<input
+			id={ "form_" + name }
+			name={ name }
+			class={ input_base_style + " focus:outline focus:outline-emerald-500" }
+			value={ value }
+		/>
+	</div>
+}
+
+templ PageEditFile(f *file.Meta) {
+	@layouts.Main(helper.TitleAdminEditFile(f)) {
+		<div>
+			<b>File | { f.Name } [{ f.ID }]</b>
+			<hr/>
+			{{ action := "/admin/files/" + f.Slug }}
+			<form action={ templ.URL(action) } method="post">
+				<div class="flex flex-col gap-2">
+					@form_text("Slug", "slug", f.Slug)
+					@form_text("Name", "name", f.Name)
+					<br/>
+					<b>Hash</b>:
+					{ f.Hash }
+					<br/>
+					<b>Size</b>:
+					{ f.Size }
+					<br/>
+					<b>Content Type:</b>:
+					{ f.ContentType }
+					<br/>
+					<b>Comment:</b>
+					<input name="comment" type="text" value={ f.Comment }/>
+					<br/>
+					<b>Private:</b>
+					<input
+						name="private"
+						type="checkbox"
+						if f.Private {
+							checked
+						}
+					/>
+					<br/>
+					<div>
+						@form_button("Submit")
+					</div>
+				</div>
+			</form>
+		</div>
+	}
+}

@@ -1,0 +1,15 @@
+package admin
+
+import "github.com/zqz/web/backend/templates/layouts"
+
+templ PageError(err error) {
+	@layouts.Main("error") {
+		<div>
+			<b>Error</b>:
+			<br/>
+			<p>
+				{ err.Error() }
+			</p>
+		</div>
+	}
+}

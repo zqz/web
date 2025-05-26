@@ -1,0 +1,43 @@
+package admin
+
+import (
+	"github.com/dustin/go-humanize"
+	"github.com/zqz/web/backend/internal/domain/user"
+	"github.com/zqz/web/backend/internal/transport/shared/helper"
+	"github.com/zqz/web/backend/templates/layouts"
+)
+
+templ PageUsers(users *user.DB) {
+	@layouts.Main("Admin - All Users") {
+		{{ users, err := users.List() }}
+		<div>
+			if err != nil {
+				<div>{ err.Error() }</div>
+			}
+		</div>
+		<table class="w-full table-fixed" border="1">
+			<thead>
+				<tr>
+					<th class="text-left w-[7%]">ID</th>
+					<th class="text-left w-full">Email</th>
+					<th class="text-left w-[20%]">Age</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, u := range users {
+					<tr>
+						<td>
+							{ u.ID }
+						</td>
+						<td>
+							<a href={ helper.URLUserView(u) }>{ u.Email } </a>
+						</td>
+						<td>
+							{ humanize.Time(u.CreatedAt) }
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+}

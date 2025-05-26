@@ -1,0 +1,66 @@
+package pages
+
+import (
+	"github.com/dustin/go-humanize"
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/domain/user"
+	"github.com/zqz/web/backend/internal/transport/shared/helper"
+	"github.com/zqz/web/backend/internal/transport/shared/icons"
+	"github.com/zqz/web/backend/templates/layouts"
+)
+
+templ ThumbnailPreview(f *file.Meta) {
+	if f.ContentType == "image/jpeg" {
+		<div>
+			<img src={ helper.URLThumbnailData(f) }/>
+		</div>
+	}
+}
+
+templ PageFile(f *file.Meta, u *user.User) {
+	{{ u := helper.GetUserFromContext(ctx) }}
+	{{ isAdmin := helper.IsAdmin(u) }}
+	@layouts.Main(helper.TitleAdminFile(f)) {
+		<div>
+			<div class="flex flex-row justify-between">
+				<div>
+					<b>File</b>: { f.Name }
+					if isAdmin && u != nil {
+						| <a href={ helper.URLUserView(u) }>{ u.Email } </a>
+					}
+				</div>
+				<a href={ helper.URLFileEdit(f) }>
+					@icons.Edit(15)
+				</a>
+			</div>
+			<hr/>
+			if isAdmin {
+				<p>
+					<a hx-post={ helper.URLFileProcess(f) }>Process</a>
+				</p>
+			}
+			@FilePreview(f)
+			if isAdmin {
+				@ThumbnailPreview(f)
+			}
+			<p>
+				Hash: { f.Hash }
+				<br/>
+				Size: { humanize.Bytes(uint64(f.Size)) }
+				<br/>
+				Content Type: { f.ContentType }
+				<br/>
+				Age: { humanize.Time(f.Date) }
+				<br/>
+				if isAdmin {
+					Slug: { f.Slug }
+					<br/>
+					Comment: { f.Comment }
+					<br/>
+					Private: { f.Private }
+					<br/>
+				}
+			</p>
+		</div>
+	}
+}

@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/zqz/web/backend/web"
+	"github.com/zqz/web/backend/internal/service"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 	env := os.Getenv("ZQZ_ENV")
 	log := logger(env)
 
-	s, err := web.Init(&log, env)
+	s, err := service.Init(&log, env)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start server")
 	}

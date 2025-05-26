@@ -1,0 +1,37 @@
+package pages
+
+import (
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/transport/shared/helper"
+	"slices"
+)
+
+templ imagePreview(f *file.Meta) {
+	<div>
+		<img src={ helper.URLFileData(f) }/>
+	</div>
+}
+
+templ noPreviewPossible() {
+	<div>No preview possible</div>
+}
+
+var supportedImages = []string{
+	"image/bmp",
+	"image/gif",
+	"image/jpeg",
+	"image/png",
+	"image/webp",
+}
+
+func isImage(f *file.Meta) bool {
+	return slices.Contains(supportedImages, f.ContentType)
+}
+
+templ FilePreview(f *file.Meta) {
+	if isImage(f) {
+		@imagePreview(f)
+	} else {
+		@noPreviewPossible()
+	}
+}
