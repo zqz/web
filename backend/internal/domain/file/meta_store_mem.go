@@ -1,4 +1,4 @@
-package filedb
+package file
 
 import (
 	"errors"
@@ -29,6 +29,10 @@ func NewMemoryMetaStorage() *MemoryMetaStorage {
 	return &MemoryMetaStorage{
 		entries: make(map[string]*Meta, 0),
 	}
+}
+
+func (m *MemoryMetaStorage) DeleteMetaById(id int) error {
+	return nil
 }
 
 func (m *MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
@@ -71,4 +75,24 @@ func nextId() int {
 	currentId++
 	idMutex.Unlock()
 	return currentId
+}
+
+func (m *MemoryMetaStorage) UpdateMeta(x *Meta) error {
+	return nil
+}
+
+func (m *MemoryMetaStorage) List(size int) ([]*Meta, error) {
+	return nil, nil
+}
+
+func (m *MemoryMetaStorage) ListFilesByUserId(size, offset int) ([]*Meta, error) {
+	return nil, nil
+}
+
+func (m *MemoryMetaStorage) RemoveThumbnails(x *Meta) error {
+	return nil
+}
+
+func (m *MemoryMetaStorage) StoreThumbnail(s string, sz int, x *Meta) error {
+	return nil
 }

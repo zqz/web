@@ -1,4 +1,4 @@
-package filedb
+package file
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/zqz/web/backend/models"
+	"github.com/zqz/web/backend/internal/models"
 )
 
 type DBMetaStorage struct {

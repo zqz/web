@@ -1,4 +1,4 @@
-package filedb
+package file
 
 import (
 	"bytes"
@@ -58,4 +58,8 @@ func (m MemoryPersistence) Get(hash string) (io.ReadCloser, error) {
 	buf := bytes.NewBuffer(data)
 
 	return nopReadCloser{buf}, nil
+}
+
+func (m MemoryPersistence) Path(hash string) string {
+	return hash
 }
