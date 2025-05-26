@@ -1,4 +1,4 @@
-package userdb
+package user
 
 type MemoryStorage struct {
 	userIdx int

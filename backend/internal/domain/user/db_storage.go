@@ -1,4 +1,4 @@
-package userdb
+package user
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"github.com/zqz/web/backend/models"
+	"github.com/zqz/web/backend/internal/models"
 )
 
 type DBStorage struct {

@@ -1,7 +1,7 @@
-package userdb
+package user
 
 import (
-	"github.com/zqz/web/backend/models"
+	"github.com/zqz/web/backend/internal/models"
 )
 
 type User struct {
