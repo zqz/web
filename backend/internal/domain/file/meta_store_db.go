@@ -40,7 +40,7 @@ func file2meta(f *models.File) Meta {
 }
 
 func meta2file(m *Meta) *models.File {
-	return &models.File{
+	f := models.File{
 		ID:          m.ID,
 		Name:        m.Name,
 		Alias:       m.Name,
@@ -50,8 +50,13 @@ func meta2file(m *Meta) *models.File {
 		ContentType: m.ContentType,
 		Private:     m.Private,
 		Comment:     m.Comment,
-		UserID:      null.IntFrom(m.UserID),
 	}
+
+	if m.UserID > 0 {
+		f.UserID = null.IntFrom(m.UserID)
+	}
+
+	return &f
 }
 
 const paginationSQL = `

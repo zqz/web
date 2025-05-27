@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -72,15 +73,17 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 		f.Comment = r.FormValue("comment")
 		f.Name = r.FormValue("name")
 		f.Slug = r.FormValue("slug")
+
+		fmt.Println("prv:", r.FormValue("private"))
 		f.Private = len(r.FormValue("private")) > 0
 
 		err := db.UpdateMeta(f)
 		if err == nil {
 			helper.AddFlash(w, r, "file was edited")
-			http.Redirect(w, r, "/admin/files/"+f.Slug, http.StatusFound)
+			http.Redirect(w, r, "/files/"+f.Slug, http.StatusFound)
 		} else {
-			helper.AddFlash(w, r, "failed to save")
-			http.Redirect(w, r, "/admin/files/"+f.Slug+"/edit", http.StatusFound)
+			helper.AddFlash(w, r, "failed to save "+err.Error())
+			http.Redirect(w, r, "/admin/files/"+f.Slug+"/edit", http.StatusTemporaryRedirect)
 		}
 	})
 

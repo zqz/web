@@ -29,6 +29,7 @@ templ form_checkbox(label, name, description string, value bool) {
 		<div class="flex gap-2 mt-2 items-center">
 			<input
 				id={ "form_" + name }
+				name={ name }
 				aria-describedby="helper-checkbox-text"
 				type="checkbox"
 				class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -61,8 +62,7 @@ templ form_textarea(label, name, value string) {
       border border-green-50 bg-green-800 px-2 py-1 text-green-50
       focus:outline-none focus:border-green-200 focus:border-dotted
       "
-			value={ value }
-		></textarea>
+		>{ value }</textarea>
 	</div>
 }
 
