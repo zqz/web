@@ -2,6 +2,7 @@ package service
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"github.com/zqz/web/backend/internal/transport/api"
 	"github.com/zqz/web/backend/internal/transport/shared/middleware"
 	"github.com/zqz/web/backend/internal/transport/web"
+	"github.com/zqz/web/backend/templates/pages"
 )
 
 type Server struct {
@@ -106,6 +108,9 @@ func (s Server) Run() error {
 	r := chi.NewRouter()
 	r.Use(middleware.Auth(&userDB))
 	r.Use(middleware.Logging(s.logger))
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		pages.PageError(errors.New("not found")).Render(r.Context(), w)
+	})
 
 	if s.config.isDevelopment() {
 		s.logger.Info().Msg("running in development mode")
