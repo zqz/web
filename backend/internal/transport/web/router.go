@@ -27,6 +27,7 @@ func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 
 	r.Get("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
 		existingUser, err := gothic.CompleteUserAuth(w, r)
+
 		if err != nil {
 			pages.PageError(err).Render(r.Context(), w)
 			return
@@ -98,7 +99,6 @@ func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 		}
 
 		u, err := users.FindById(f.UserID)
-
 		if err != nil {
 			pages.PageError(err).Render(r.Context(), w)
 			return
