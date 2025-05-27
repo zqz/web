@@ -7,7 +7,12 @@ import (
 )
 
 templ fileInfo(f *file.Meta) {
-	<a href={ helper.URLFileView(f) }>
+	<a
+		href={ helper.URLFileView(f) }
+		hx-get={ helper.URLFileView(f) }
+		hx-trigger="mouseenter"
+		hx-swap="none"
+	>
 		<div
 			class=" h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden
     bg-black p-2 text-green-900 text-white
