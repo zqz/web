@@ -18,8 +18,8 @@ templ ThumbnailPreview(f *file.Meta) {
 }
 
 templ PageFile(f *file.Meta, u *user.User) {
-	{{ u := helper.GetUserFromContext(ctx) }}
-	{{ isAdmin := helper.IsAdmin(u) }}
+	{{ currentUser := helper.GetUserFromContext(ctx) }}
+	{{ isAdmin := helper.IsAdmin(currentUser) }}
 	@layouts.Main(helper.TitleAdminFile(f)) {
 		<div>
 			<div class="flex flex-row justify-between">
