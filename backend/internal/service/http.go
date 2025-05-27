@@ -108,8 +108,12 @@ func (s Server) Run() error {
 	r := chi.NewRouter()
 	r.Use(middleware.Auth(&userDB))
 	r.Use(middleware.Logging(s.logger))
+
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		pages.PageError(errors.New("not found")).Render(r.Context(), w)
+	})
+	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		pages.PageError(errors.New("not allowed")).Render(r.Context(), w)
 	})
 
 	if s.config.isDevelopment() {

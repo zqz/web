@@ -1,18 +1,69 @@
 package admin
 
 import (
+	"github.com/dustin/go-humanize"
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/transport/shared/helper"
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-const input_base_style = "rounded-md border border-gray-800 bg-gray-800 px-2 py-1 text-gray-200"
-
-templ form_button(text string) {
+templ form_submit_button(text string) {
 	<input
 		type="submit"
-		class={ input_base_style + " hover: border-r-gray-500" }
+		class="border border-green-50 bg-green-50 text-green-900 px-2 py-1 
+    hover:bg-green-900 hover:text-green-50 hover:border-green-50 hover:border
+    active:bg-green-800 active:text-green-200 active:border-dotted
+    "
+		value={ text }
 	/>
+}
+
+templ form_checkbox(label, name, description string, value bool) {
+	<div class="flex flex-col">
+		<label
+			for={ "form_" + name }
+			class="text-sm font-bold uppercase"
+		>
+			{ label }
+		</label>
+		<div class="flex gap-2 mt-2 items-center">
+			<input
+				id={ "form_" + name }
+				aria-describedby="helper-checkbox-text"
+				type="checkbox"
+				class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+				if value {
+					checked
+				}
+			/>
+			<p id="helper-checkbox-text">
+				<label
+					for={ "form_" + name }
+					class="select-none"
+				>
+					{ description }
+				</label>
+			</p>
+		</div>
+	</div>
+}
+
+templ form_textarea(label, name, value string) {
+	<div class="flex flex-col">
+		<label
+			for={ "form_" + name }
+			class="text-sm font-bold uppercase"
+		>{ label }</label>
+		<textarea
+			id={ "form_" + name }
+			name={ name }
+			class="
+      border border-green-50 bg-green-800 px-2 py-1 text-green-50
+      focus:outline-none focus:border-green-200 focus:border-dotted
+      "
+			value={ value }
+		></textarea>
+	</div>
 }
 
 templ form_text(label, name, value string) {
@@ -24,9 +75,21 @@ templ form_text(label, name, value string) {
 		<input
 			id={ "form_" + name }
 			name={ name }
-			class={ input_base_style + " focus:outline focus:outline-emerald-500" }
+			class="
+      border border-green-50 bg-green-800 px-2 py-1 text-green-50
+      focus:outline-none focus:border-green-200 focus:border-dotted
+      "
 			value={ value }
 		/>
+	</div>
+}
+
+templ form_display_text(label, value string) {
+	<div class="flex flex-col">
+		<div
+			class="text-sm font-bold uppercase"
+		>{ label }</div>
+		<div>{ value }</div>
 	</div>
 }
 
@@ -40,30 +103,17 @@ templ PageEditFile(f *file.Meta) {
 				<div class="flex flex-col gap-2">
 					@form_text("Slug", "slug", f.Slug)
 					@form_text("Name", "name", f.Name)
-					<br/>
-					<b>Hash</b>:
-					{ f.Hash }
-					<br/>
-					<b>Size</b>:
-					{ f.Size }
-					<br/>
-					<b>Content Type:</b>:
-					{ f.ContentType }
-					<br/>
-					<b>Comment:</b>
-					<input name="comment" type="text" value={ f.Comment }/>
-					<br/>
-					<b>Private:</b>
-					<input
-						name="private"
-						type="checkbox"
-						if f.Private {
-							checked
-						}
-					/>
-					<br/>
+					@form_textarea("Comment", "comment", f.Comment)
+					@form_checkbox("Private", "private", "Show this on the public areas of the site?", f.Private)
+					<div class="m-10"></div>
+					<b>Unmodifiable attributes:</b>
+					<hr/>
+					@form_display_text("Hash", f.Hash)
+					@form_display_text("Size", humanize.Bytes(uint64(f.Size)))
+					@form_display_text("Content Type", f.ContentType)
+					<hr/>
 					<div>
-						@form_button("Submit")
+						@form_submit_button("Submit")
 					</div>
 				</div>
 			</form>
