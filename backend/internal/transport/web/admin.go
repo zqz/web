@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/a-h/templ"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi/v5"
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
@@ -40,18 +39,30 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 
 	r.Get("/files/{slug}/edit", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
-		f, _ := db.FetchMetaWithSlug(slug)
+		f, err := db.FetchMetaWithSlug(slug)
+		if err != nil {
+			pages.PageError(err).Render(r.Context(), w)
+			return
+		}
 
 		admin.PageEditFile(f).Render(r.Context(), w)
 	})
 
 	r.Post("/files/{slug}/process", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
-		f, _ := db.FetchMetaWithSlug(slug)
-		spew.Dump(f)
+		f, err := db.FetchMetaWithSlug(slug)
+		if err != nil {
+			w.Write([]byte("error: " + err.Error()))
+			return
+		}
 
-		w.Write([]byte("file was re-processed"))
-		db.Process(f)
+		err = db.Process(f)
+		if err != nil {
+			w.Write([]byte("error: " + err.Error()))
+			return
+		}
+
+		w.Write([]byte("success"))
 	})
 
 	r.Post("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +75,6 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 		f.Private = len(r.FormValue("private")) > 0
 
 		err := db.UpdateMeta(f)
-
 		if err == nil {
 			helper.AddFlash(w, r, "file was edited")
 			http.Redirect(w, r, "/admin/files/"+f.Slug, http.StatusFound)
