@@ -1,9 +1,15 @@
 package pages
 
+import "github.com/zqz/web/backend/templates/layouts"
+
 templ PageError(err error) {
-	<div>
-		<b>Error</b>:
-		<br/>
-		<p>{ err.Error() }</p>
-	</div>
+	@layouts.Main("error") {
+		<div>
+			<b>Error</b>:
+			<br/>
+			<p>
+				{ err.Error() }
+			</p>
+		</div>
+	}
 }
