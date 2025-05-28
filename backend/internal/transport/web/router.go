@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -92,6 +93,11 @@ func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
 		f, err := db.FetchMetaWithSlug(slug)
+
+		if f == nil {
+			w.WriteHeader(http.StatusNotFound)
+			pages.PageError(errors.New("not found")).Render(r.Context(), w)
+		}
 
 		if err != nil {
 			pages.PageError(err).Render(r.Context(), w)

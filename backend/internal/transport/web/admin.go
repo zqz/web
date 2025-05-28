@@ -1,11 +1,10 @@
 package web
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/a-h/templ"
 	"github.com/go-chi/chi/v5"
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
@@ -20,7 +19,9 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	r.Use(middleware.AdminOnly)
 	r.Use(middleware.Flash)
 
-	r.Get("/users", templ.Handler(admin.PageUsers(users)).ServeHTTP)
+	r.Get("/users", func(w http.ResponseWriter, r *http.Request) {
+		admin.PageUsers(users).Render(r.Context(), w)
+	})
 
 	r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
 		userIdStr := chi.URLParam(r, "id")
@@ -30,7 +31,21 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 			return
 		}
 
-		u, _ := users.FindById(userId)
+		u, err := users.FindById(userId)
+		if err != nil {
+			if u == nil {
+				w.WriteHeader(http.StatusNotFound)
+			}
+			pages.PageError(err).Render(r.Context(), w)
+			return
+		}
+
+		if u == nil {
+			w.WriteHeader(http.StatusNotFound)
+			pages.PageError(errors.New("user not found")).Render(r.Context(), w)
+			return
+		}
+
 		admin.PageUser(u, db).Render(r.Context(), w)
 	})
 
@@ -73,8 +88,6 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 		f.Comment = r.FormValue("comment")
 		f.Name = r.FormValue("name")
 		f.Slug = r.FormValue("slug")
-
-		fmt.Println("prv:", r.FormValue("private"))
 		f.Private = len(r.FormValue("private")) > 0
 
 		err := db.UpdateMeta(f)

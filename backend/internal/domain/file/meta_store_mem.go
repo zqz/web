@@ -3,6 +3,8 @@ package file
 import (
 	"errors"
 	"sync"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type MemoryMetaStorage struct {
@@ -60,6 +62,8 @@ func (s *MemoryMetaStorage) StoreMeta(m *Meta) error {
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
 
+	spew.Dump(s.entries)
+
 	if m.ID == 0 {
 		m.ID = nextId()
 	}
@@ -86,7 +90,12 @@ func (m *MemoryMetaStorage) List(size int) ([]*Meta, error) {
 }
 
 func (m *MemoryMetaStorage) ListFilesByUserId(size, offset int) ([]*Meta, error) {
-	return nil, nil
+	files := make([]*Meta, 0)
+	for _, f := range m.entries {
+		files = append(files, f)
+	}
+
+	return files, nil
 }
 
 func (m *MemoryMetaStorage) RemoveThumbnails(x *Meta) error {

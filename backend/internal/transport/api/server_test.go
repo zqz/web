@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"bytes"
@@ -9,24 +9,27 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/zqz/web/backend/internal/domain/file"
+	"github.com/zqz/web/backend/internal/domain/user"
+	"github.com/zqz/web/backend/internal/transport/api"
 )
 
 func testServer() *httptest.Server {
-	db := FileDB{
-		p: NewMemoryPersistence(),
-		m: NewMemoryMetaStorage(),
-	}
+	db := file.NewFileDB(
+		file.NewMemoryPersistence(),
+		file.NewMemoryMetaStorage(),
+	)
 
-	s := Server{
-		db: db,
-	}
+	udb := user.NewDB(nil)
+
+	s := api.NewServer(db, udb)
 
 	ts := httptest.NewServer(s.Router())
 
 	return ts
 }
 
-func toJSON(o interface{}) string {
+func toJSON(o any) string {
 	b, _ := json.Marshal(&o)
 
 	return string(b)
@@ -77,7 +80,7 @@ func TestPostMeta(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name: "foo",
 		Size: 5,
 		Hash: hash,
@@ -111,7 +114,7 @@ func TestGetMetaFound(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name: "foo",
 		Size: 5,
 		Hash: hash,
@@ -142,7 +145,7 @@ func TestPostFileTwice(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name: "foo",
 		Size: 5,
 		Hash: hash,
@@ -164,7 +167,7 @@ func TestPostFile(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name: "foo",
 		Size: 5,
 		Hash: hash,
@@ -201,7 +204,7 @@ func TestGetDataWithSlug(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name:        "foo",
 		Size:        5,
 		Hash:        hash,
@@ -230,7 +233,7 @@ func TestGetData(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name:        "foo",
 		Size:        5,
 		Hash:        hash,
@@ -254,7 +257,7 @@ func TestGetDataCachedInBrowser(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name:        "foo",
 		Size:        5,
 		Hash:        hash,
@@ -305,7 +308,7 @@ func TestGetFilesWithFiles(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
+	m := file.Meta{
 		Name:        "foo",
 		Size:        5,
 		Hash:        hash,
@@ -321,7 +324,7 @@ func TestGetFilesWithFiles(t *testing.T) {
 	b, _ := io.ReadAll(res.Body)
 	res.Body.Close()
 
-	var metas []Meta
+	var metas []file.Meta
 	json.Unmarshal(b, &metas)
 
 	assert.Equal(t, 1, len(metas))

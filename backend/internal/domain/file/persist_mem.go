@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"io"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type nopReadCloser struct {
@@ -49,6 +51,8 @@ func (m MemoryPersistence) Put(hash string) (io.WriteCloser, error) {
 
 func (m MemoryPersistence) Get(hash string) (io.ReadCloser, error) {
 	b, ok := m.entries[hash]
+
+	spew.Dump(m.entries)
 
 	if !ok {
 		return nil, errors.New("no file with hash: " + hash)

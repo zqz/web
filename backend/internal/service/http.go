@@ -28,30 +28,14 @@ type Server struct {
 	database *sql.DB
 	logger   *zerolog.Logger
 	env      string
+	UserDB   *user.DB
+	FileDB   *file.FileDB
+
+	Router *chi.Mux
 }
 
-func Init(logger *zerolog.Logger, env string) (Server, error) {
-	s := Server{
-		logger: logger,
-	}
-
-	s.logger.Info().Msg("initializing")
-	cfg, err := LoadConfig(env)
-	if err != nil {
-		return s, err
-	}
-	s.logger.Info().Msg("config loaded")
-
-	db, err := OpenDatabase(cfg.DatabaseURL)
-	if err != nil {
-		return s, err
-	}
-	s.logger.Info().Msg("connected to database")
-
-	s.database = db
-	s.config = cfg
-
-	return s, nil
+func NewServer(logger *zerolog.Logger, env string, fdb file.FileDB, udb *user.DB) (*Server, error) {
+	return nil, nil
 }
 
 func (s Server) Close() {
@@ -88,13 +72,33 @@ func (s Server) setupGoth() {
 	)
 }
 
-func (s Server) Run() error {
+func NewProdServer(logger *zerolog.Logger, env string) (Server, error) {
+	s := Server{
+		logger: logger,
+	}
+
+	s.logger.Info().Msg("initializing")
+	cfg, err := LoadConfig(env)
+	if err != nil {
+		return s, err
+	}
+	s.logger.Info().Msg("config loaded")
+
+	db, err := OpenDatabase(cfg.DatabaseURL)
+	if err != nil {
+		return s, err
+	}
+	s.logger.Info().Msg("connected to database")
+
+	s.database = db
+	s.config = cfg
+
 	userStorage := user.NewDBStorage(s.database)
 	userDB := user.NewDB(userStorage)
 
 	storage, err := file.NewDiskPersistence(s.config.FilesPath)
 	if err != nil {
-		return err
+		return s, err
 	}
 
 	fdb := file.NewFileDB(
@@ -103,16 +107,51 @@ func (s Server) Run() error {
 	)
 
 	fdb.AddProcessor(file.NewThumbnailProcessor(128))
-	apiServer := api.NewServer(fdb, userDB)
 
+	s.FileDB = &fdb
+	s.UserDB = &userDB
+
+	s.SetupRoutes()
+
+	return s, nil
+}
+
+func NewTestServer() Server {
+	userStorage := user.NewMemoryStorage()
+	userDB := user.NewDB(userStorage)
+
+	fileMetaStorage := file.NewMemoryMetaStorage()
+	fileFileStorage := file.NewMemoryPersistence()
+	fileDB := file.NewFileDB(
+		&fileFileStorage,
+		fileMetaStorage,
+	)
+
+	logger := zerolog.New(os.Stdout)
+	s := Server{
+		logger: &logger,
+		FileDB: &fileDB,
+		UserDB: &userDB,
+	}
+
+	s.SetupRoutes()
+	s.setupGoth()
+
+	return s
+}
+
+func (s *Server) SetupRoutes() {
 	r := chi.NewRouter()
-	r.Use(middleware.Auth(&userDB))
+	r.Use(middleware.Auth(s.UserDB))
 	r.Use(middleware.Logging(s.logger))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
 		pages.PageError(errors.New("not found")).Render(r.Context(), w)
 	})
+
 	r.MethodNotAllowed(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		pages.PageError(errors.New("not allowed")).Render(r.Context(), w)
 	})
 
@@ -130,12 +169,17 @@ func (s Server) Run() error {
 	}
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
+	apiServer := api.NewServer(*s.FileDB, *s.UserDB)
 	r.Mount("/api", apiServer.Router())
 
-	r.Mount("/", web.DefaultRoutes(&userDB, &fdb))
-	r.Mount("/admin", web.AdminRoutes(&userDB, &fdb))
+	r.Mount("/", web.DefaultRoutes(s.UserDB, s.FileDB))
+	r.Mount("/admin", web.AdminRoutes(s.UserDB, s.FileDB))
 
-	return s.run(r)
+	s.Router = r
+}
+
+func (s Server) Run() error {
+	return s.run(s.Router)
 }
 
 func (s Server) run(r http.Handler) error {

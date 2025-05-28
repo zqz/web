@@ -322,6 +322,7 @@ func (db FileDB) finish(m *Meta) error {
 	}
 
 	if h != m.Hash {
+		fmt.Println("got:", m.Hash, "expected", h)
 		return errors.New("hash does not match")
 	}
 

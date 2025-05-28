@@ -211,6 +211,10 @@ func (s *DBMetaStorage) fetchMetaFromDBWithHash(h string) (Meta, error) {
 
 func (s *DBMetaStorage) fetchMetaFromDBWithSlug(slug string) (Meta, error) {
 	f, err := models.Files(qm.Where("slug=?", slug)).One(s.ctx, s.db)
+	if f == nil {
+		return Meta{}, errors.New("failed to find meta")
+	}
+
 	m := file2meta(f)
 
 	t, err := f.Thumbnails().One(s.ctx, s.db)
