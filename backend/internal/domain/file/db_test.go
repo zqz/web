@@ -89,7 +89,7 @@ func TestStoreMeta(t *testing.T) {
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
 
-	testMeta, err := db.FetchMeta("foo")
+	testMeta, err := db.FetchByHash("foo")
 	m.ID = testMeta.ID // not sure what id would be in the test
 
 	assert.Equal(t, &m, testMeta)
@@ -116,42 +116,42 @@ func TestStoreMetaCantChangeSize(t *testing.T) {
 	assert.Equal(t, "can not change file size", err.Error())
 }
 
-func TestFetchMetaNoStorage(t *testing.T) {
+func TestFetchByHashNoStorage(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 	}
 
-	meta, err := db.FetchMeta("hash")
+	meta, err := db.FetchByHash("hash")
 
 	assert.Equal(t, "no storage specified", err.Error())
 	assert.Nil(t, meta)
 }
 
-func TestFetchMetaNoHash(t *testing.T) {
+func TestFetchByHashNoHash(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
-	meta, err := db.FetchMeta("")
+	meta, err := db.FetchByHash("")
 
 	assert.Equal(t, "no hash specified", err.Error())
 	assert.Nil(t, meta)
 }
 
-func TestFetchMetaNoMeta(t *testing.T) {
+func TestFetchByHashNoMeta(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 
-	meta, err := db.FetchMeta("foo")
+	meta, err := db.FetchByHash("foo")
 
 	assert.Equal(t, "file not found", err.Error())
 	assert.Nil(t, meta)
 }
 
-func TestFetchMeta(t *testing.T) {
+func TestFetchByHash(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -164,7 +164,7 @@ func TestFetchMeta(t *testing.T) {
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
 
-	meta, err := db.FetchMeta("foo")
+	meta, err := db.FetchByHash("foo")
 	assert.Nil(t, err)
 
 	assert.Equal(t, meta.Hash, m.Hash)

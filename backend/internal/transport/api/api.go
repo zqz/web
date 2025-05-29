@@ -40,7 +40,7 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if m2, err := s.db.FetchMeta(m.Hash); err == nil {
+	if m2, err := s.db.FetchByHash(m.Hash); err == nil {
 		JSON(w, m2)
 		return
 	}
@@ -61,7 +61,7 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	meta, err := s.db.FetchMeta(hash)
+	meta, err := s.db.FetchByHash(hash)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNoContent)
@@ -74,7 +74,7 @@ func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	meta, err := s.db.FetchMeta(hash)
+	meta, err := s.db.FetchByHash(hash)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -163,7 +163,7 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 	hash := chi.URLParam(r, "hash")
 
-	meta, err := s.db.FetchMeta(hash)
+	meta, err := s.db.FetchByHash(hash)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)

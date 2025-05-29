@@ -35,7 +35,7 @@ func (m *MemoryMetaStorage) DeleteById(id int) error {
 	return nil
 }
 
-func (m *MemoryMetaStorage) FetchMeta(hash string) (*File, error) {
+func (m *MemoryMetaStorage) FetchByHash(hash string) (*File, error) {
 	meta, ok := m.entries[hash]
 
 	if !ok {

@@ -286,7 +286,7 @@ func addFile(t *testing.T, s *service.Server, name string) *file.File {
 	assert.NoError(t, err)
 
 	// expect to be able to get the meta back
-	f2, err := s.FileDB.FetchMeta(hash)
+	f2, err := s.FileDB.FetchByHash(hash)
 	assert.NoError(t, err)
 
 	return f2

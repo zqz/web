@@ -17,7 +17,7 @@ type persister interface {
 type metaStorer interface {
 	DeleteById(int) error
 	FetchBySlug(string) (*File, error)
-	FetchMeta(string) (*File, error)
+	FetchByHash(string) (*File, error)
 	StoreMeta(*File) error
 	StoreThumbnail(string, int, *File) error
 	RemoveThumbnails(*File) error
@@ -103,7 +103,7 @@ func (db DB) Read(hash string, wc io.Writer) error {
 		return err
 	}
 
-	m, err := db.m.FetchMeta(hash)
+	m, err := db.m.FetchByHash(hash)
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (db DB) StoreMeta(meta File) error {
 
 	meta.BytesReceived = 0
 
-	m, _ := db.m.FetchMeta(meta.Hash)
+	m, _ := db.m.FetchByHash(meta.Hash)
 	if m != nil {
 		if meta.Size != m.Size {
 			return errors.New("can not change file size")
@@ -152,7 +152,7 @@ func (db DB) StoreMeta(meta File) error {
 	return db.m.StoreMeta(&meta)
 }
 
-func (db DB) FetchMeta(h string) (*File, error) {
+func (db DB) FetchByHash(h string) (*File, error) {
 	return db.fetch(h)
 }
 
@@ -169,7 +169,7 @@ func (db DB) fetch(hash string) (*File, error) {
 		return nil, errors.New("no hash specified")
 	}
 
-	return db.m.FetchMeta(hash)
+	return db.m.FetchByHash(hash)
 }
 
 func (db DB) FetchBySlug(slug string) (*File, error) {

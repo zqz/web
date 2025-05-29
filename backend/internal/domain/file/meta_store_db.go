@@ -205,7 +205,7 @@ func (s *DBMetaStorage) StoreThumbnail(h string, size int, m *File) error {
 	return nil
 }
 
-func (s *DBMetaStorage) FetchMeta(h string) (*File, error) {
+func (s *DBMetaStorage) FetchByHash(h string) (*File, error) {
 	m, ok := s.entries[h]
 
 	if ok {
