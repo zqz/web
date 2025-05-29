@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type persister interface {
@@ -155,11 +153,7 @@ func (db DB) StoreMeta(meta File) error {
 }
 
 func (db DB) FetchMeta(h string) (*File, error) {
-	fmt.Println("fetching by hash", h)
-	r, err := db.fetch(h)
-	spew.Dump(r)
-	fmt.Println("returning")
-	return r, err
+	return db.fetch(h)
 }
 
 func (db DB) UpdateMeta(m *File) error {
