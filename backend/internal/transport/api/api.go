@@ -17,12 +17,12 @@ import (
 
 // Server implements an HTTP File Uploading Server.
 type Server struct {
-	db  file.FileDB
+	db  file.DB
 	udb user.DB
 }
 
 // NewServer returns a new Server.
-func NewServer(db file.FileDB, udb user.DB) Server {
+func NewServer(db file.DB, udb user.DB) Server {
 	return Server{
 		db:  db,
 		udb: udb,

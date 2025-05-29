@@ -20,7 +20,7 @@ func NewThumbnailProcessor(size int) ThumbnailProcessor {
 	}
 }
 
-func (t ThumbnailProcessor) Process(db FileDB, m *File) error {
+func (t ThumbnailProcessor) Process(db DB, m *File) error {
 	fmt.Println("thumb process", t.size)
 	r, err := db.p.Get(m.Hash)
 	if err != nil {

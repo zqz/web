@@ -5,7 +5,7 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-templ PageFiles(db *file.FileDB) {
+templ PageFiles(db *file.DB) {
 	@layouts.Main("Admin | All Files") {
 		{{ files, _ := db.List(0) }}
 		@FileList(files)

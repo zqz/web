@@ -8,7 +8,7 @@ import (
 )
 
 func TestWriteNoPersistence(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -18,7 +18,7 @@ func TestWriteNoPersistence(t *testing.T) {
 }
 
 func TestReadNoPersistence(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		m: NewMemoryMetaStorage(),
 	}
 
@@ -27,7 +27,7 @@ func TestReadNoPersistence(t *testing.T) {
 }
 
 func TestStoreMetaNoStorage(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 	}
 	m := File{}
@@ -38,7 +38,7 @@ func TestStoreMetaNoStorage(t *testing.T) {
 }
 
 func TestStoreMetaNoHash(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -49,7 +49,7 @@ func TestStoreMetaNoHash(t *testing.T) {
 }
 
 func TestStoreMetaNoSize(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -62,7 +62,7 @@ func TestStoreMetaNoSize(t *testing.T) {
 }
 
 func TestStoreMetaNoName(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -76,7 +76,7 @@ func TestStoreMetaNoName(t *testing.T) {
 }
 
 func TestStoreMeta(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -96,7 +96,7 @@ func TestStoreMeta(t *testing.T) {
 }
 
 func TestStoreMetaCantChangeSize(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -117,7 +117,7 @@ func TestStoreMetaCantChangeSize(t *testing.T) {
 }
 
 func TestFetchMetaNoStorage(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 	}
 
@@ -128,7 +128,7 @@ func TestFetchMetaNoStorage(t *testing.T) {
 }
 
 func TestFetchMetaNoHash(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -140,7 +140,7 @@ func TestFetchMetaNoHash(t *testing.T) {
 }
 
 func TestFetchMetaNoMeta(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -152,7 +152,7 @@ func TestFetchMetaNoMeta(t *testing.T) {
 }
 
 func TestFetchMeta(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -174,7 +174,7 @@ func TestFetchMeta(t *testing.T) {
 }
 
 func TestWriteSuccess(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -201,7 +201,7 @@ func TestWriteSuccess(t *testing.T) {
 }
 
 func TestFetchMetaWithSlug(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -225,7 +225,7 @@ func TestFetchMetaWithSlug(t *testing.T) {
 }
 
 func TestReturnErrorOnBadHash(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -249,7 +249,7 @@ func TestReturnErrorOnBadHash(t *testing.T) {
 }
 
 func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -279,7 +279,7 @@ func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
 }
 
 func TestReadPartial(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -308,7 +308,7 @@ func TestReadPartial(t *testing.T) {
 }
 
 func TestFull(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -342,7 +342,7 @@ func TestFull(t *testing.T) {
 }
 
 func TestListPartial(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
@@ -367,7 +367,7 @@ func TestListPartial(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	db := FileDB{
+	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}

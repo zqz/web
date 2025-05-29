@@ -28,18 +28,18 @@ type metaStorer interface {
 	ListFilesByUserId(int, int) ([]*File, error)
 }
 
-// FileDB implements a upload server.
-type FileDB struct {
+// DB implements a upload server.
+type DB struct {
 	p  persister
 	m  metaStorer
 	px []processor
 }
 
-func (db *FileDB) ListFilesByUserId(uID, offset int) ([]*File, error) {
+func (db *DB) ListFilesByUserId(uID, offset int) ([]*File, error) {
 	return db.m.ListFilesByUserId(uID, offset)
 }
 
-func (db *FileDB) AddProcessor(p processor) {
+func (db *DB) AddProcessor(p processor) {
 	db.px = append(db.px, p)
 }
 
@@ -51,21 +51,21 @@ func (w writeCounter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-// NewFileDB returns an instance of a FileDB.
-func NewFileDB(p persister, m metaStorer) FileDB {
-	return FileDB{
+// NewDB returns an instance of a DB.
+func NewDB(p persister, m metaStorer) DB {
+	return DB{
 		m:  m,
 		p:  p,
 		px: make([]processor, 0),
 	}
 }
 
-func (db FileDB) Process(m *File) error {
+func (db DB) Process(m *File) error {
 	err := db.process(m)
 	return err
 }
 
-func (db FileDB) List(page int) ([]*File, error) {
+func (db DB) List(page int) ([]*File, error) {
 	metas, err := db.m.ListPage(page)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (db FileDB) List(page int) ([]*File, error) {
 	return metas, nil
 }
 
-func (db FileDB) Write(hash string, rc io.ReadCloser) (*File, error) {
+func (db DB) Write(hash string, rc io.ReadCloser) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (db FileDB) Write(hash string, rc io.ReadCloser) (*File, error) {
 	return m, nil
 }
 
-func (db FileDB) Read(hash string, wc io.Writer) error {
+func (db DB) Read(hash string, wc io.Writer) error {
 	if err := db.validate(); err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 	return err
 }
 
-func (db FileDB) StoreMeta(meta File) error {
+func (db DB) StoreMeta(meta File) error {
 	if err := db.validate(); err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (db FileDB) StoreMeta(meta File) error {
 	return db.m.StoreMeta(&meta)
 }
 
-func (db FileDB) FetchMeta(h string) (*File, error) {
+func (db DB) FetchMeta(h string) (*File, error) {
 	fmt.Println("fetching by hash", h)
 	r, err := db.fetch(h)
 	spew.Dump(r)
@@ -162,11 +162,11 @@ func (db FileDB) FetchMeta(h string) (*File, error) {
 	return r, err
 }
 
-func (db FileDB) UpdateMeta(m *File) error {
+func (db DB) UpdateMeta(m *File) error {
 	return db.m.UpdateMeta(m)
 }
 
-func (db FileDB) fetch(hash string) (*File, error) {
+func (db DB) fetch(hash string) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func (db FileDB) fetch(hash string) (*File, error) {
 	return db.m.FetchMeta(hash)
 }
 
-func (db FileDB) FetchMetaWithSlug(slug string) (*File, error) {
+func (db DB) FetchMetaWithSlug(slug string) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func (db FileDB) FetchMetaWithSlug(slug string) (*File, error) {
 	return db.m.FetchMetaWithSlug(slug)
 }
 
-func (db FileDB) DeleteMetaWithSlug(slug string) error {
+func (db DB) DeleteMetaWithSlug(slug string) error {
 	m, err := db.m.FetchMetaWithSlug(slug)
 	if err != nil {
 		fmt.Println("failed to fetch meta")
@@ -216,7 +216,7 @@ func (db FileDB) DeleteMetaWithSlug(slug string) error {
 	return db.m.DeleteMetaById(m.ID)
 }
 
-func (db FileDB) validate() error {
+func (db DB) validate() error {
 	if db.m == nil {
 		return errors.New("no storage specified")
 	}
@@ -244,11 +244,11 @@ func validateMeta(meta *File) error {
 	return nil
 }
 
-func (db FileDB) GetData(h string) (io.ReadCloser, error) {
+func (db DB) GetData(h string) (io.ReadCloser, error) {
 	return db.p.Get(h)
 }
 
-func (db FileDB) finish(m *File) error {
+func (db DB) finish(m *File) error {
 	w, err := db.p.Get(m.Hash)
 	if err != nil {
 		return err
@@ -280,7 +280,7 @@ func (db FileDB) finish(m *File) error {
 //	func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
 //		return 0, nil
 //	}
-func (db FileDB) process(m *File) error {
+func (db DB) process(m *File) error {
 	fmt.Println("processing")
 	for i, p := range db.px {
 		fmt.Println("processing", i)
@@ -292,11 +292,11 @@ func (db FileDB) process(m *File) error {
 	return nil
 }
 
-func (db FileDB) Path(s string) string {
+func (db DB) Path(s string) string {
 	return db.p.Path(s)
 }
 
-func (db FileDB) store(m *File, rc io.ReadCloser) error {
+func (db DB) store(m *File, rc io.ReadCloser) error {
 	fmt.Println("storing")
 	if m.Finished() {
 		return errors.New("file already uploaded")

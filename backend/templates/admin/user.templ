@@ -16,7 +16,7 @@ func fileSize(files []*file.File) string {
 	return humanize.Bytes(uint64(sum))
 }
 
-templ PageUser(u *user.User, db *file.FileDB) {
+templ PageUser(u *user.User, db *file.DB) {
 	@layouts.Main("Admin | User") {
 		<div>
 			{{ files, _ := db.ListFilesByUserId(u.ID, 0) }}

@@ -29,12 +29,12 @@ type Server struct {
 	logger   *zerolog.Logger
 	env      string
 	UserDB   *user.DB
-	FileDB   *file.FileDB
+	FileDB   *file.DB
 
 	Router *chi.Mux
 }
 
-func NewServer(logger *zerolog.Logger, env string, fdb file.FileDB, udb *user.DB) (*Server, error) {
+func NewServer(logger *zerolog.Logger, env string, fdb file.DB, udb *user.DB) (*Server, error) {
 	return nil, nil
 }
 
@@ -94,7 +94,7 @@ func NewProdServer(logger *zerolog.Logger, env string) (Server, error) {
 		return s, err
 	}
 
-	fdb := file.NewFileDB(
+	fdb := file.NewDB(
 		storage,
 		file.NewDBMetaStorage(s.database),
 	)
@@ -116,7 +116,7 @@ func NewTestServer() Server {
 
 	fileMetaStorage := file.NewMemoryMetaStorage()
 	fileFileStorage := file.NewMemoryPersistence()
-	fileDB := file.NewFileDB(
+	fileDB := file.NewDB(
 		&fileFileStorage,
 		fileMetaStorage,
 	)

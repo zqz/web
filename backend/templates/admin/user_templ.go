@@ -24,7 +24,7 @@ func fileSize(files []*file.File) string {
 	return humanize.Bytes(uint64(sum))
 }
 
-func PageUser(u *user.User, db *file.FileDB) templ.Component {
+func PageUser(u *user.User, db *file.DB) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

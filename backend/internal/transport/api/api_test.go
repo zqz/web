@@ -15,7 +15,7 @@ import (
 )
 
 func testServer() *httptest.Server {
-	db := file.NewFileDB(
+	db := file.NewDB(
 		file.NewMemoryPersistence(),
 		file.NewMemoryMetaStorage(),
 	)
