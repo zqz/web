@@ -14,6 +14,71 @@ import (
 	"github.com/zqz/web/backend/templates/pages"
 )
 
+func findFileBySlug(r *http.Request, files *file.FileDB) (*file.Meta, error) {
+	slug := chi.URLParam(r, "slug")
+	if len(slug) == 0 {
+		return nil, errors.New("blank slug")
+	}
+
+	f, err := files.FetchMetaWithSlug(slug)
+	if f == nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+func findFile(w http.ResponseWriter, r *http.Request, files *file.FileDB) (*file.Meta, bool) {
+	u, err := findFileBySlug(r, files)
+
+	if u == nil {
+		w.WriteHeader(http.StatusNotFound)
+		pages.PageError(errors.New("file not found")).Render(r.Context(), w)
+		return nil, false
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		pages.PageError(err).Render(r.Context(), w)
+		return nil, false
+	}
+
+	return u, true
+}
+
+func findUserById(r *http.Request, users *user.DB) (*user.User, error) {
+	userIdStr := chi.URLParam(r, "id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := users.FindById(userId)
+	if u == nil {
+		return nil, err
+	}
+
+	return u, nil
+}
+
+func findUser(w http.ResponseWriter, r *http.Request, users *user.DB) (*user.User, bool) {
+	u, err := findUserById(r, users)
+
+	if u == nil {
+		w.WriteHeader(http.StatusNotFound)
+		pages.PageError(errors.New("user not found")).Render(r.Context(), w)
+		return nil, false
+	}
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		pages.PageError(err).Render(r.Context(), w)
+		return nil, false
+	}
+
+	return u, true
+}
+
 func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.AdminOnly)
@@ -22,56 +87,17 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	r.Get("/users", func(w http.ResponseWriter, r *http.Request) {
 		admin.PageUsers(users).Render(r.Context(), w)
 	})
+
 	r.Get("/users/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
-		userIdStr := chi.URLParam(r, "id")
-		userId, err := strconv.Atoi(userIdStr)
-		if err != nil {
-			pages.PageError(err).Render(r.Context(), w)
-			return
+		if u, ok := findUser(w, r, users); ok {
+			admin.PageUser(u, db).Render(r.Context(), w)
 		}
-
-		u, err := users.FindById(userId)
-		if err != nil {
-			if u == nil {
-				w.WriteHeader(http.StatusNotFound)
-			}
-			pages.PageError(err).Render(r.Context(), w)
-			return
-		}
-
-		if u == nil {
-			w.WriteHeader(http.StatusNotFound)
-			pages.PageError(errors.New("user not found")).Render(r.Context(), w)
-			return
-		}
-
-		admin.PageUser(u, db).Render(r.Context(), w)
 	})
 
 	r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
-		userIdStr := chi.URLParam(r, "id")
-		userId, err := strconv.Atoi(userIdStr)
-		if err != nil {
-			pages.PageError(err).Render(r.Context(), w)
-			return
+		if u, ok := findUser(w, r, users); ok {
+			admin.PageUser(u, db).Render(r.Context(), w)
 		}
-
-		u, err := users.FindById(userId)
-		if err != nil {
-			if u == nil {
-				w.WriteHeader(http.StatusNotFound)
-			}
-			pages.PageError(err).Render(r.Context(), w)
-			return
-		}
-
-		if u == nil {
-			w.WriteHeader(http.StatusNotFound)
-			pages.PageError(errors.New("user not found")).Render(r.Context(), w)
-			return
-		}
-
-		admin.PageUser(u, db).Render(r.Context(), w)
 	})
 
 	r.Get("/files", func(w http.ResponseWriter, r *http.Request) {
@@ -79,70 +105,60 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	})
 
 	r.Get("/files/{slug}/edit", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
-		f, err := db.FetchMetaWithSlug(slug)
-		if err != nil {
-			pages.PageError(err).Render(r.Context(), w)
-			return
+		if f, ok := findFile(w, r, db); ok {
+			admin.PageEditFile(f).Render(r.Context(), w)
 		}
-
-		admin.PageEditFile(f).Render(r.Context(), w)
 	})
 
 	r.Post("/files/{slug}/process", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
-		f, err := db.FetchMetaWithSlug(slug)
-		if err != nil {
-			w.Write([]byte("error: " + err.Error()))
-			return
-		}
+		if f, ok := findFile(w, r, db); ok {
+			err := db.Process(f)
+			if err != nil {
+				w.Write([]byte("error: " + err.Error()))
+				return
+			}
 
-		err = db.Process(f)
-		if err != nil {
-			w.Write([]byte("error: " + err.Error()))
-			return
+			w.Write([]byte("success"))
 		}
-
-		w.Write([]byte("success"))
 	})
 
 	r.Post("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
-		f, _ := db.FetchMetaWithSlug(slug)
+		if f, ok := findFile(w, r, db); ok {
+			if comment := r.FormValue("comment"); len(comment) > 0 {
+				f.Comment = comment
+			}
+			if name := r.FormValue("name"); len(name) > 0 {
+				f.Name = name
+			}
+			if slug := r.FormValue("slug"); len(slug) > 0 {
+				f.Slug = slug
+			}
 
-		if comment := r.FormValue("comment"); len(comment) > 0 {
-			f.Comment = comment
-		}
-		if name := r.FormValue("name"); len(name) > 0 {
-			f.Name = name
-		}
-		if slug := r.FormValue("slug"); len(slug) > 0 {
-			f.Slug = slug
-		}
+			f.Private = len(r.FormValue("private")) > 0
 
-		f.Private = len(r.FormValue("private")) > 0
-
-		err := db.UpdateMeta(f)
-		if err == nil {
-			helper.AddFlash(w, r, "file was edited")
-			http.Redirect(w, r, "/files/"+f.Slug, http.StatusFound)
-		} else {
-			helper.AddFlash(w, r, "failed to save "+err.Error())
-			http.Redirect(w, r, "/admin/files/"+f.Slug+"/edit", http.StatusTemporaryRedirect)
+			err := db.UpdateMeta(f)
+			if err == nil {
+				helper.AddFlash(w, r, "file was edited")
+				http.Redirect(w, r, "/files/"+f.Slug, http.StatusFound)
+			} else {
+				helper.AddFlash(w, r, "failed to save "+err.Error())
+				http.Redirect(w, r, "/admin/files/"+f.Slug+"/edit", http.StatusTemporaryRedirect)
+			}
 		}
 	})
 
 	r.Delete("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
-		slug := chi.URLParam(r, "slug")
+		if f, ok := findFile(w, r, db); ok {
+			err := db.DeleteMetaWithSlug(f.Slug)
 
-		err := db.DeleteMetaWithSlug(slug)
-		if err != nil {
-			w.Write([]byte("failed to delete " + err.Error()))
-			return
+			if err != nil {
+				w.Write([]byte("failed to delete " + err.Error()))
+				return
+			}
+
+			helper.AddFlash(w, r, "file was deleted")
+			w.Write([]byte("Deleted"))
 		}
-
-		helper.AddFlash(w, r, "file was deleted")
-		w.Write([]byte("Deleted"))
 	})
 
 	return r

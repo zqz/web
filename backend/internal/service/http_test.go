@@ -40,16 +40,14 @@ func TestAuthenticatedAdminEndpoints(t *testing.T) {
 		{"GET", "admin users", "/admin/users", http.StatusOK},
 
 		{"GET", "admin user by id", "/admin/users/" + userId, http.StatusOK},
-		{"GET", "admin edit user by id", "/admin/users/" + userId + "/edit", http.StatusOK},
-
+		{"GET", "admin user edit by id", "/admin/users/" + userId + "/edit", http.StatusOK},
 		{"GET", "admin file by id", "/files/" + f.Slug, http.StatusOK},
-		{"GET", "admin edit file by id", "/admin/files/" + f.Slug + "/edit", http.StatusOK},
+		{"GET", "admin file edit by id", "/admin/files/" + f.Slug + "/edit", http.StatusOK},
 
-		{"GET", "admin user by id", "/admin/users/1231", http.StatusNotFound},
-		{"GET", "admin edit user by id", "/admin/users/1231/edit", http.StatusNotFound},
-
-		{"GET", "admin file by id", "/files/1231", http.StatusNotFound},
-		{"GET", "admin edit file by id", "/admin/files/1231/edit", http.StatusNotFound},
+		{"GET", "admin unk user by id", "/admin/users/1231", http.StatusNotFound},
+		{"GET", "admin unk user edit by id", "/admin/users/1231/edit", http.StatusNotFound},
+		{"GET", "admin unk file by id", "/files/1231", http.StatusNotFound},
+		{"GET", "admin unk file edit by id", "/admin/files/1231/edit", http.StatusNotFound},
 	}
 
 	for _, tt := range tests {
@@ -59,7 +57,6 @@ func TestAuthenticatedAdminEndpoints(t *testing.T) {
 
 			if response.Code != tt.status {
 				t.Errorf("Expected %d, got %d for %s", tt.status, response.Code, tt.path)
-
 				fmt.Println(string(response.Body.String()))
 			}
 		})
@@ -238,7 +235,7 @@ func addUser(t *testing.T, s *service.Server, name string) *user.User {
 	u.Name = "test"
 	u.Email = "test@site.com"
 	u.Provider = "goggle"
-	u.ProviderID = "123"
+	u.ProviderID = "xa1123"
 
 	err := s.UserDB.Create(&u)
 	assert.NoError(t, err)
