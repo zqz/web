@@ -262,7 +262,7 @@ func (s *DBMetaStorage) StoreMeta(m *File) error {
 	return nil
 }
 
-func (s *DBMetaStorage) DeleteMetaById(id int) error {
+func (s *DBMetaStorage) DeleteById(id int) error {
 	f, err := models.Files(qm.Where("id=?", id)).One(s.ctx, s.db)
 	if err != nil {
 		return err

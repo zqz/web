@@ -31,7 +31,7 @@ func NewMemoryMetaStorage() *MemoryMetaStorage {
 	}
 }
 
-func (m *MemoryMetaStorage) DeleteMetaById(id int) error {
+func (m *MemoryMetaStorage) DeleteById(id int) error {
 	return nil
 }
 

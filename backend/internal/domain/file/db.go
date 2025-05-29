@@ -15,7 +15,7 @@ type persister interface {
 }
 
 type metaStorer interface {
-	DeleteMetaById(int) error
+	DeleteById(int) error
 	FetchMetaWithSlug(string) (*File, error)
 	FetchMeta(string) (*File, error)
 	StoreMeta(*File) error
@@ -207,7 +207,7 @@ func (db DB) DeleteMetaWithSlug(slug string) error {
 		return err
 	}
 
-	return db.m.DeleteMetaById(m.ID)
+	return db.m.DeleteById(m.ID)
 }
 
 func (db DB) validate() error {
