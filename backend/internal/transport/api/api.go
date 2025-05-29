@@ -12,7 +12,6 @@ import (
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
 	"github.com/zqz/web/backend/internal/transport/shared/helper"
-	"github.com/zqz/web/backend/render"
 )
 
 // Server implements an HTTP File Uploading Server.
@@ -36,12 +35,12 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 	u := helper.GetUserFromContext(r.Context())
 
 	if m, err = parseMeta(r.Body); err != nil {
-		render.Error(w, "failed to read request")
+		Error(w, "failed to read request")
 		return
 	}
 
 	if m2, err := s.db.FetchMeta(m.Hash); err == nil {
-		render.JSON(w, m2)
+		JSON(w, m2)
 		return
 	}
 
@@ -51,11 +50,11 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 
 	if err = s.db.StoreMeta(*m); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 
-	render.JSON(w, m)
+	JSON(w, m)
 }
 
 func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
@@ -68,7 +67,7 @@ func (s Server) getMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render.JSON(w, meta)
+	JSON(w, meta)
 }
 
 func (s Server) postData(w http.ResponseWriter, r *http.Request) {
@@ -78,13 +77,13 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 
 	if meta.Finished() {
 		w.WriteHeader(http.StatusConflict)
-		render.Error(w, "file already uploaded")
+		Error(w, "file already uploaded")
 		return
 	}
 
@@ -92,11 +91,11 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 
-	render.JSON(w, meta)
+	JSON(w, meta)
 }
 
 func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
@@ -139,7 +138,7 @@ func (s Server) getThumbnailDataWithSlug(w http.ResponseWriter, r *http.Request)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 
@@ -153,7 +152,7 @@ func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 
@@ -167,7 +166,7 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
-		render.Error(w, err.Error())
+		Error(w, err.Error())
 		return
 	}
 

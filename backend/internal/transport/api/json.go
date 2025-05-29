@@ -1,4 +1,4 @@
-package render
+package api
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ type errorMessage struct {
 	Message string `json:"message"`
 }
 
-func JSON(w http.ResponseWriter, o interface{}) {
+func JSON(w http.ResponseWriter, o any) {
 	b, err := json.Marshal(o)
 
 	if err != nil {
