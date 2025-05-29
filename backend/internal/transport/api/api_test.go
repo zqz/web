@@ -15,16 +15,14 @@ import (
 )
 
 func testServer() *httptest.Server {
-	db := file.NewDB(
+	files := file.NewDB(
 		file.NewMemoryPersistence(),
 		file.NewMemoryMetaStorage(),
 	)
 
-	udb := user.NewDB(nil)
+	users := user.NewDB(nil)
 
-	s := api.NewServer(db, udb)
-
-	ts := httptest.NewServer(s.Router())
+	ts := httptest.NewServer(api.Routes(&users, &files))
 
 	return ts
 }

@@ -79,7 +79,7 @@ func findUser(w http.ResponseWriter, r *http.Request, users *user.DB) (*user.Use
 	return u, true
 }
 
-func AdminRoutes(users *user.DB, db *file.DB) *chi.Mux {
+func AdminRoutes(users *user.DB, db *file.DB) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.AdminOnly)
 	r.Use(middleware.Flash)

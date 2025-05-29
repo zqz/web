@@ -49,7 +49,7 @@ func loginAs(
 	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
 
-func DefaultRoutes(users *user.DB, db *file.DB) *chi.Mux {
+func DefaultRoutes(users *user.DB, db *file.DB) http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {

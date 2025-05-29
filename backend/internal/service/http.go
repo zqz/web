@@ -150,11 +150,10 @@ func (s *Server) SetupRoutes() {
 	})
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	apiServer := api.NewServer(*s.FileDB, *s.UserDB)
-	r.Mount("/api", apiServer.Router())
 
 	r.Mount("/", web.DefaultRoutes(s.UserDB, s.FileDB))
 	r.Mount("/admin", web.AdminRoutes(s.UserDB, s.FileDB))
+	r.Mount("/api", api.Routes(s.UserDB, s.FileDB))
 
 	s.Router = r
 }
