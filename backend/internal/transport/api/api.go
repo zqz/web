@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
@@ -98,11 +97,6 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, meta)
-}
-
-func queryParamInt(r *http.Request, key string) (int, error) {
-	v := r.URL.Query().Get(key)
-	return strconv.Atoi(v)
 }
 
 func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
