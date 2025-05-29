@@ -2,13 +2,17 @@ package service_test
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/markbates/goth/gothic"
 	"github.com/stretchr/testify/assert"
 	"github.com/zqz/web/backend/internal/domain/file"
@@ -17,6 +21,15 @@ import (
 )
 
 func TestAuthenticatedAdminEndpoints(t *testing.T) {
+
+	s := service.NewTestServer()
+	f := addFile(t, &s, "test")
+	u := addUser(t, &s, "test")
+
+	userId := strconv.Itoa(u.ID)
+
+	spew.Dump(u)
+
 	tests := []struct {
 		method string
 		name   string
@@ -25,13 +38,19 @@ func TestAuthenticatedAdminEndpoints(t *testing.T) {
 	}{
 		{"GET", "admin files", "/admin/files", http.StatusOK},
 		{"GET", "admin users", "/admin/users", http.StatusOK},
-		{"GET", "admin user by id", "/admin/users/1231", http.StatusNotFound},
-		{"GET", "admin file by id", "/files/1231", http.StatusNotFound},
-		{"GET", "admin edit user by id", "/admin/users/1231/edit", http.StatusNotFound},
-		{"GET", "admin edit file by id", "/files/1231/edit", http.StatusNotFound},
-	}
 
-	s := service.NewTestServer()
+		{"GET", "admin user by id", "/admin/users/" + userId, http.StatusOK},
+		{"GET", "admin edit user by id", "/admin/users/" + userId + "/edit", http.StatusOK},
+
+		{"GET", "admin file by id", "/files/" + f.Slug, http.StatusOK},
+		{"GET", "admin edit file by id", "/admin/files/" + f.Slug + "/edit", http.StatusOK},
+
+		{"GET", "admin user by id", "/admin/users/1231", http.StatusNotFound},
+		{"GET", "admin edit user by id", "/admin/users/1231/edit", http.StatusNotFound},
+
+		{"GET", "admin file by id", "/files/1231", http.StatusNotFound},
+		{"GET", "admin edit file by id", "/admin/files/1231/edit", http.StatusNotFound},
+	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -40,6 +59,8 @@ func TestAuthenticatedAdminEndpoints(t *testing.T) {
 
 			if response.Code != tt.status {
 				t.Errorf("Expected %d, got %d for %s", tt.status, response.Code, tt.path)
+
+				fmt.Println(string(response.Body.String()))
 			}
 		})
 	}
@@ -70,6 +91,78 @@ func TestUnauthenticatedAdminEndpoints(t *testing.T) {
 				t.Errorf("Expected %d, got %d for %s", http.StatusForbidden, response.Code, tt.path)
 			}
 		})
+	}
+}
+
+func TestAdminViewEditFile(t *testing.T) {
+	s := service.NewTestServer()
+	f := addFile(t, &s, "test")
+
+	req, _ := http.NewRequest("GET", "/admin/files/"+f.Slug+"/edit", nil)
+	response, _ := requestAsAdmin(t, req, &s)
+	checkResponseCode(t, http.StatusOK, response.Code)
+
+	doc, err := goquery.NewDocumentFromReader(response.Body)
+	assert.NoError(t, err)
+
+	name, exists := doc.Find(`input[id="form_name"]`).Attr("value")
+	if !exists {
+		t.Error("expected to find input with name on the page")
+	}
+
+	if name != f.Name {
+		t.Errorf("file name should be accessable, got: '%s', expected: '%s'", name, f.Name)
+	}
+}
+
+func TestAdminEditFileWorks(t *testing.T) {
+	s := service.NewTestServer()
+	f := addFile(t, &s, "test")
+
+	newFileName := "new-name"
+	newSlug := "new-slug"
+	newComment := "new-comment"
+	newPrivate := "true"
+
+	formData := url.Values{}
+	formData.Set("name", newFileName)
+	formData.Set("slug", newSlug)
+	formData.Set("comment", newComment)
+	formData.Set("private", newPrivate)
+
+	// Create request with form data
+	data := strings.NewReader(formData.Encode())
+	req, _ := http.NewRequest("POST", "/admin/files/"+f.Slug, data)
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	response, _ := requestAsAdmin(t, req, &s)
+	checkResponseCode(t, http.StatusFound, response.Code)
+
+	req, _ = http.NewRequest("GET", "/files/"+newSlug, nil)
+	response, _ = requestAsAdmin(t, req, &s)
+	checkResponseCode(t, http.StatusOK, response.Code)
+	doc, err := goquery.NewDocumentFromReader(response.Body)
+	assert.NoError(t, err)
+
+	name := doc.Find(`span[data-name]`).Text()
+	slug := doc.Find(`span[data-slug]`).Text()
+	comment := doc.Find(`span[data-comment]`).Text()
+	private := doc.Find(`span[data-private]`).Text()
+
+	if name != newFileName {
+		t.Errorf("file name should have been updated, got: '%s', expected: '%s'", name, newFileName)
+	}
+
+	if slug != newSlug {
+		t.Errorf("file slug should have been updated, got: '%s', expected: '%s'", slug, newSlug)
+	}
+
+	if comment != newComment {
+		t.Errorf("file comment should have been updated, got: '%s', expected: '%s'", comment, newComment)
+	}
+
+	if private != newPrivate {
+		t.Errorf("file private should have been updated, got: '%s', expected: '%s'", private, newPrivate)
 	}
 }
 
@@ -140,6 +233,19 @@ func TestGetFileDoesNotShowEditForNotAdmin(t *testing.T) {
 	}
 }
 
+func addUser(t *testing.T, s *service.Server, name string) *user.User {
+	u := user.User{}
+	u.Name = "test"
+	u.Email = "test@site.com"
+	u.Provider = "goggle"
+	u.ProviderID = "123"
+
+	err := s.UserDB.Create(&u)
+	assert.NoError(t, err)
+
+	return &u
+}
+
 func addFile(t *testing.T, s *service.Server, name string) *file.Meta {
 	content := "test"
 	hash := "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
@@ -172,7 +278,7 @@ func requestAsAdmin(t *testing.T, req *http.Request, s *service.Server) (*httpte
 	u.Name = "test"
 	u.Email = "qdylanj@gmail.com"
 	u.Provider = "goggle"
-	u.ProviderID = "123"
+	u.ProviderID = "321123"
 
 	return requestAsUser(t, req, s, &u)
 }
@@ -191,7 +297,7 @@ func requestAsUser(t *testing.T, req *http.Request, s *service.Server, u *user.U
 	err := s.UserDB.Create(u)
 	assert.NoError(t, err)
 
-	u2, err := s.UserDB.FindByProviderId("123")
+	u2, err := s.UserDB.FindByProviderId(u.ProviderID)
 	assert.NoError(t, err)
 
 	w := httptest.NewRecorder()

@@ -114,6 +114,7 @@ func (w whereHelperint) IN(slice []int) qm.QueryMod {
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
+
 func (w whereHelperint) NIN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
@@ -141,6 +142,7 @@ func (w whereHelperstring) IN(slice []string) qm.QueryMod {
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
+
 func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
@@ -154,18 +156,23 @@ type whereHelpernull_Time struct{ field string }
 func (w whereHelpernull_Time) EQ(x null.Time) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
+
 func (w whereHelpernull_Time) NEQ(x null.Time) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
+
 func (w whereHelpernull_Time) LT(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
+
 func (w whereHelpernull_Time) LTE(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
+
 func (w whereHelpernull_Time) GT(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
+
 func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
@@ -178,21 +185,27 @@ type whereHelpernull_Int struct{ field string }
 func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
+
 func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
+
 func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
+
 func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
+
 func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
+
 func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
+
 func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
@@ -200,6 +213,7 @@ func (w whereHelpernull_Int) IN(slice []int) qm.QueryMod {
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
+
 func (w whereHelpernull_Int) NIN(slice []int) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
@@ -326,28 +340,38 @@ var (
 	_ = qmhelper.Where
 )
 
-var fileAfterSelectMu sync.Mutex
-var fileAfterSelectHooks []FileHook
+var (
+	fileAfterSelectMu    sync.Mutex
+	fileAfterSelectHooks []FileHook
+)
 
-var fileBeforeInsertMu sync.Mutex
-var fileBeforeInsertHooks []FileHook
-var fileAfterInsertMu sync.Mutex
-var fileAfterInsertHooks []FileHook
+var (
+	fileBeforeInsertMu    sync.Mutex
+	fileBeforeInsertHooks []FileHook
+	fileAfterInsertMu     sync.Mutex
+	fileAfterInsertHooks  []FileHook
+)
 
-var fileBeforeUpdateMu sync.Mutex
-var fileBeforeUpdateHooks []FileHook
-var fileAfterUpdateMu sync.Mutex
-var fileAfterUpdateHooks []FileHook
+var (
+	fileBeforeUpdateMu    sync.Mutex
+	fileBeforeUpdateHooks []FileHook
+	fileAfterUpdateMu     sync.Mutex
+	fileAfterUpdateHooks  []FileHook
+)
 
-var fileBeforeDeleteMu sync.Mutex
-var fileBeforeDeleteHooks []FileHook
-var fileAfterDeleteMu sync.Mutex
-var fileAfterDeleteHooks []FileHook
+var (
+	fileBeforeDeleteMu    sync.Mutex
+	fileBeforeDeleteHooks []FileHook
+	fileAfterDeleteMu     sync.Mutex
+	fileAfterDeleteHooks  []FileHook
+)
 
-var fileBeforeUpsertMu sync.Mutex
-var fileBeforeUpsertHooks []FileHook
-var fileAfterUpsertMu sync.Mutex
-var fileAfterUpsertHooks []FileHook
+var (
+	fileBeforeUpsertMu    sync.Mutex
+	fileBeforeUpsertHooks []FileHook
+	fileAfterUpsertMu     sync.Mutex
+	fileAfterUpsertHooks  []FileHook
+)
 
 // doAfterSelectHooks executes all "after Select" hooks.
 func (o *File) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {

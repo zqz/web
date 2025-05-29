@@ -22,6 +22,31 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 	r.Get("/users", func(w http.ResponseWriter, r *http.Request) {
 		admin.PageUsers(users).Render(r.Context(), w)
 	})
+	r.Get("/users/{id}/edit", func(w http.ResponseWriter, r *http.Request) {
+		userIdStr := chi.URLParam(r, "id")
+		userId, err := strconv.Atoi(userIdStr)
+		if err != nil {
+			pages.PageError(err).Render(r.Context(), w)
+			return
+		}
+
+		u, err := users.FindById(userId)
+		if err != nil {
+			if u == nil {
+				w.WriteHeader(http.StatusNotFound)
+			}
+			pages.PageError(err).Render(r.Context(), w)
+			return
+		}
+
+		if u == nil {
+			w.WriteHeader(http.StatusNotFound)
+			pages.PageError(errors.New("user not found")).Render(r.Context(), w)
+			return
+		}
+
+		admin.PageUser(u, db).Render(r.Context(), w)
+	})
 
 	r.Get("/users/{id}", func(w http.ResponseWriter, r *http.Request) {
 		userIdStr := chi.URLParam(r, "id")
@@ -85,9 +110,16 @@ func AdminRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 		slug := chi.URLParam(r, "slug")
 		f, _ := db.FetchMetaWithSlug(slug)
 
-		f.Comment = r.FormValue("comment")
-		f.Name = r.FormValue("name")
-		f.Slug = r.FormValue("slug")
+		if comment := r.FormValue("comment"); len(comment) > 0 {
+			f.Comment = comment
+		}
+		if name := r.FormValue("name"); len(name) > 0 {
+			f.Name = name
+		}
+		if slug := r.FormValue("slug"); len(slug) > 0 {
+			f.Slug = slug
+		}
+
 		f.Private = len(r.FormValue("private")) > 0
 
 		err := db.UpdateMeta(f)

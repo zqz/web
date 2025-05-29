@@ -24,7 +24,7 @@ templ PageFile(f *file.Meta, u *user.User) {
 		<div>
 			<div class="flex flex-row justify-between">
 				<div>
-					<b>File</b>: { f.Name }
+					<b>File</b>: <span data-name>{ f.Name }</span>
 					if isAdmin && u != nil {
 						| <a href={ helper.URLUserView(u) }>{ u.Email } </a>
 					}
@@ -55,11 +55,11 @@ templ PageFile(f *file.Meta, u *user.User) {
 				Age: { humanize.Time(f.Date) }
 				<br/>
 				if isAdmin {
-					Slug: { f.Slug }
+					Slug: <span data-slug>{ f.Slug }</span>
 					<br/>
-					Comment: { f.Comment }
+					Comment: <span data-comment>{ f.Comment }</span>
 					<br/>
-					Private: { f.Private }
+					Private: <span data-private>{ f.Private }</span>
 					<br/>
 				}
 			</p>

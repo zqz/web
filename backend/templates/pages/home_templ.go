@@ -57,7 +57,7 @@ func fileInfo(f *file.Meta) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"mouseenter\" hx-swap=\"none\"><div class=\" h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden\n    bg-black p-2 text-green-900 text-white\n    hover:outline-[6px] hover:outline-green-600\" onhover=\"hover(this);\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" hx-trigger=\"mouseenter\" hx-swap=\"none\"><div class=\"h-[48px] w-[48px] max-w-[48px] grow cursor-pointer overflow-hidden bg-black p-2 text-white\n    hover:outline-[6px] hover:outline-green-600\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,10 +67,12 @@ func fileInfo(f *file.Meta) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues("background-position: center center; background-size: 120%",
-				helper.StyleFileBG(f))
+			templ_7745c5c3_Var4, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(
+				"background-position: center center; background-size: 120%",
+				helper.StyleFileBG(f),
+			)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/home.templ`, Line: 23, Col: 25}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/pages/home.templ`, Line: 23, Col: 4}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +144,7 @@ func Home(files []*file.Meta) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><!--<script type=\"module\"\n    src=\"http://localhost:5173/src/widget.ts\"></script>-->")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</div></div><!--<script type=\"module\" src=\"http://localhost:5173/src/widget.ts\"></script>-->")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

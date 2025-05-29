@@ -6,6 +6,7 @@ toolchain go1.23.9
 
 require (
 	github.com/HugoSmits86/nativewebp v1.2.0
+	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/a-h/templ v0.3.865
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc
@@ -17,7 +18,6 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
-	github.com/labstack/gommon v0.4.2
 	github.com/lib/pq v1.10.9
 	github.com/markbates/goth v1.81.0
 	github.com/rs/zerolog v1.34.0
@@ -31,7 +31,6 @@ require (
 
 require (
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
-	github.com/PuerkitoBio/goquery v1.10.3 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect

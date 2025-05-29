@@ -81,7 +81,11 @@ func nextId() int {
 	return currentId
 }
 
-func (m *MemoryMetaStorage) UpdateMeta(x *Meta) error {
+func (s *MemoryMetaStorage) UpdateMeta(m *Meta) error {
+	s.entriesMutex.Lock()
+	s.entries[m.Hash] = m
+	s.entriesMutex.Unlock()
+
 	return nil
 }
 
