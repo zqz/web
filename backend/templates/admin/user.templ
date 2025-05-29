@@ -13,6 +13,8 @@ templ PageUser(u *user.User, db *file.FileDB) {
 			{{ files, _ := db.ListFilesByUserId(u.ID, 0) }}
 			<b>User</b>
 			<hr/>
+			<b>Role</b>: { u.Role }
+			<br/>
 			<b>Email:</b>{ u.Email }
 			<br/>
 			<b>ID</b>: { u.ID }
