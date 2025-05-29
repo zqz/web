@@ -237,7 +237,7 @@ func (s *DBMetaStorage) FetchBySlug(slug string) (*File, error) {
 	return &m, nil
 }
 
-func (s *DBMetaStorage) UpdateMeta(m *File) error {
+func (s *DBMetaStorage) Update(m *File) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()

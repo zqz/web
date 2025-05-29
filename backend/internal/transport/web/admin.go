@@ -136,7 +136,7 @@ func AdminRoutes(users *user.DB, db *file.DB) *chi.Mux {
 
 			f.Private = len(r.FormValue("private")) > 0
 
-			err := db.UpdateMeta(f)
+			err := db.Update(f)
 			if err == nil {
 				helper.AddFlash(w, r, "file was edited")
 				http.Redirect(w, r, "/files/"+f.Slug, http.StatusFound)

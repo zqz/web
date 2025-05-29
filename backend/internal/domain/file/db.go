@@ -21,7 +21,7 @@ type metaStorer interface {
 	Create(*File) error
 	StoreThumbnail(string, int, *File) error
 	RemoveThumbnails(*File) error
-	UpdateMeta(*File) error
+	Update(*File) error
 	ListPage(int) ([]*File, error)
 	ListFilesByUserId(int, int) ([]*File, error)
 }
@@ -156,8 +156,8 @@ func (db DB) FetchByHash(h string) (*File, error) {
 	return db.fetch(h)
 }
 
-func (db DB) UpdateMeta(m *File) error {
-	return db.m.UpdateMeta(m)
+func (db DB) Update(m *File) error {
+	return db.m.Update(m)
 }
 
 func (db DB) fetch(hash string) (*File, error) {
