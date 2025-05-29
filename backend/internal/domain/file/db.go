@@ -16,7 +16,7 @@ type persister interface {
 
 type metaStorer interface {
 	DeleteById(int) error
-	FetchMetaWithSlug(string) (*File, error)
+	FetchBySlug(string) (*File, error)
 	FetchMeta(string) (*File, error)
 	StoreMeta(*File) error
 	StoreThumbnail(string, int, *File) error
@@ -172,7 +172,7 @@ func (db DB) fetch(hash string) (*File, error) {
 	return db.m.FetchMeta(hash)
 }
 
-func (db DB) FetchMetaWithSlug(slug string) (*File, error) {
+func (db DB) FetchBySlug(slug string) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -181,11 +181,11 @@ func (db DB) FetchMetaWithSlug(slug string) (*File, error) {
 		return nil, errors.New("no slug specified")
 	}
 
-	return db.m.FetchMetaWithSlug(slug)
+	return db.m.FetchBySlug(slug)
 }
 
 func (db DB) DeleteMetaWithSlug(slug string) error {
-	m, err := db.m.FetchMetaWithSlug(slug)
+	m, err := db.m.FetchBySlug(slug)
 	if err != nil {
 		fmt.Println("failed to fetch meta")
 		return err

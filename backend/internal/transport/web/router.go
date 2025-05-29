@@ -86,7 +86,7 @@ func DefaultRoutes(users *user.DB, db *file.DB) *chi.Mux {
 
 	r.Get("/files/{slug}/preview", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
-		f, err := db.FetchMetaWithSlug(slug)
+		f, err := db.FetchBySlug(slug)
 
 		if err != nil {
 			pages.PageError(err).Render(r.Context(), w)
@@ -98,7 +98,7 @@ func DefaultRoutes(users *user.DB, db *file.DB) *chi.Mux {
 
 	r.Get("/files/{slug}", func(w http.ResponseWriter, r *http.Request) {
 		slug := chi.URLParam(r, "slug")
-		f, err := db.FetchMetaWithSlug(slug)
+		f, err := db.FetchBySlug(slug)
 
 		if f == nil {
 			w.WriteHeader(http.StatusNotFound)

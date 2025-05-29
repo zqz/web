@@ -200,7 +200,7 @@ func TestWriteSuccess(t *testing.T) {
 	assert.Equal(t, hash, meta.Hash)
 }
 
-func TestFetchMetaWithSlug(t *testing.T) {
+func TestFetchBySlug(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -216,7 +216,7 @@ func TestFetchMetaWithSlug(t *testing.T) {
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
 
-	meta, err := db.FetchMetaWithSlug("doo")
+	meta, err := db.FetchBySlug("doo")
 
 	assert.Nil(t, err)
 	assert.Equal(t, 5, meta.Size)

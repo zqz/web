@@ -224,7 +224,7 @@ func (s *DBMetaStorage) FetchMeta(h string) (*File, error) {
 	return &m2, nil
 }
 
-func (s *DBMetaStorage) FetchMetaWithSlug(slug string) (*File, error) {
+func (s *DBMetaStorage) FetchBySlug(slug string) (*File, error) {
 	m, err := s.fetchMetaFromDBWithSlug(slug)
 	if err != nil {
 		return nil, errors.New("file not found")

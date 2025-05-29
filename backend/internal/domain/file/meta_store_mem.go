@@ -45,7 +45,7 @@ func (m *MemoryMetaStorage) FetchMeta(hash string) (*File, error) {
 	return meta, nil
 }
 
-func (m *MemoryMetaStorage) FetchMetaWithSlug(slug string) (*File, error) {
+func (m *MemoryMetaStorage) FetchBySlug(slug string) (*File, error) {
 	for _, e := range m.entries {
 		if e.Slug == slug {
 			return e, nil

@@ -20,7 +20,7 @@ func findFileBySlug(r *http.Request, files *file.DB) (*file.File, error) {
 		return nil, errors.New("blank slug")
 	}
 
-	f, err := files.FetchMetaWithSlug(slug)
+	f, err := files.FetchBySlug(slug)
 	if f == nil {
 		return nil, err
 	}

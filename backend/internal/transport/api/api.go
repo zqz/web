@@ -135,7 +135,7 @@ func (s Server) downloadFile(meta *file.File, w http.ResponseWriter, r *http.Req
 func (s Server) getThumbnailDataWithSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
-	meta, err := s.db.FetchMetaWithSlug(slug)
+	meta, err := s.db.FetchBySlug(slug)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
@@ -149,7 +149,7 @@ func (s Server) getThumbnailDataWithSlug(w http.ResponseWriter, r *http.Request)
 func (s Server) getDataWithSlug(w http.ResponseWriter, r *http.Request) {
 	slug := chi.URLParam(r, "slug")
 
-	meta, err := s.db.FetchMetaWithSlug(slug)
+	meta, err := s.db.FetchBySlug(slug)
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
