@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/markbates/goth/gothic"
 	"github.com/stretchr/testify/assert"
 	"github.com/zqz/web/backend/internal/domain/file"
@@ -20,15 +19,38 @@ import (
 	"github.com/zqz/web/backend/internal/service"
 )
 
-func TestAuthenticatedAdminEndpoints(t *testing.T) {
+func TestEdgecaseEndpoints(t *testing.T) {
+	s := service.NewTestServer()
 
+	tests := []struct {
+		method string
+		name   string
+		path   string
+		status int
+	}{
+		{"GET", "non existing route", "/foo/bar", http.StatusNotFound},
+		{"POST", "non existing method existing route", "/", http.StatusMethodNotAllowed},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req, _ := http.NewRequest(tt.method, tt.path, nil)
+			response, _ := requestAsAdmin(t, req, &s)
+
+			if response.Code != tt.status {
+				t.Errorf("Expected %d, got %d for %s", tt.status, response.Code, tt.path)
+				fmt.Println(string(response.Body.String()))
+			}
+		})
+	}
+}
+
+func TestAuthenticatedAdminEndpoints(t *testing.T) {
 	s := service.NewTestServer()
 	f := addFile(t, &s, "test")
 	u := addUser(t, &s, "test")
 
 	userId := strconv.Itoa(u.ID)
-
-	spew.Dump(u)
 
 	tests := []struct {
 		method string

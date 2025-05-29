@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/go-chi/chi/v5"
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
@@ -40,8 +39,6 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 		render.Error(w, "failed to read request")
 		return
 	}
-
-	spew.Dump(u)
 
 	if m2, err := s.db.FetchMeta(m.Hash); err == nil {
 		render.JSON(w, m2)
@@ -105,24 +102,6 @@ func (s Server) postData(w http.ResponseWriter, r *http.Request) {
 func queryParamInt(r *http.Request, key string) (int, error) {
 	v := r.URL.Query().Get(key)
 	return strconv.Atoi(v)
-}
-
-func (s Server) files(w http.ResponseWriter, r *http.Request) {
-	page, err := queryParamInt(r, "page")
-	if err != nil {
-		page = 0
-	}
-
-	m, err := s.db.List(page)
-
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		fmt.Println("err", err.Error())
-		render.Error(w, "error loading file list")
-		return
-	}
-
-	render.JSON(w, m)
 }
 
 func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
@@ -203,7 +182,6 @@ func (s Server) getData(w http.ResponseWriter, r *http.Request) {
 func (s Server) Router() http.Handler {
 	r := chi.NewRouter()
 
-	r.Get("/files", s.files)
 	r.Get("/file/by-hash/{hash}", s.getData)
 	r.Get("/file/by-slug/{slug}", s.getDataWithSlug)
 	r.Get("/file/by-slug/{slug}/thumbnail", s.getThumbnailDataWithSlug)

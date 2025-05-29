@@ -7,6 +7,15 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
+func fileSize(files []*file.Meta) string {
+	sum := 0
+	for _, f := range files {
+		sum += f.Size
+	}
+
+	return humanize.Bytes(uint64(sum))
+}
+
 templ PageUser(u *user.User, db *file.FileDB) {
 	@layouts.Main("Admin | User") {
 		<div>
@@ -26,7 +35,7 @@ templ PageUser(u *user.User, db *file.FileDB) {
 			<b>Created</b>: { humanize.Time(u.CreatedAt) }
 		</div>
 		<div>
-			<b>Files - { len(files) }</b>
+			<b>Files - { len(files) } ({ fileSize(files) }) </b>
 			<hr/>
 			@FileList(files)
 		</div>
