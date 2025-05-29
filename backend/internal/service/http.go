@@ -174,12 +174,8 @@ func (s *Server) SetupRoutes() {
 }
 
 func (s Server) Run() error {
-	return s.run(s.Router)
-}
-
-func (s Server) run(r http.Handler) error {
 	listenPort := fmt.Sprintf(":%d", s.config.Port)
 	s.logger.Info().Int("port", s.config.Port).Msg("listening for requests")
 
-	return http.ListenAndServe(listenPort, r)
+	return http.ListenAndServe(listenPort, s.Router)
 }
