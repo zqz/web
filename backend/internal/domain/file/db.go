@@ -273,13 +273,6 @@ func (db DB) finish(m *File) error {
 	return nil
 }
 
-//	type bufSeeker struct {
-//		*bytes.Buffer
-//	}
-//
-//	func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
-//		return 0, nil
-//	}
 func (db DB) process(m *File) error {
 	fmt.Println("processing")
 	for i, p := range db.px {
