@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/cors"
 	"github.com/gorilla/sessions"
 
 	"github.com/markbates/goth"
@@ -149,19 +148,6 @@ func (s *Server) SetupRoutes() {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		pages.PageError(errors.New("not allowed")).Render(r.Context(), w)
 	})
-
-	if s.config.isDevelopment() {
-		s.logger.Info().Msg("running in development mode")
-
-		r.Use(cors.New(cors.Options{
-			AllowedOrigins:   []string{"*"},
-			AllowedMethods:   []string{"POST", "GET", "PATCH", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300,
-		}).Handler)
-	}
 
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	apiServer := api.NewServer(*s.FileDB, *s.UserDB)
