@@ -43,15 +43,6 @@ func (s Server) Close() {
 	s.database.Close()
 }
 
-func (s Server) runInsecure(r http.Handler) error {
-	listenPort := fmt.Sprintf(":%d", s.config.Port)
-
-	s.logger.Info().Int("port", s.config.Port).Msg("listening for requests")
-	s.setupGoth()
-
-	return http.ListenAndServe(listenPort, r)
-}
-
 func (s Server) setupGoth() {
 	key := "xyz"         // Replace with your SESSION_SECRET or similar
 	maxAge := 86400 * 30 // 30 days
@@ -62,6 +53,8 @@ func (s Server) setupGoth() {
 	store.Options.Path = "/"
 	store.Options.HttpOnly = true // HttpOnly should always be enabled
 	store.Options.Secure = isProd
+	store.Options.SameSite = http.SameSiteDefaultMode
+
 	gothic.Store = store
 
 	goth.UseProviders(
@@ -113,6 +106,7 @@ func NewProdServer(logger *zerolog.Logger, env string) (Server, error) {
 	s.UserDB = &userDB
 
 	s.SetupRoutes()
+	s.setupGoth()
 
 	return s, nil
 }
@@ -184,5 +178,8 @@ func (s Server) Run() error {
 }
 
 func (s Server) run(r http.Handler) error {
-	return s.runInsecure(r)
+	listenPort := fmt.Sprintf(":%d", s.config.Port)
+	s.logger.Info().Int("port", s.config.Port).Msg("listening for requests")
+
+	return http.ListenAndServe(listenPort, r)
 }

@@ -6,52 +6,36 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
-	"github.com/zqz/web/backend/internal/transport/shared/helper"
 	"github.com/zqz/web/backend/templates/pages"
+
+	_ "github.com/markbates/goth/providers/google"
 )
 
-func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
-	r := chi.NewRouter()
+func loginAs(
+	w http.ResponseWriter, r *http.Request,
+	users *user.DB, au goth.User) {
 
-	r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {
-		u := helper.GetUser(r)
-		if u != nil {
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-			return
-		}
-		gothic.BeginAuthHandler(w, r)
-	})
+	providerId := au.UserID
 
-	r.Get("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
-		existingUser, err := gothic.CompleteUserAuth(w, r)
+	// check if user exists in DB
+	u, err := users.FindByProviderId(providerId)
+	if err != nil {
+		// db errors only, hopefully...
+		pages.PageError(err).Render(r.Context(), w)
+		return
+	}
 
-		if err != nil {
-			pages.PageError(err).Render(r.Context(), w)
-			return
-		}
-
-		providerId := existingUser.UserID
-
-		u, err := users.FindByProviderId(providerId)
-		if err != nil {
-			pages.PageError(err).Render(r.Context(), w)
-			return
-		}
-
-		if u != nil {
-			gothic.StoreInSession("user_id", strconv.Itoa(u.ID), r, w)
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-			return
-		}
-
+	// no user exists, create one.
+	if u == nil {
 		u = &user.User{}
-		u.Name = existingUser.Name
-		u.Email = existingUser.Email
-		u.Provider = "google"
+		u.Name = au.Name
+		u.Email = au.Email
+		u.Provider = "google" // for now only google is supported
 		u.ProviderID = providerId
 
 		err = users.Create(u)
@@ -59,8 +43,30 @@ func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 			pages.PageError(err).Render(r.Context(), w)
 			return
 		}
+	}
 
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+	gothic.StoreInSession("user_id", strconv.Itoa(u.ID), r, w)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+}
+
+func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
+	r := chi.NewRouter()
+
+	r.Get("/auth", func(w http.ResponseWriter, r *http.Request) {
+		if au, err := gothic.CompleteUserAuth(w, r); err == nil {
+			loginAs(w, r, users, au)
+		} else {
+			gothic.BeginAuthHandler(w, r)
+		}
+	})
+
+	r.Get("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
+		if au, err := gothic.CompleteUserAuth(w, r); err == nil {
+			loginAs(w, r, users, au)
+			return
+		}
+
+		pages.PageError(errors.New("failed to login")).Render(r.Context(), w)
 	})
 
 	r.Get("/logout", func(w http.ResponseWriter, r *http.Request) {

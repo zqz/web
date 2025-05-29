@@ -37,6 +37,10 @@ func (s *DBStorage) FindById(id int) (*User, error) {
 func (s *DBStorage) FindByProviderId(id string) (*User, error) {
 	user, err := models.Users(qm.Where("provider_id=?", id)).One(context.Background(), s.db)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 
