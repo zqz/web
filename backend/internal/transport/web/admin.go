@@ -14,7 +14,7 @@ import (
 	"github.com/zqz/web/backend/templates/pages"
 )
 
-func findFileBySlug(r *http.Request, files *file.FileDB) (*file.Meta, error) {
+func findFileBySlug(r *http.Request, files *file.FileDB) (*file.File, error) {
 	slug := chi.URLParam(r, "slug")
 	if len(slug) == 0 {
 		return nil, errors.New("blank slug")
@@ -28,7 +28,7 @@ func findFileBySlug(r *http.Request, files *file.FileDB) (*file.Meta, error) {
 	return f, nil
 }
 
-func findFile(w http.ResponseWriter, r *http.Request, files *file.FileDB) (*file.Meta, bool) {
+func findFile(w http.ResponseWriter, r *http.Request, files *file.FileDB) (*file.File, bool) {
 	u, err := findFileBySlug(r, files)
 
 	if u == nil {

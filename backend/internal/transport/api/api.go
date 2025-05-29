@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
+	"github.com/volatiletech/null/v8"
 	"github.com/zqz/web/backend/internal/domain/file"
 	"github.com/zqz/web/backend/internal/domain/user"
 	"github.com/zqz/web/backend/internal/transport/shared/helper"
@@ -29,7 +30,7 @@ func NewServer(db file.FileDB, udb user.DB) Server {
 }
 
 func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
-	var m *file.Meta
+	var m *file.File
 	var err error
 
 	u := helper.GetUserFromContext(r.Context())
@@ -45,7 +46,7 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if u != nil {
-		m.UserID = u.ID
+		m.UserID = null.IntFrom(u.ID)
 	}
 
 	if err = s.db.StoreMeta(*m); err != nil {
@@ -119,13 +120,13 @@ func (s Server) sendfile(hash string, w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, rr)
 }
 
-func (s Server) downloadThumbnail(meta *file.Meta, w http.ResponseWriter, r *http.Request) {
+func (s Server) downloadThumbnail(meta *file.File, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Content-Disposition", "inline; filename=thumb_"+meta.Name)
 	s.sendfile(meta.Thumbnail, w, r)
 }
 
-func (s Server) downloadFile(meta *file.Meta, w http.ResponseWriter, r *http.Request) {
+func (s Server) downloadFile(meta *file.File, w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", meta.ContentType)
 	w.Header().Set("Content-Disposition", "inline; filename="+meta.Name)
 	s.sendfile(meta.Hash, w, r)
@@ -196,7 +197,7 @@ func (s Server) Router() http.Handler {
 	return r
 }
 
-func parseMeta(r io.ReadCloser) (*file.Meta, error) {
+func parseMeta(r io.ReadCloser) (*file.File, error) {
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
@@ -204,7 +205,7 @@ func parseMeta(r io.ReadCloser) (*file.Meta, error) {
 
 	defer r.Close()
 
-	m := file.Meta{}
+	m := file.File{}
 	if err = json.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}

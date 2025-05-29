@@ -80,11 +80,10 @@ func TestPostMeta(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name: "foo",
-		Size: 5,
-		Hash: hash,
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
 
 	res := post(ts, "/meta", m)
 	assert.Equal(t, 200, res.StatusCode)
@@ -114,17 +113,27 @@ func TestGetMetaFound(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name: "foo",
-		Size: 5,
-		Hash: hash,
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
 
-	post(ts, "/meta", m)
-	res := get(ts, "/meta/by-hash/"+hash)
-
+	res := post(ts, "/meta", m)
 	assert.Equal(t, 200, res.StatusCode)
-	assert.Equal(t, toJSON(m), readBody(res))
+	body := readBody(res)
+
+	res = get(ts, "/meta/by-hash/"+hash)
+	assert.Equal(t, 200, res.StatusCode)
+
+	body = readBody(res)
+	rm := file.File{}
+	err := json.Unmarshal([]byte(body), &rm)
+
+	assert.NoError(t, err)
+
+	assert.Equal(t, rm.Name, m.Name)
+	assert.Equal(t, rm.Size, m.Size)
+	assert.Equal(t, rm.Hash, m.Hash)
 }
 
 func TestPostFileNoMeta(t *testing.T) {
@@ -145,11 +154,10 @@ func TestPostFileTwice(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name: "foo",
-		Size: 5,
-		Hash: hash,
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
 
 	post(ts, "/meta", m)
 
@@ -167,11 +175,10 @@ func TestPostFile(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name: "foo",
-		Size: 5,
-		Hash: hash,
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
 
 	post(ts, "/meta", m)
 
@@ -204,12 +211,11 @@ func TestGetDataWithSlug(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name:        "foo",
-		Size:        5,
-		Hash:        hash,
-		ContentType: "foo/bar",
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
+	m.ContentType = "foo/bar"
 
 	post(ts, "/meta", m)
 	postFile(ts, "/file/"+hash, "bytes")
@@ -232,13 +238,11 @@ func TestGetData(t *testing.T) {
 	defer ts.Close()
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
-
-	m := file.Meta{
-		Name:        "foo",
-		Size:        5,
-		Hash:        hash,
-		ContentType: "foo/bar",
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
+	m.ContentType = "foo/bar"
 
 	post(ts, "/meta", m)
 	postFile(ts, "/file/"+hash, "bytes")
@@ -257,12 +261,11 @@ func TestGetDataCachedInBrowser(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := file.Meta{
-		Name:        "foo",
-		Size:        5,
-		Hash:        hash,
-		ContentType: "foo/bar",
-	}
+	m := file.File{}
+	m.Name = "foo"
+	m.Size = 5
+	m.Hash = hash
+	m.ContentType = "foo/bar"
 
 	post(ts, "/meta", m)
 	postFile(ts, "/file/"+hash, "bytes")

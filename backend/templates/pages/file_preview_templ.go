@@ -14,7 +14,7 @@ import (
 	"slices"
 )
 
-func imagePreview(f *file.Meta) templ.Component {
+func imagePreview(f *file.File) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -93,11 +93,11 @@ var supportedImages = []string{
 	"image/webp",
 }
 
-func isImage(f *file.Meta) bool {
+func isImage(f *file.File) bool {
 	return slices.Contains(supportedImages, f.ContentType)
 }
 
-func FilePreview(f *file.Meta) templ.Component {
+func FilePreview(f *file.File) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

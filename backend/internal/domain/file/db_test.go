@@ -30,7 +30,7 @@ func TestStoreMetaNoStorage(t *testing.T) {
 	db := FileDB{
 		p: NewMemoryPersistence(),
 	}
-	m := Meta{}
+	m := File{}
 
 	err := db.StoreMeta(m)
 
@@ -42,7 +42,7 @@ func TestStoreMetaNoHash(t *testing.T) {
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
-	m := Meta{}
+	m := File{}
 
 	err := db.StoreMeta(m)
 	assert.Equal(t, "no hash specified", err.Error())
@@ -54,9 +54,8 @@ func TestStoreMetaNoSize(t *testing.T) {
 		m: NewMemoryMetaStorage(),
 	}
 
-	m := Meta{
-		Hash: "foo",
-	}
+	m := File{}
+	m.Hash = "foo"
 
 	err := db.StoreMeta(m)
 	assert.Equal(t, "no size specified", err.Error())
@@ -68,10 +67,9 @@ func TestStoreMetaNoName(t *testing.T) {
 		m: NewMemoryMetaStorage(),
 	}
 
-	m := Meta{
-		Hash: "foo",
-		Size: 123,
-	}
+	m := File{}
+	m.Hash = "foo"
+	m.Size = 123
 
 	err := db.StoreMeta(m)
 	assert.Equal(t, "no name specified", err.Error())
@@ -83,11 +81,10 @@ func TestStoreMeta(t *testing.T) {
 		m: NewMemoryMetaStorage(),
 	}
 
-	m := Meta{
-		Hash: "foo",
-		Size: 123,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = "foo"
+	m.Size = 123
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -104,11 +101,10 @@ func TestStoreMetaCantChangeSize(t *testing.T) {
 		m: NewMemoryMetaStorage(),
 	}
 
-	m := Meta{
-		Hash: "foo",
-		Size: 123,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = "foo"
+	m.Size = 123
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -161,12 +157,10 @@ func TestFetchMeta(t *testing.T) {
 		m: NewMemoryMetaStorage(),
 	}
 
-	m := Meta{
-		Hash: "foo",
-		Size: 123,
-		Name: "foobar",
-	}
-
+	m := File{}
+	m.Hash = "foo"
+	m.Size = 123
+	m.Name = "foobar"
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
 
@@ -187,11 +181,10 @@ func TestWriteSuccess(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -215,13 +208,11 @@ func TestFetchMetaWithSlug(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-		Slug: "doo",
-	}
-
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
+	m.Slug = "doo"
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
 
@@ -241,11 +232,10 @@ func TestReturnErrorOnBadHash(t *testing.T) {
 
 	hash := "badhash"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -266,11 +256,10 @@ func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -297,11 +286,10 @@ func TestReadPartial(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -327,11 +315,10 @@ func TestFull(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -362,11 +349,10 @@ func TestListPartial(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)
@@ -388,11 +374,10 @@ func TestList(t *testing.T) {
 
 	hash := "daf529a73101c2be626b99fc6938163e7a27620b"
 
-	m := Meta{
-		Hash: hash,
-		Size: 5,
-		Name: "foobar",
-	}
+	m := File{}
+	m.Hash = hash
+	m.Size = 5
+	m.Name = "foobar"
 
 	err := db.StoreMeta(m)
 	assert.Nil(t, err)

@@ -265,11 +265,11 @@ func addUser(t *testing.T, s *service.Server, name string) *user.User {
 	return &u
 }
 
-func addFile(t *testing.T, s *service.Server, name string) *file.Meta {
+func addFile(t *testing.T, s *service.Server, name string) *file.File {
 	content := "test"
 	hash := "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3"
 
-	f := file.Meta{}
+	f := file.File{}
 	f.ID = 123
 	f.Hash = hash
 	f.Name = name

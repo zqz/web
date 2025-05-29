@@ -14,7 +14,7 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-func fileInfo(f *file.Meta) templ.Component {
+func fileInfo(f *file.File) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -101,7 +101,7 @@ func fileInfo(f *file.Meta) templ.Component {
 	})
 }
 
-func Home(files []*file.Meta) templ.Component {
+func Home(files []*file.File) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {

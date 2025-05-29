@@ -1,11 +1,12 @@
 package file
 
 import (
-	"bytes"
 	"crypto/sha1"
 	"errors"
 	"fmt"
 	"io"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type persister interface {
@@ -17,14 +18,14 @@ type persister interface {
 
 type metaStorer interface {
 	DeleteMetaById(int) error
-	FetchMetaWithSlug(string) (*Meta, error)
-	FetchMeta(string) (*Meta, error)
-	StoreMeta(*Meta) error
-	StoreThumbnail(string, int, *Meta) error
-	RemoveThumbnails(*Meta) error
-	UpdateMeta(*Meta) error
-	ListPage(int) ([]*Meta, error)
-	ListFilesByUserId(int, int) ([]*Meta, error)
+	FetchMetaWithSlug(string) (*File, error)
+	FetchMeta(string) (*File, error)
+	StoreMeta(*File) error
+	StoreThumbnail(string, int, *File) error
+	RemoveThumbnails(*File) error
+	UpdateMeta(*File) error
+	ListPage(int) ([]*File, error)
+	ListFilesByUserId(int, int) ([]*File, error)
 }
 
 // FileDB implements a upload server.
@@ -34,7 +35,7 @@ type FileDB struct {
 	px []processor
 }
 
-func (db *FileDB) ListFilesByUserId(uID, offset int) ([]*Meta, error) {
+func (db *FileDB) ListFilesByUserId(uID, offset int) ([]*File, error) {
 	return db.m.ListFilesByUserId(uID, offset)
 }
 
@@ -59,12 +60,12 @@ func NewFileDB(p persister, m metaStorer) FileDB {
 	}
 }
 
-func (db FileDB) Process(m *Meta) error {
+func (db FileDB) Process(m *File) error {
 	err := db.process(m)
 	return err
 }
 
-func (db FileDB) List(page int) ([]*Meta, error) {
+func (db FileDB) List(page int) ([]*File, error) {
 	metas, err := db.m.ListPage(page)
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func (db FileDB) List(page int) ([]*Meta, error) {
 	return metas, nil
 }
 
-func (db FileDB) Write(hash string, rc io.ReadCloser) (*Meta, error) {
+func (db FileDB) Write(hash string, rc io.ReadCloser) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -124,7 +125,7 @@ func (db FileDB) Read(hash string, wc io.Writer) error {
 	return err
 }
 
-func (db FileDB) StoreMeta(meta Meta) error {
+func (db FileDB) StoreMeta(meta File) error {
 	if err := db.validate(); err != nil {
 		return err
 	}
@@ -153,15 +154,19 @@ func (db FileDB) StoreMeta(meta Meta) error {
 	return db.m.StoreMeta(&meta)
 }
 
-func (db FileDB) FetchMeta(h string) (*Meta, error) {
-	return db.fetch(h)
+func (db FileDB) FetchMeta(h string) (*File, error) {
+	fmt.Println("fetching by hash", h)
+	r, err := db.fetch(h)
+	spew.Dump(r)
+	fmt.Println("returning")
+	return r, err
 }
 
-func (db FileDB) UpdateMeta(m *Meta) error {
+func (db FileDB) UpdateMeta(m *File) error {
 	return db.m.UpdateMeta(m)
 }
 
-func (db FileDB) fetch(hash string) (*Meta, error) {
+func (db FileDB) fetch(hash string) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -173,7 +178,7 @@ func (db FileDB) fetch(hash string) (*Meta, error) {
 	return db.m.FetchMeta(hash)
 }
 
-func (db FileDB) FetchMetaWithSlug(slug string) (*Meta, error) {
+func (db FileDB) FetchMetaWithSlug(slug string) (*File, error) {
 	if err := db.validate(); err != nil {
 		return nil, err
 	}
@@ -223,7 +228,7 @@ func (db FileDB) validate() error {
 	return nil
 }
 
-func validateMeta(meta *Meta) error {
+func validateMeta(meta *File) error {
 	if meta.Hash == "" {
 		return errors.New("no hash specified")
 	}
@@ -243,7 +248,7 @@ func (db FileDB) GetData(h string) (io.ReadCloser, error) {
 	return db.p.Get(h)
 }
 
-func (db FileDB) finish(m *Meta) error {
+func (db FileDB) finish(m *File) error {
 	w, err := db.p.Get(m.Hash)
 	if err != nil {
 		return err
@@ -268,15 +273,14 @@ func (db FileDB) finish(m *Meta) error {
 	return nil
 }
 
-type bufSeeker struct {
-	*bytes.Buffer
-}
-
-func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
-	return 0, nil
-}
-
-func (db FileDB) process(m *Meta) error {
+//	type bufSeeker struct {
+//		*bytes.Buffer
+//	}
+//
+//	func (_ bufSeeker) Seek(offset int64, whence int) (int64, error) {
+//		return 0, nil
+//	}
+func (db FileDB) process(m *File) error {
 	fmt.Println("processing")
 	for i, p := range db.px {
 		fmt.Println("processing", i)
@@ -292,7 +296,8 @@ func (db FileDB) Path(s string) string {
 	return db.p.Path(s)
 }
 
-func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
+func (db FileDB) store(m *File, rc io.ReadCloser) error {
+	fmt.Println("storing")
 	if m.Finished() {
 		return errors.New("file already uploaded")
 	}
@@ -305,8 +310,13 @@ func (db FileDB) store(m *Meta, rc io.ReadCloser) error {
 	n, _ := io.Copy(writer, rc)
 	m.BytesReceived += int(n)
 
+	fmt.Println("after br", m.BytesReceived, m.Size)
 	if m.Finished() {
+		fmt.Println("setting slug")
 		m.Slug = randStr(5)
+	} else {
+
+		fmt.Println("NOT setting slug")
 	}
 
 	if err := db.m.StoreMeta(m); err != nil {

@@ -8,23 +8,23 @@ import (
 	"github.com/zqz/web/backend/internal/domain/user"
 )
 
-func URLFileEdit(f *file.Meta) templ.SafeURL {
+func URLFileEdit(f *file.File) templ.SafeURL {
 	return templ.URL("/admin/files/" + f.Slug + "/edit")
 }
 
-func URLFileView(f *file.Meta) templ.SafeURL {
+func URLFileView(f *file.File) templ.SafeURL {
 	return templ.URL("/files/" + f.Slug)
 }
 
-func URLFileData(f *file.Meta) templ.SafeURL {
+func URLFileData(f *file.File) templ.SafeURL {
 	return templ.URL("/api/file/by-hash/" + f.Hash)
 }
 
-func URLFileProcess(f *file.Meta) templ.SafeURL {
+func URLFileProcess(f *file.File) templ.SafeURL {
 	return templ.URL("/admin/files/" + f.Slug + "/process")
 }
 
-func URLThumbnailData(f *file.Meta) templ.SafeURL {
+func URLThumbnailData(f *file.File) templ.SafeURL {
 	return templ.URL("/api/file/by-slug/" + f.Slug + "/thumbnail")
 }
 

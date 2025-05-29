@@ -3,19 +3,17 @@ package file
 import (
 	"errors"
 	"sync"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 type MemoryMetaStorage struct {
-	entries      map[string]*Meta
+	entries      map[string]*File
 	entriesMutex sync.Mutex
 }
 
-func (m *MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
-	var metas []*Meta
+func (m *MemoryMetaStorage) ListPage(page int) ([]*File, error) {
+	var metas []*File
 
-	metas = make([]*Meta, 0, len(m.entries))
+	metas = make([]*File, 0, len(m.entries))
 
 	for _, m := range m.entries {
 		if !m.Finished() {
@@ -29,7 +27,7 @@ func (m *MemoryMetaStorage) ListPage(page int) ([]*Meta, error) {
 
 func NewMemoryMetaStorage() *MemoryMetaStorage {
 	return &MemoryMetaStorage{
-		entries: make(map[string]*Meta, 0),
+		entries: make(map[string]*File, 0),
 	}
 }
 
@@ -37,7 +35,7 @@ func (m *MemoryMetaStorage) DeleteMetaById(id int) error {
 	return nil
 }
 
-func (m *MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
+func (m *MemoryMetaStorage) FetchMeta(hash string) (*File, error) {
 	meta, ok := m.entries[hash]
 
 	if !ok {
@@ -47,7 +45,7 @@ func (m *MemoryMetaStorage) FetchMeta(hash string) (*Meta, error) {
 	return meta, nil
 }
 
-func (m *MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
+func (m *MemoryMetaStorage) FetchMetaWithSlug(slug string) (*File, error) {
 	for _, e := range m.entries {
 		if e.Slug == slug {
 			return e, nil
@@ -57,12 +55,10 @@ func (m *MemoryMetaStorage) FetchMetaWithSlug(slug string) (*Meta, error) {
 	return nil, errors.New("file not found")
 }
 
-func (s *MemoryMetaStorage) StoreMeta(m *Meta) error {
+func (s *MemoryMetaStorage) StoreMeta(m *File) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
-
-	spew.Dump(s.entries)
 
 	if m.ID == 0 {
 		m.ID = nextId()
@@ -81,7 +77,7 @@ func nextId() int {
 	return currentId
 }
 
-func (s *MemoryMetaStorage) UpdateMeta(m *Meta) error {
+func (s *MemoryMetaStorage) UpdateMeta(m *File) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
@@ -89,12 +85,12 @@ func (s *MemoryMetaStorage) UpdateMeta(m *Meta) error {
 	return nil
 }
 
-func (m *MemoryMetaStorage) List(size int) ([]*Meta, error) {
+func (m *MemoryMetaStorage) List(size int) ([]*File, error) {
 	return nil, nil
 }
 
-func (m *MemoryMetaStorage) ListFilesByUserId(size, offset int) ([]*Meta, error) {
-	files := make([]*Meta, 0)
+func (m *MemoryMetaStorage) ListFilesByUserId(size, offset int) ([]*File, error) {
+	files := make([]*File, 0)
 	for _, f := range m.entries {
 		files = append(files, f)
 	}
@@ -102,10 +98,10 @@ func (m *MemoryMetaStorage) ListFilesByUserId(size, offset int) ([]*Meta, error)
 	return files, nil
 }
 
-func (m *MemoryMetaStorage) RemoveThumbnails(x *Meta) error {
+func (m *MemoryMetaStorage) RemoveThumbnails(x *File) error {
 	return nil
 }
 
-func (m *MemoryMetaStorage) StoreThumbnail(s string, sz int, x *Meta) error {
+func (m *MemoryMetaStorage) StoreThumbnail(s string, sz int, x *File) error {
 	return nil
 }

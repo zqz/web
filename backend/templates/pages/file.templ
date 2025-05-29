@@ -9,7 +9,7 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-templ ThumbnailPreview(f *file.Meta) {
+templ ThumbnailPreview(f *file.File) {
 	if f.ContentType == "image/jpeg" {
 		<div>
 			<img src={ helper.URLThumbnailData(f) }/>
@@ -17,7 +17,7 @@ templ ThumbnailPreview(f *file.Meta) {
 	}
 }
 
-templ PageFile(f *file.Meta, u *user.User) {
+templ PageFile(f *file.File, u *user.User) {
 	{{ currentUser := helper.GetUserFromContext(ctx) }}
 	{{ isAdmin := helper.IsAdmin(currentUser) }}
 	@layouts.Main(helper.TitleAdminFile(f)) {
@@ -52,7 +52,7 @@ templ PageFile(f *file.Meta, u *user.User) {
 				<br/>
 				Content Type: { f.ContentType }
 				<br/>
-				Age: { humanize.Time(f.Date) }
+				Age: { humanize.Time(f.CreatedAt.Time) }
 				<br/>
 				if isAdmin {
 					Slug: <span data-slug>{ f.Slug }</span>

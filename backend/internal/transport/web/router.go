@@ -110,7 +110,7 @@ func DefaultRoutes(users *user.DB, db *file.FileDB) *chi.Mux {
 			return
 		}
 
-		u, err := users.FindById(f.UserID)
+		u, err := users.FindById(f.UserID.Int)
 		if err != nil {
 			pages.PageError(err).Render(r.Context(), w)
 			return

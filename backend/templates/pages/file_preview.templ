@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-templ imagePreview(f *file.Meta) {
+templ imagePreview(f *file.File) {
 	<div>
 		<img src={ helper.URLFileData(f) }/>
 	</div>
@@ -24,11 +24,11 @@ var supportedImages = []string{
 	"image/webp",
 }
 
-func isImage(f *file.Meta) bool {
+func isImage(f *file.File) bool {
 	return slices.Contains(supportedImages, f.ContentType)
 }
 
-templ FilePreview(f *file.Meta) {
+templ FilePreview(f *file.File) {
 	if isImage(f) {
 		@imagePreview(f)
 	} else {

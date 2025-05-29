@@ -93,7 +93,7 @@ templ form_display_text(label, value string) {
 	</div>
 }
 
-templ PageEditFile(f *file.Meta) {
+templ PageEditFile(f *file.File) {
 	@layouts.Main(helper.TitleAdminEditFile(f)) {
 		<div>
 			<b>File | { f.Name } [{ f.ID }]</b>

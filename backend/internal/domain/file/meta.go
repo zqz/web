@@ -1,6 +1,17 @@
 package file
 
-import "time"
+import (
+	"time"
+
+	"github.com/zqz/web/backend/internal/models"
+)
+
+type File struct {
+	models.File
+
+	BytesReceived int
+	Thumbnail     string `json:"thumbnail,omitempty"`
+}
 
 type Meta struct {
 	ID            int       `json:"-"`
@@ -20,6 +31,6 @@ type Meta struct {
 	Thumbnail string `json:"thumbnail,omitempty"`
 }
 
-func (m Meta) Finished() bool {
+func (m File) Finished() bool {
 	return m.Size == m.BytesReceived
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-func fileSize(files []*file.Meta) string {
+func fileSize(files []*file.File) string {
 	sum := 0
 	for _, f := range files {
 		sum += f.Size

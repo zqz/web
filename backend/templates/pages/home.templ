@@ -6,7 +6,7 @@ import (
 	"github.com/zqz/web/backend/templates/layouts"
 )
 
-templ fileInfo(f *file.Meta) {
+templ fileInfo(f *file.File) {
 	<a
 		href={ helper.URLFileView(f) }
 		hx-get={ helper.URLFileView(f) }
@@ -30,7 +30,7 @@ templ fileInfo(f *file.Meta) {
 	</a>
 }
 
-templ Home(files []*file.Meta) {
+templ Home(files []*file.File) {
 	@layouts.Main("zqz.ca") {
 		<div id="app"></div>
 		<div>
