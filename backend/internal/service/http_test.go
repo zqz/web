@@ -274,7 +274,7 @@ func addFile(t *testing.T, s *service.Server, name string) *file.File {
 	f.Hash = hash
 	f.Name = name
 	f.Size = len(content)
-	err := s.FileDB.StoreMeta(f)
+	err := s.FileDB.Create(f)
 	assert.NoError(t, err)
 
 	// expect to be able to write the data

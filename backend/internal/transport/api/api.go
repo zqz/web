@@ -49,7 +49,7 @@ func (s Server) postMeta(w http.ResponseWriter, r *http.Request) {
 		m.UserID = null.IntFrom(u.ID)
 	}
 
-	if err = s.db.StoreMeta(*m); err != nil {
+	if err = s.db.Create(*m); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		Error(w, err.Error())
 		return

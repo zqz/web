@@ -18,7 +18,7 @@ type metaStorer interface {
 	DeleteById(int) error
 	FetchBySlug(string) (*File, error)
 	FetchByHash(string) (*File, error)
-	StoreMeta(*File) error
+	Create(*File) error
 	StoreThumbnail(string, int, *File) error
 	RemoveThumbnails(*File) error
 	UpdateMeta(*File) error
@@ -123,7 +123,7 @@ func (db DB) Read(hash string, wc io.Writer) error {
 	return err
 }
 
-func (db DB) StoreMeta(meta File) error {
+func (db DB) Create(meta File) error {
 	if err := db.validate(); err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func (db DB) StoreMeta(meta File) error {
 		db.p.Del(meta.Hash)
 	}
 
-	return db.m.StoreMeta(&meta)
+	return db.m.Create(&meta)
 }
 
 func (db DB) FetchByHash(h string) (*File, error) {
@@ -306,7 +306,7 @@ func (db DB) store(m *File, rc io.ReadCloser) error {
 		fmt.Println("NOT setting slug")
 	}
 
-	if err := db.m.StoreMeta(m); err != nil {
+	if err := db.m.Create(m); err != nil {
 		return err
 	}
 

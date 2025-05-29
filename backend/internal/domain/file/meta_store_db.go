@@ -247,7 +247,7 @@ func (s *DBMetaStorage) UpdateMeta(m *File) error {
 	return err
 }
 
-func (s *DBMetaStorage) StoreMeta(m *File) error {
+func (s *DBMetaStorage) Create(m *File) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()

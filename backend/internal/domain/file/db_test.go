@@ -26,29 +26,29 @@ func TestReadNoPersistence(t *testing.T) {
 	assert.Equal(t, "no persistence specified", err.Error())
 }
 
-func TestStoreMetaNoStorage(t *testing.T) {
+func TestCreateNoStorage(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 	}
 	m := File{}
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 
 	assert.Equal(t, "no storage specified", err.Error())
 }
 
-func TestStoreMetaNoHash(t *testing.T) {
+func TestCreateNoHash(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
 	}
 	m := File{}
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Equal(t, "no hash specified", err.Error())
 }
 
-func TestStoreMetaNoSize(t *testing.T) {
+func TestCreateNoSize(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -57,11 +57,11 @@ func TestStoreMetaNoSize(t *testing.T) {
 	m := File{}
 	m.Hash = "foo"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Equal(t, "no size specified", err.Error())
 }
 
-func TestStoreMetaNoName(t *testing.T) {
+func TestCreateNoName(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -71,11 +71,11 @@ func TestStoreMetaNoName(t *testing.T) {
 	m.Hash = "foo"
 	m.Size = 123
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Equal(t, "no name specified", err.Error())
 }
 
-func TestStoreMeta(t *testing.T) {
+func TestCreate(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -86,7 +86,7 @@ func TestStoreMeta(t *testing.T) {
 	m.Size = 123
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	testMeta, err := db.FetchByHash("foo")
@@ -95,7 +95,7 @@ func TestStoreMeta(t *testing.T) {
 	assert.Equal(t, &m, testMeta)
 }
 
-func TestStoreMetaCantChangeSize(t *testing.T) {
+func TestCreateCantChangeSize(t *testing.T) {
 	db := DB{
 		p: NewMemoryPersistence(),
 		m: NewMemoryMetaStorage(),
@@ -106,12 +106,12 @@ func TestStoreMetaCantChangeSize(t *testing.T) {
 	m.Size = 123
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	m.Size = 321
 
-	err = db.StoreMeta(m)
+	err = db.Create(m)
 
 	assert.Equal(t, "can not change file size", err.Error())
 }
@@ -161,7 +161,7 @@ func TestFetchByHash(t *testing.T) {
 	m.Hash = "foo"
 	m.Size = 123
 	m.Name = "foobar"
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	meta, err := db.FetchByHash("foo")
@@ -186,7 +186,7 @@ func TestWriteSuccess(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "bytes"
@@ -213,7 +213,7 @@ func TestFetchBySlug(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 	m.Slug = "doo"
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	meta, err := db.FetchBySlug("doo")
@@ -237,7 +237,7 @@ func TestReturnErrorOnBadHash(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "bytes"
@@ -261,7 +261,7 @@ func TestCanNotWriteOnceReceivedAllData(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "bytes"
@@ -291,7 +291,7 @@ func TestReadPartial(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "byt"
@@ -320,7 +320,7 @@ func TestFull(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "bytes"
@@ -354,7 +354,7 @@ func TestListPartial(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "byt"
@@ -379,7 +379,7 @@ func TestList(t *testing.T) {
 	m.Size = 5
 	m.Name = "foobar"
 
-	err := db.StoreMeta(m)
+	err := db.Create(m)
 	assert.Nil(t, err)
 
 	str := "bytes"

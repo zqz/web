@@ -55,7 +55,7 @@ func (m *MemoryMetaStorage) FetchBySlug(slug string) (*File, error) {
 	return nil, errors.New("file not found")
 }
 
-func (s *MemoryMetaStorage) StoreMeta(m *File) error {
+func (s *MemoryMetaStorage) Create(m *File) error {
 	s.entriesMutex.Lock()
 	s.entries[m.Hash] = m
 	s.entriesMutex.Unlock()
