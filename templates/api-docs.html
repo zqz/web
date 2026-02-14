@@ -1,0 +1,53 @@
+{{define "content_api_docs"}}
+<div class="main">
+    <h3>{{t "api_docs.base_url"}}</h3>
+    <p><code>/api/v1</code></p>
+
+    <h3>{{t "api_docs.health"}}</h3>
+    <p><code>GET /health</code> — {{t "api_docs.returns_ok"}}</p>
+
+    <h3>{{t "api_docs.create_file"}}</h3>
+    <p><code>POST /api/v1/files</code></p>
+    <p><span class="file-meta">Content-Type:</span> application/json</p>
+    <pre>{
+  "name": "example.txt",
+  "hash": "sha1-hash",
+  "size": 1024,
+  "content_type": "text/plain",
+  "private": false,
+  "comment": ""
+}</pre>
+
+    <h3>{{t "api_docs.upload_file"}}</h3>
+    <p><code>POST /api/v1/meta/{hash}</code></p>
+    <p><span class="file-meta">Content-Type:</span> application/octet-stream</p>
+
+    <h3>{{t "api_docs.get_metadata"}}</h3>
+    <p><code>GET /api/v1/meta/{hash}</code></p>
+
+    <h3>{{t "api_docs.download"}}</h3>
+    <p><code>GET /api/v1/files/{slug}</code></p>
+
+    <h3>{{t "api_docs.list_files"}}</h3>
+    <p><code>GET /api/v1/files?limit=50&offset=0</code></p>
+
+    <h3>{{t "api_docs.delete_file"}}</h3>
+    <p><code>DELETE /api/v1/files/{slug}</code></p>
+
+    <h3>{{t "api_docs.auth"}}</h3>
+    <p><code>GET /auth/login</code> — Google OAuth</p>
+    <p><code>GET /auth/me</code> — current user JSON</p>
+    <p><code>GET /auth/logout</code> — logout</p>
+
+    <h3>{{t "api_docs.example"}}</h3>
+    <pre># Create metadata
+curl -X POST /api/v1/files -H "Content-Type: application/json" \\
+  -d '{"name":"f.txt","hash":"...","size":1024,"content_type":"text/plain"}'
+
+# Upload body
+curl -X POST /api/v1/meta/YOUR_HASH -H "Content-Type: application/octet-stream" --data-binary @f.txt
+
+# Download
+curl /api/v1/files/SLUG -o out.txt</pre>
+</div>
+{{end}}

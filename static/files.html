@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Files · zqz.ca</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fafaf9;
+            --text: #1c1917;
+            --text-muted: #78716c;
+            --border: #e7e5e4;
+            --accent: #1c1917;
+            --accent-hover: #44403c;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg);
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 42rem;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+
+        header {
+            margin-bottom: 2.5rem;
+        }
+
+        .site-title {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin: 0 0 1rem 0;
+            letter-spacing: -0.02em;
+        }
+
+        nav {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        nav a:hover {
+            color: var(--accent-hover);
+        }
+
+        nav span {
+            margin: 0 0.35em;
+            color: var(--border);
+        }
+
+        h2 {
+            font-family: 'Instrument Serif', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin: 0 0 1.25rem 0;
+            color: var(--text-muted);
+        }
+
+        .list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list li {
+            padding: 0.65rem 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.5rem 1rem;
+        }
+
+        .list li:last-child {
+            border-bottom: none;
+        }
+
+        .file-name {
+            font-weight: 500;
+            min-width: 0;
+        }
+
+        .file-name a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .file-name a:hover {
+            text-decoration: underline;
+        }
+
+        .file-meta {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .file-actions {
+            font-size: 0.8125rem;
+            margin-left: auto;
+        }
+
+        .file-actions a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+
+        .file-actions a:hover {
+            color: var(--text);
+        }
+
+        .file-comment-icon {
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.25rem;
+            color: var(--text-muted);
+            cursor: help;
+            vertical-align: middle;
+        }
+
+        .file-comment-icon:hover {
+            color: var(--text);
+        }
+
+        .file-comment-tooltip {
+            position: fixed;
+            z-index: 1000;
+            max-width: 20rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.8125rem;
+            line-height: 1.4;
+            color: var(--text);
+            background: var(--border);
+            border: 1px solid var(--text-muted);
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            white-space: pre-wrap;
+            word-break: break-word;
+            pointer-events: none;
+            display: none;
+        }
+
+        .file-comment-tooltip.is-visible {
+            display: block;
+        }
+
+        .file-actions a + a {
+            margin-left: 0.75rem;
+        }
+
+        .file-actions a.danger:hover {
+            color: #b91c1c;
+        }
+
+        .file-actions .file-copy-link {
+            margin-left: 0.75rem;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font: inherit;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        .file-actions .file-copy-link:hover {
+            color: var(--text);
+        }
+
+        .file-actions .file-copy-link.copied {
+            color: #15803d;
+        }
+
+        .badge {
+            font-size: 0.6875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .badge--public { color: #15803d; }
+        .badge--private { color: #b91c1c; }
+
+        #fileListLoading {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            padding: 1rem 0;
+        }
+
+        #emptyState {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            padding: 2rem 0;
+        }
+
+        #emptyState a {
+            color: var(--text);
+            text-decoration: underline;
+        }
+
+        #emptyState a:hover {
+            color: var(--accent-hover);
+        }
+
+        .load-more {
+            margin-top: 1.5rem;
+        }
+
+        .load-more button {
+            font: inherit;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            background: none;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .load-more button:hover {
+            color: var(--text);
+            border-color: var(--text-muted);
+        }
+
+        #authStatus {
+            color: var(--text-muted);
+        }
+
+        #authStatus a {
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        #authStatus a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header>
+            <h1 class="site-title">zqz.ca</h1>
+            <nav>
+                <a href="/">Upload</a><span>·</span>
+                <a href="/files">Files</a><span>·</span>
+                <span id="navUsersWrap" style="display: none;"><a href="/users">Users</a><span>·</span></span>
+                <a href="/api-docs">API</a>
+                <span id="authStatus">Loading…</span>
+            </nav>
+        </header>
+
+        <h2>Files</h2>
+
+        <div id="fileListLoading">
+            Loading…
+        </div>
+
+        <ul id="fileList" class="list" style="display: none;"></ul>
+
+        <div id="emptyState" style="display: none;">
+            No files yet. <a href="/">Upload your first file</a>.
+        </div>
+
+        <p class="load-more">
+            <button id="loadMoreBtn" onclick="loadMoreFiles()" style="display: none;">Load more</button>
+        </p>
+    </div>
+
+    <div id="commentTooltip" class="file-comment-tooltip" role="tooltip" aria-hidden="true"></div>
+
+    <script>
+        let allFiles = [];
+        let currentOffset = 0;
+        const pageSize = 20;
+        let currentUser = null;
+
+        async function loadFiles(append = false) {
+            const fileListLoading = document.getElementById('fileListLoading');
+            const fileList = document.getElementById('fileList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!append) {
+                currentOffset = 0;
+                fileListLoading.style.display = 'block';
+                fileList.style.display = 'none';
+                emptyState.style.display = 'none';
+            }
+
+            try {
+                const response = await fetch(`/api/v1/files?limit=${pageSize}&offset=${currentOffset}`);
+                if (!response.ok) throw new Error('Failed to load files');
+                const files = await response.json();
+
+                if (!append) allFiles = files;
+                else allFiles = allFiles.concat(files);
+
+                renderFiles();
+                fileListLoading.style.display = 'none';
+
+                if (allFiles.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    fileList.style.display = 'block';
+                    document.getElementById('loadMoreBtn').style.display = files.length === pageSize ? 'block' : 'none';
+                }
+            } catch (error) {
+                fileListLoading.style.display = 'none';
+                fileList.innerHTML = '<li class="file-meta">Failed to load: ' + escapeHtml(error.message) + '</li>';
+                fileList.style.display = 'block';
+            }
+        }
+
+        function loadMoreFiles() {
+            currentOffset += pageSize;
+            loadFiles(true);
+        }
+
+        function fileActionsHtml(file) {
+            const isComplete = file.bytes_received === file.size;
+            if (!isComplete) return '<em>Uploading…</em>';
+            const canEdit = currentUser && (currentUser.admin || file.user_id === currentUser.id);
+            const isAdmin = currentUser && currentUser.admin;
+            const isImage = file.view_url && file.content_type && file.content_type.startsWith('image/');
+            let html = '';
+            if (isImage) html += '<a href="' + file.view_url + '" target="_blank">View</a>';
+            html += '<a href="' + file.download_url + '" download>Download</a>';
+            const copyPath = (isImage && file.view_url) ? file.view_url : file.download_url;
+            html += ' <button type="button" class="file-copy-link" title="Copy link" aria-label="Copy link" data-copy-url="' + escapeAttr(copyPath) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>';
+            if (canEdit) html += '<a href="/files/' + file.slug + '">Edit</a>';
+            if (isAdmin) html += '<a href="#" class="danger" onclick="deleteFile(\'' + file.slug + '\'); return false;">Delete</a>';
+            return html;
+        }
+
+        function renderFiles() {
+            const fileList = document.getElementById('fileList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (allFiles.length === 0) {
+                fileList.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            fileList.style.display = 'block';
+            emptyState.style.display = 'none';
+            fileList.innerHTML = allFiles.map(file => {
+                const badge = file.private
+                    ? '<span class="badge badge--private">private</span>'
+                    : '<span class="badge badge--public">public</span>';
+                const commentIcon = (file.comment && file.comment.trim())
+                    ? ' <span class="file-comment-icon" data-comment="' + escapeAttr(file.comment) + '" title="View comment" aria-label="Has comment">' + commentIconSvg + '</span>'
+                    : '';
+                return '<li id="file-' + escapeAttr(file.slug) + '">' +
+                    '<span class="file-name">' + escapeHtml(file.name) + commentIcon + '</span>' +
+                    '<span class="file-meta">' + badge + ' · ' + formatBytes(file.size) + ' · ' + escapeHtml(file.content_type || '') + '</span>' +
+                    '<span class="file-actions">' + fileActionsHtml(file) + '</span>' +
+                    '</li>';
+            }).join('');
+            const hash = window.location.hash;
+            if (hash && hash.startsWith('#file-')) {
+                const el = document.getElementById(hash.slice(1));
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        async function deleteFile(slug) {
+            if (!confirm('Delete this file? This cannot be undone.')) return;
+            try {
+                const response = await fetch('/api/v1/files/' + slug, { method: 'DELETE' });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || 'Delete failed');
+                }
+                allFiles = allFiles.filter(f => f.slug !== slug);
+                renderFiles();
+            } catch (e) {
+                alert('Failed to delete: ' + e.message);
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024, sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+            return (bytes / Math.pow(k, i)).toFixed(i ? 2 : 0) + ' ' + sizes[i];
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeAttr(text) {
+            if (!text) return '';
+            return escapeHtml(text).replace(/"/g, '&quot;');
+        }
+
+        const commentIconSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+
+        (function commentTooltip() {
+            const tooltip = document.getElementById('commentTooltip');
+            let hoverTimer = null;
+            let hideTimer = null;
+            let pinned = false;
+
+            function show(el) {
+                const comment = el.getAttribute('data-comment');
+                if (!comment) return;
+                clearTimeout(hideTimer);
+                tooltip.textContent = comment;
+                tooltip.classList.add('is-visible');
+                tooltip.setAttribute('aria-hidden', 'false');
+                function position() {
+                    const rect = el.getBoundingClientRect();
+                    const ttRect = tooltip.getBoundingClientRect();
+                    let left = rect.left;
+                    let top = rect.bottom + 6;
+                    if (left + ttRect.width > window.innerWidth) left = window.innerWidth - ttRect.width - 8;
+                    if (left < 8) left = 8;
+                    if (top + ttRect.height > window.innerHeight - 8) top = rect.top - ttRect.height - 6;
+                    if (top < 8) top = 8;
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                }
+                position();
+                requestAnimationFrame(position);
+            }
+
+            function hide() {
+                if (pinned) return;
+                tooltip.classList.remove('is-visible');
+                tooltip.setAttribute('aria-hidden', 'true');
+            }
+
+            function scheduleHide() {
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(hide, 150);
+            }
+
+            document.addEventListener('mouseenter', function(e) {
+                const icon = e.target.closest && e.target.closest('.file-comment-icon');
+                if (!icon) return;
+                clearTimeout(hideTimer);
+                hoverTimer = setTimeout(function() { show(icon); }, 200);
+            }, true);
+
+            document.addEventListener('mouseleave', function(e) {
+                const icon = e.target.closest && e.target.closest('.file-comment-icon');
+                if (!icon) return;
+                clearTimeout(hoverTimer);
+                scheduleHide();
+            }, true);
+
+            document.addEventListener('click', function(e) {
+                const icon = e.target.closest && e.target.closest('.file-comment-icon');
+                if (icon) {
+                    e.preventDefault();
+                    clearTimeout(hoverTimer);
+                    clearTimeout(hideTimer);
+                    if (pinned && tooltip.classList.contains('is-visible')) {
+                        pinned = false;
+                        hide();
+                    } else {
+                        pinned = true;
+                        show(icon);
+                    }
+                    return;
+                }
+                if (pinned) {
+                    pinned = false;
+                    hide();
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && pinned) {
+                    pinned = false;
+                    hide();
+                }
+            });
+        })();
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/auth/me');
+                const data = await res.json();
+                currentUser = data.authenticated ? data : null;
+            } catch (_) {
+                currentUser = null;
+            }
+            const authStatus = document.getElementById('authStatus');
+            const navUsersWrap = document.getElementById('navUsersWrap');
+            if (navUsersWrap) navUsersWrap.style.display = (currentUser && currentUser.admin) ? 'inline' : 'none';
+            authStatus.innerHTML = currentUser
+                ? ' · ' + escapeHtml(currentUser.name) + ' · <a href="/auth/logout">Logout</a>'
+                : ' · <a href="/auth/login">Login</a>';
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.file-copy-link');
+            if (!btn) return;
+            const path = btn.getAttribute('data-copy-url');
+            if (!path) return;
+            const url = window.location.origin + path;
+            navigator.clipboard.writeText(url).then(() => {
+                btn.classList.add('copied');
+                btn.setAttribute('title', 'Copied!');
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.setAttribute('title', 'Copy link');
+                }, 1500);
+            });
+        });
+
+        window.addEventListener('load', () => {
+            checkAuth();
+            loadFiles();
+        });
+    </script>
+</body>
+</html>

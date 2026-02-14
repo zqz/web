@@ -1,0 +1,31 @@
+{{define "files_list_append.html"}}
+{{range .Rows}}
+<li id="file-{{.Slug}}" hx-swap-oob="beforeend:#file-list">
+    <span class="list-badge">{{if .Private}}<span class="badge badge--private">{{t "common.private"}}</span>{{else}}<span class="badge badge--public">{{t "common.public"}}</span>{{end}}</span>
+    <span class="file-name">{{.Name}}{{if .Comment}} <span class="file-comment-icon" data-comment="{{.Comment}}" title="{{t "files.view_comment"}}" aria-label="{{t "files.has_comment_aria"}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>{{end}}</span>
+    <span class="file-meta">· {{.SizeFmt}} · {{.ContentType}}</span>
+    <span class="file-actions">
+        {{if .Complete}}
+            {{if .ViewURL}}<a href="{{.ViewURL}}" target="_blank">{{t "common.view"}}</a>{{end}}
+            <a href="{{.DownloadURL}}" download>{{t "common.download"}}</a>
+            <button type="button" class="file-copy-link" title="{{t "common.copy_link"}}" aria-label="{{t "common.copy_link_aria"}}" data-view-url="{{.ViewURL}}" data-download-url="{{.DownloadURL}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            {{if .CanEdit}}<a href="/files/{{.Slug}}">{{t "common.edit"}}</a>{{end}}
+            {{if .ShowDelete}}<a href="#" class="danger" onclick="if(confirm('{{t "files.delete_confirm" | quotejs}}')) { fetch('/api/v1/files/{{.Slug}}', { method: 'DELETE' }).then(r => { if(r.ok) { this.closest('li').remove(); } else { r.json().then(d => alert(d.error || '{{t "files.delete_failed" | quotejs}}')); } }); } return false;">{{t "common.delete"}}</a>{{end}}
+        {{else}}
+            <em>{{t "files.uploading"}}</em>
+        {{end}}
+    </span>
+</li>
+{{end}}
+{{if .HasMore}}
+<p class="load-more" id="load-more-wrap" hx-swap-oob="outerHTML:#load-more-wrap">
+    <button hx-get="/files/list?limit={{.Limit}}&offset={{.NextOffset}}{{if .SearchEncoded}}&q={{.SearchEncoded}}{{end}}"
+            hx-target="#file-list"
+            hx-swap="beforeend">
+        {{t "files.load_more"}}
+    </button>
+</p>
+{{else}}
+<p class="load-more" id="load-more-wrap" hx-swap-oob="outerHTML:#load-more-wrap"></p>
+{{end}}
+{{end}}

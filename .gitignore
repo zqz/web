@@ -1,0 +1,13 @@
+assets.go
+Dockerfile
+vendor
+serv
+upl
+config.json
+files
+.env
+node_modules
+coverage*
+server.log
+bin
+tmp

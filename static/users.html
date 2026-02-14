@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - zqz.ca</title>
+</head>
+<body>
+    <header>
+        <h1>zqz.ca - File Hosting</h1>
+        <nav>
+            <a href="/">Upload</a> |
+            <a href="/files">Files</a> |
+            <span id="navUsersWrap" style="display: none;"><a href="/users">Users</a> | </span>
+            <a href="/api-docs">API Docs</a>
+            <span id="authStatus">Loading...</span>
+        </nav>
+    </header>
+
+    <hr>
+
+    <h2>Users</h2>
+
+    <div id="loadingState">
+        <p>Loading users...</p>
+    </div>
+
+    <div id="userContent" style="display: none;">
+        <ul id="userList"></ul>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/v1/users');
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+
+                const users = await response.json();
+                displayUsers(users);
+
+            } catch (error) {
+                document.getElementById('loadingState').innerHTML = `<p>Error: ${error.message}</p>`;
+            }
+        }
+
+        function displayUsers(users) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('userContent').style.display = 'block';
+
+            const userList = document.getElementById('userList');
+            
+            if (users.length === 0) {
+                userList.innerHTML = '<li>No users yet.</li>';
+                return;
+            }
+
+            userList.innerHTML = users.map(user => `
+                <li>
+                    <strong>${escapeHtml(user.name)}</strong> 
+                    (${escapeHtml(user.email)})
+                    - Role: <em>${user.role}</em>
+                    - Files: ${user.file_count}
+                    <a href="#" onclick="loadUserFiles(${user.id}, '${escapeHtml(user.name)}'); return false;">View Files</a>
+                </li>
+            `).join('');
+        }
+
+        async function loadUserFiles(userId, userName) {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = '<li>Loading files...</li>';
+
+            try {
+                const response = await fetch(`/api/v1/users/${userId}/files`);
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load user files');
+                }
+
+                const files = await response.json();
+                displayUserFiles(userId, userName, files);
+
+            } catch (error) {
+                userList.innerHTML = `<li>Error: ${error.message}</li>`;
+            }
+        }
+
+        function displayUserFiles(userId, userName, files) {
+            const userList = document.getElementById('userList');
+            
+            let html = `
+                <li>
+                    <a href="#" onclick="loadUsers(); return false;">← Back to Users</a>
+                </li>
+                <li>
+                    <h3>Files uploaded by ${escapeHtml(userName)}</h3>
+                </li>
+            `;
+
+            if (files.length === 0) {
+                html += '<li>No files uploaded yet.</li>';
+            } else {
+                html += '<ul>';
+                html += files.map(file => {
+                    const isComplete = file.bytes_received === file.size;
+                    const canEdit = currentUser && (currentUser.admin || file.user_id === currentUser.id);
+                    return `
+                        <li>
+                            <strong>${escapeHtml(file.name)}</strong>
+                            (${formatBytes(file.size)}, ${file.content_type})
+                            ${isComplete ? 
+                                `- <a href="/api/v1/files/${file.slug}" download>Download</a>${canEdit ? ` | <a href="/files/${file.slug}">Edit</a>` : ''}` :
+                                '- <em>Uploading...</em>'
+                            }
+                        </li>
+                    `;
+                }).join('');
+                html += '</ul>';
+            }
+
+            userList.innerHTML = html;
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me');
+                const data = await response.json();
+                
+                currentUser = data.authenticated ? data : null;
+                updateAuthUI();
+            } catch (error) {
+                console.error('Failed to check auth:', error);
+                currentUser = null;
+                updateAuthUI();
+            }
+        }
+
+        function updateAuthUI() {
+            const authStatus = document.getElementById('authStatus');
+            const navUsersWrap = document.getElementById('navUsersWrap');
+            if (navUsersWrap) navUsersWrap.style.display = (currentUser && currentUser.admin) ? 'inline' : 'none';
+            if (currentUser) {
+                authStatus.innerHTML = ` | Logged in as ${escapeHtml(currentUser.name)} - <a href="/auth/logout">Logout</a>`;
+            } else {
+                authStatus.innerHTML = ` | <a href="/auth/login">Login with Google</a>`;
+            }
+        }
+
+        // Load on page load
+        window.addEventListener('load', () => {
+            checkAuth();
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - zqz.ca</title>
+</head>
+<body>
+    <header>
+        <h1>zqz.ca - File Hosting</h1>
+        <nav>
+            <a href="/">Upload</a> |
+            <a href="/files">Files</a> |
+            <span id="navUsersWrap" style="display: none;"><a href="/users">Users</a> | </span>
+            <a href="/api-docs">API Docs</a>
+            <span id="authStatus">Loading...</span>
+        </nav>
+    </header>
+
+    <hr>
+
+    <h2>API Documentation</h2>
+    
+    <h3>Base URL</h3>
+    <p><code>http://localhost:3001/api/v1</code></p>
+
+    <hr>
+
+    <h3>Health Check</h3>
+    <p><code>GET /health</code></p>
+    <p>Returns "OK" if the server is running.</p>
+
+    <hr>
+
+    <h3>Create File Metadata</h3>
+    <p><code>POST /api/v1/files</code></p>
+    <p><strong>Content-Type:</strong> application/json</p>
+    <pre>{
+  "name": "example.txt",
+  "hash": "sha1-hash-here",
+  "size": 1024,
+  "content_type": "text/plain",
+  "private": false,
+  "comment": "Optional comment"
+}</pre>
+    <p><strong>Response:</strong> File metadata with generated slug</p>
+
+    <hr>
+
+    <h3>Upload File Data</h3>
+    <p><code>POST /api/v1/meta/{hash}</code></p>
+    <p><strong>Content-Type:</strong> application/octet-stream</p>
+    <p>Upload the actual file content. The hash must match the SHA1 hash of the file.</p>
+    <p><strong>Response:</strong> Updated file metadata</p>
+
+    <hr>
+
+    <h3>Get File Metadata</h3>
+    <p><code>GET /api/v1/meta/{hash}</code></p>
+    <p><strong>Response:</strong> File metadata for the given hash</p>
+
+    <hr>
+
+    <h3>Download File</h3>
+    <p><code>GET /api/v1/files/{slug}</code></p>
+    <p>Download the file with the given slug. Returns the raw file content.</p>
+
+    <hr>
+
+    <h3>List Files</h3>
+    <p><code>GET /api/v1/files?limit=50&offset=0</code></p>
+    <p><strong>Query Parameters:</strong></p>
+    <ul>
+        <li><code>limit</code> - Maximum number of files to return (default: 50)</li>
+        <li><code>offset</code> - Number of files to skip (default: 0)</li>
+    </ul>
+    <p><strong>Response:</strong> Array of file metadata</p>
+
+    <hr>
+
+    <h3>Delete File</h3>
+    <p><code>DELETE /api/v1/files/{slug}</code></p>
+    <p>Delete a file. Requires authentication and ownership.</p>
+
+    <hr>
+
+    <h3>Authentication Endpoints</h3>
+    
+    <h4>Login with Google</h4>
+    <p><code>GET /auth/login</code></p>
+    <p>Redirects to Google OAuth login flow.</p>
+
+    <h4>Get Current User</h4>
+    <p><code>GET /auth/me</code></p>
+    <p><strong>Response:</strong></p>
+    <pre>{
+  "authenticated": true,
+  "id": 1,
+  "email": "user@example.com",
+  "name": "User Name",
+  "admin": false
+}</pre>
+
+    <h4>Logout</h4>
+    <p><code>GET /auth/logout</code></p>
+    <p>Logs out the current user and redirects to home.</p>
+
+    <hr>
+
+    <h3>Example: Upload a File</h3>
+    <pre># 1. Calculate SHA1 hash
+sha1sum myfile.txt
+# Output: abc123def456...
+
+# 2. Create file metadata
+curl -X POST http://localhost:3001/api/v1/files \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "myfile.txt",
+    "hash": "abc123def456...",
+    "size": 1024,
+    "content_type": "text/plain"
+  }'
+
+# 3. Upload file content
+curl -X POST http://localhost:3001/api/v1/meta/abc123def456... \
+  -H "Content-Type: application/octet-stream" \
+  --data-binary @myfile.txt
+
+# 4. Download file (using slug from response)
+curl http://localhost:3001/api/v1/files/AbCdEf -o downloaded.txt</pre>
+
+    <script>
+        let currentUser = null;
+
+        // Authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me');
+                const data = await response.json();
+                
+                currentUser = data.authenticated ? data : null;
+                updateAuthUI();
+            } catch (error) {
+                console.error('Failed to check auth:', error);
+                currentUser = null;
+                updateAuthUI();
+            }
+        }
+
+        function updateAuthUI() {
+            const authStatus = document.getElementById('authStatus');
+            const navUsersWrap = document.getElementById('navUsersWrap');
+            if (navUsersWrap) navUsersWrap.style.display = (currentUser && currentUser.admin) ? 'inline' : 'none';
+            if (currentUser) {
+                authStatus.innerHTML = ` | Logged in as ${escapeHtml(currentUser.name)} - <a href="/auth/logout">Logout</a>`;
+            } else {
+                authStatus.innerHTML = ` | <a href="/auth/login">Login with Google</a>`;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Load on page load
+        window.addEventListener('load', () => {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>

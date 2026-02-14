@@ -1,0 +1,105 @@
+{{define "content_profile"}}
+<div class="main">
+    <form id="profileForm" onsubmit="saveProfile(event)">
+        <div class="form-group">
+            <label for="displayTag">{{t "profile.display_tag_label"}}</label>
+            <input type="text" id="displayTag" name="display_tag" maxlength="3" pattern=".{0,3}" placeholder="{{t "profile.display_tag_placeholder"}}" style="width: 4rem;">
+            <span class="file-meta">{{t "profile.shown_next_to_files"}}</span>
+        </div>
+        <div class="form-group">
+            <label for="colour">{{t "profile.colour_label"}}</label>
+            <input type="color" id="colour" name="colour" value="#737373" style="width: 3rem; height: 1.5rem; padding: 0; border: none; cursor: pointer;">
+            <input type="text" id="colourHex" name="colour_hex" maxlength="7" placeholder="#RRGGBB" style="width: 6rem; margin-left: 0.5rem;">
+        </div>
+        <p>
+            <button type="submit" id="saveBtn">{{t "common.save"}}</button>
+        </p>
+        <div id="profileStatus" class="status" style="display: none;"></div>
+    </form>
+</div>
+<script>
+const colourEl = document.getElementById('colour');
+const colourHexEl = document.getElementById('colourHex');
+
+function hexToInput(hex) {
+    if (!hex || !hex.startsWith('#')) return '#737373';
+    if (hex.length === 7) return hex;
+    if (hex.length === 4) return '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+    return '#737373';
+}
+
+colourEl.addEventListener('input', () => { colourHexEl.value = colourEl.value; });
+colourHexEl.addEventListener('input', (e) => {
+    const v = e.target.value;
+    if (v.startsWith('#') && v.length === 7 && /^#[0-9A-Fa-f]{6}$/.test(v)) colourEl.value = v;
+});
+
+async function loadProfile() {
+    try {
+        const res = await fetch('/auth/me');
+        const d = await res.json();
+        if (!d.authenticated) return;
+        document.getElementById('displayTag').value = d.display_tag || '';
+        const hex = hexToInput(d.colour);
+        document.getElementById('colour').value = hex;
+        document.getElementById('colourHex').value = hex;
+    } catch (_) {}
+}
+
+async function saveProfile(e) {
+    e.preventDefault();
+    const tag = document.getElementById('displayTag').value.trim();
+    let colour = document.getElementById('colourHex').value.trim();
+    if (!colour && document.getElementById('colour').value) colour = document.getElementById('colour').value;
+    if (colour && !colour.startsWith('#')) colour = '#' + colour;
+    if (tag.length > 3) {
+        document.getElementById('profileStatus').textContent = 'Tag must be 1–3 characters';
+        document.getElementById('profileStatus').style.display = 'block';
+        document.getElementById('profileStatus').style.background = 'var(--border)';
+        return;
+    }
+    if (colour && !/^#[0-9A-Fa-f]{6}$/.test(colour)) {
+        document.getElementById('profileStatus').textContent = 'Colour must be #RRGGBB';
+        document.getElementById('profileStatus').style.display = 'block';
+        document.getElementById('profileStatus').style.background = 'var(--border)';
+        return;
+    }
+    const btn = document.getElementById('saveBtn');
+    const st = document.getElementById('profileStatus');
+    btn.disabled = true;
+    st.style.display = 'block';
+    st.style.background = 'var(--border)';
+    st.textContent = 'Saving…';
+    try {
+        const res = await fetch('/auth/profile', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                display_tag: tag || null,
+                colour: colour || null
+            })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            st.style.background = '#7f1d1d';
+            st.textContent = data.error || data.message || 'Save failed';
+            return;
+        }
+        st.style.background = '#14532d';
+        st.textContent = 'Saved';
+        if (data.display_tag !== undefined) document.getElementById('displayTag').value = data.display_tag || '';
+        if (data.colour) {
+            const hex = hexToInput(data.colour);
+            document.getElementById('colour').value = hex;
+            document.getElementById('colourHex').value = hex;
+        }
+    } catch (err) {
+        st.style.background = '#7f1d1d';
+        st.textContent = err.message || 'Request failed';
+    }
+    btn.disabled = false;
+}
+
+window.addEventListener('load', loadProfile);
+</script>
+{{end}}

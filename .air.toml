@@ -1,0 +1,12 @@
+# Air config for live reload - restarts server on file changes
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main ./cmd/server"
+  bin = "./tmp/main"
+  include_ext = ["go", "html", "tpl", "tmpl"]
+  exclude_dir = ["assets", "tmp", "vendor", "node_modules", "bin"]
+
+[misc]
+  clean_on_exit = true

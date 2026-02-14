@@ -1,0 +1,63 @@
+{{define "content_users"}}
+<div class="main">
+    <div id="loadingState" style="color: var(--muted);">{{t "users.loading"}}</div>
+    <div id="userContent" style="display: none;">
+        <ul id="userList" class="list"></ul>
+    </div>
+</div>
+<script>
+let currentUser = null;
+
+async function loadUsers() {
+    const i18n = window.I18N || {};
+    try {
+        const res = await fetch('/api/v1/users');
+        if (!res.ok) throw new Error(i18n['users.failed_to_load'] || 'Failed to load');
+        displayUsers(await res.json());
+    } catch (e) {
+        document.getElementById('loadingState').innerHTML = '<p>' + escapeHtml(e.message) + '</p>';
+        return;
+    }
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('userContent').style.display = 'block';
+}
+
+function displayUsers(users) {
+    const i18n = window.I18N || {};
+    const list = document.getElementById('userList');
+    if (!users.length) {
+        list.innerHTML = '<li class="file-meta">' + (i18n['users.no_users'] || 'No users yet.') + '</li>';
+        return;
+    }
+    const viewFiles = i18n['users.view_files'] || 'view files';
+    list.innerHTML = users.map(u => {
+        const bg = u.colour || 'var(--border)';
+        const fg = (u.colour ? contrastTextColour(u.colour) : '#0d0d0d');
+        const tagContent = (u.display_tag && String(u.display_tag).trim()) ? escapeHtml(u.display_tag) : '—';
+        const tag = '<span class="uploader-tag" style="background:' + bg + ';color:' + fg + '">' + tagContent + '</span> ';
+        return '<li>' + tag + '<span class="file-name">' + escapeHtml(u.name) + '</span> <span class="file-meta">' + escapeHtml(u.email) + ' · ' + u.role + ' · ' + u.file_count + ' files</span> <a href="/users/' + u.id + '">' + viewFiles + '</a></li>';
+    }).join('');
+}
+
+function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+function contrastTextColour(hex) {
+    if (!hex || typeof hex !== 'string') return '#0d0d0d';
+    hex = hex.replace(/^#/, '');
+    if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) return '#0d0d0d';
+    const r = parseInt(hex.slice(0, 2), 16), g = parseInt(hex.slice(2, 4), 16), b = parseInt(hex.slice(4, 6), 16);
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum <= 0.45 ? '#ffffff' : '#0d0d0d';
+}
+
+async function checkAuth() {
+    try {
+        const res = await fetch('/auth/me');
+        const d = await res.json();
+        currentUser = d.authenticated ? d : null;
+    } catch (_) { currentUser = null; }
+}
+
+window.addEventListener('load', () => { checkAuth(); loadUsers(); });
+</script>
+{{end}}

@@ -1,17 +1,17 @@
-name: 'Deploy to Production'
+name: "Deploy to Production"
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: 'golang:1.22.0-bookworm'
+    container: "golang:1.24-bookworm"
 
     services:
       postgres:
-        image: postgres:15.6
+        image: postgres:15
         env:
           POSTGRES_USER: dylan
           POSTGRES_DB: zqz-dev
@@ -23,72 +23,95 @@ jobs:
           --health-retries 5
 
     steps:
-    - run: |
-        apt-get update
-        apt-get install postgresql-client -y
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
-      with:
-        go-version: '1.22.0'
+      - run: apt-get update && apt-get install -y postgresql-client
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
 
-    - run: cd backend && go version
-    - run: cd backend && go mod verify
-    - name: 'Setup DB'
-      run: |
-        cd backend
-        go install github.com/pressly/goose/v3/cmd/goose@latest
-        goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev" up
+      - run: go version
+      - run: go mod verify
 
-    - name: 'Setup SQLBoiler config'
-      run: |
-        cd backend
-        cat sqlboiler.toml | sed s/localhost/postgres/g > sqlboiler.toml_
-        mv sqlboiler.toml_ sqlboiler.toml
+      - name: "Run migrations"
+        run: |
+          go install github.com/pressly/goose/v3/cmd/goose@latest
+          goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev?sslmode=disable" up
 
-    - run: git config --global --add safe.directory /__w/web/web
-    - name: 'Test and Coverage'
-      uses: paambaati/codeclimate-action@v5.0.0
-      env:
-        CC_TEST_REPORTER_ID: ${{ secrets.CODE_CLIMATE_ID }}
-      with:
-        workingDirectory: backend
-        coverageCommand: go test ./... -coverprofile c.out
-        prefix: github.com/zqz/web/backend
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: "Test and Coverage"
+        run: go test ./... -coverprofile coverage.out -covermode atomic
+
+      - name: "Upload coverage"
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.out
+
+  sonarqube:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Download coverage"
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      - name: "Move coverage to workspace root"
+        run: mv coverage/coverage.out .
+
+      - name: "SonarQube Scan"
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: test
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-go@v5
-      with:
-        go-version: '1.22.0'
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
 
-    - run: cd backend && go version
-    - run: cd backend && go mod verify 
-    - run: cd backend && go build -v -o upl cmd/backend/main.go
+      - run: go version
+      - run: go mod verify
+      - run: go build -v -o upl ./cmd/server
 
-    - name: 'Copy Build to Server'
-      uses: appleboy/scp-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
-        port: ${{ secrets.PORT }}
-        source: "backend/upl"
-        target: "/home/zqz"
+      - name: "Build goose for migrations"
+        run: CGO_ENABLED=0 go build -o goose github.com/pressly/goose/v3/cmd/goose
 
-    - name: 'Extact Artifact'
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.KEY }}
-        port: ${{ secrets.PORT }}
-        script: |
-          cd backend
-          cp upl upl-$GITHUB_SHA
-          sudo systemctl stop zqz
-          mv upl-current upl-previous
-          mv upl upl-current
-          sudo systemctl start zqz
+      - name: "Copy binary, goose, and migrations to server"
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          source: "upl,goose,db"
+          target: "/home/zqz"
+
+      - name: "Run migrations and restart service"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /home/zqz
+            chmod +x goose
+            # Load DATABASE_URL from .env if present (same as app)
+            set -a
+            [ -f .env ] && . ./.env
+            set +a
+            ./goose -dir db/migrations postgres "$DATABASE_URL" up
+            cp upl upl-${{ github.sha }}
+            sudo systemctl stop zqz
+            mv upl-current upl-previous 2>/dev/null || true
+            mv upl upl-current
+            sudo systemctl start zqz

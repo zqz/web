@@ -1,0 +1,33 @@
+{{define "content_admin"}}
+<div class="main">
+    <h3>{{t "admin.statistics"}}</h3>
+    <ul class="list">
+        <li><span class="file-meta">{{t "admin.total_files"}}</span> <strong>{{.FileCount}}</strong></li>
+        <li><span class="file-meta">{{t "admin.total_size"}}</span> <strong>{{.TotalSizeFmt}}</strong></li>
+        <li><span class="file-meta">{{t "admin.total_users"}}</span> <strong>{{.UserCount}}</strong></li>
+        <li><span class="file-meta">{{t "admin.banned_users"}}</span> <strong>{{.BannedCount}}</strong></li>
+    </ul>
+
+    <h3>{{t "admin.settings"}}</h3>
+    <form method="post" action="/admin/settings" class="form-group">
+        <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" name="public_uploads" value="on" {{if .PublicUploadsEnabled}}checked{{end}}>
+            <span>{{t "admin.allow_public_uploads"}}</span>
+        </label>
+        <p class="file-meta" style="margin-top: 0.25rem;">{{t "admin.public_uploads_help"}}</p>
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="default_max_file_size_mb">{{t "admin.default_max_file_size_mb"}}</label>
+            <input type="number" id="default_max_file_size_mb" name="default_max_file_size_mb" min="1" value="{{.DefaultMaxFileSizeMB}}" style="width: 6rem;">
+            <span class="file-meta">{{t "admin.max_file_size_help"}}</span>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+            <label for="api_rate_limit_rps">{{t "admin.api_rate_limit_rps"}}</label>
+            <input type="number" id="api_rate_limit_rps" name="api_rate_limit_rps" min="0" value="{{.APIRateLimitRPS}}" style="width: 5rem;">
+            <span class="file-meta">{{t "admin.api_rate_limit_help"}}</span>
+        </div>
+        <p style="margin-top: 0.75rem;">
+            <button type="submit">{{t "common.save"}}</button>
+        </p>
+    </form>
+</div>
+{{end}}

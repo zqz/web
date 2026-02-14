@@ -1,0 +1,172 @@
+{{define "content_file_edit"}}
+<div class="main">
+    <div id="loadingState" style="color: var(--muted);">{{t "common.loading"}}</div>
+
+    <div id="errorState" style="display: none;">
+        <p id="errorMessage"></p>
+        <p><a href="/files">← {{t "common.back_to_files"}}</a></p>
+    </div>
+
+    <div id="fileContent" style="display: none;">
+        <form id="editForm" onsubmit="saveFile(event)">
+            <div class="form-group">
+                <label for="fileName">{{t "file_edit.name"}}</label>
+                <input type="text" id="fileName" name="name" required style="width: 100%; max-width: 24rem;">
+            </div>
+            <div class="form-group">
+                <label for="fileComment">{{t "file_edit.comment"}}</label>
+                <textarea id="fileComment" name="comment" rows="4" style="width: 100%; max-width: 24rem;"></textarea>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" id="filePrivate" name="private"> {{t "file_edit.private"}}</label>
+            </div>
+
+            <h3>{{t "file_edit.info"}}</h3>
+            <ul class="list">
+                <li><span class="file-meta">{{t "file_edit.slug"}}</span> <span id="fileSlug"></span></li>
+                <li><span class="file-meta">{{t "file_edit.size"}}</span> <span id="fileSize"></span></li>
+                <li><span class="file-meta">{{t "file_edit.type"}}</span> <span id="fileType"></span></li>
+                <li><span class="file-meta">{{t "file_edit.hash"}}</span> <code id="fileHash"></code></li>
+                <li><span class="file-meta">{{t "file_edit.uploaded"}}</span> <span id="fileCreated"></span></li>
+                <li><span class="file-meta">{{t "file_edit.updated"}}</span> <span id="fileUpdated"></span></li>
+                <li><span class="file-meta">{{t "file_edit.status"}}</span> <span id="fileStatus"></span></li>
+            </ul>
+
+            <h3>{{t "common.download"}}</h3>
+            <p><code id="downloadURL"></code></p>
+            <p><a href="#" id="downloadLink" target="_blank">{{t "file_edit.download"}}</a></p>
+
+            <div id="imagePreview" style="display: none;">
+                <h3>{{t "file_edit.preview"}}</h3>
+                <img id="previewImage" style="max-width: 100%; max-height: 20rem;">
+            </div>
+
+            <p style="margin-top: 1.5rem;">
+                <button type="submit" id="saveButton">{{t "common.save"}}</button>
+                <button type="button" onclick="location.href='/files'">{{t "common.cancel"}}</button>
+                <button type="button" class="btn-danger" onclick="deleteFile()" style="float: right;">{{t "file_edit.delete_btn"}}</button>
+            </p>
+            <div id="saveStatus" class="status" style="display: none;"></div>
+        </form>
+    </div>
+</div>
+<script>
+let currentUser = null;
+let currentFile = null;
+const slug = window.location.pathname.split('/').pop();
+
+async function loadFile() {
+    try {
+        const res = await fetch('/api/v1/file-metadata/' + slug);
+        if (!res.ok) {
+            showError(res.status === 404 ? 'File not found' : 'Failed to load');
+            return;
+        }
+        currentFile = await res.json();
+        displayFile();
+    } catch (e) {
+        showError(e.message);
+    }
+}
+
+function displayFile() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('fileContent').style.display = 'block';
+    document.getElementById('fileName').value = currentFile.name;
+    document.getElementById('fileComment').value = currentFile.comment || '';
+    document.getElementById('filePrivate').checked = currentFile.private;
+    document.getElementById('fileSlug').textContent = currentFile.slug;
+    document.getElementById('fileSize').textContent = formatBytes(currentFile.size);
+    document.getElementById('fileType').textContent = currentFile.content_type;
+    document.getElementById('fileHash').textContent = currentFile.hash;
+    document.getElementById('fileCreated').textContent = new Date(currentFile.created_at).toLocaleString();
+    document.getElementById('fileUpdated').textContent = new Date(currentFile.updated_at).toLocaleString();
+    const done = currentFile.bytes_received === currentFile.size;
+    document.getElementById('fileStatus').textContent = done ? '✓ Complete' : 'Uploading…';
+    const url = location.origin + '/api/v1/files/' + currentFile.slug;
+    document.getElementById('downloadURL').textContent = url;
+    document.getElementById('downloadLink').href = url;
+    if ((currentFile.content_type || '').startsWith('image/') && done) {
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('previewImage').src = url;
+    }
+    if (!currentUser || (currentFile.user_id && currentFile.user_id !== currentUser.id && !currentUser.admin)) {
+        document.getElementById('saveButton').disabled = true;
+        document.getElementById('saveButton').textContent = 'Save (login required)';
+        document.querySelectorAll('#editForm input, #editForm textarea').forEach(el => el.disabled = true);
+    }
+}
+
+function showError(msg) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+    document.getElementById('errorMessage').textContent = msg;
+}
+
+async function saveFile(e) {
+    e.preventDefault();
+    const st = document.getElementById('saveStatus');
+    const btn = document.getElementById('saveButton');
+    btn.disabled = true;
+    st.style.display = 'block';
+    st.style.background = 'var(--border)';
+    st.textContent = 'Saving…';
+    try {
+        const res = await fetch('/api/v1/files/' + slug, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: document.getElementById('fileName').value,
+                comment: document.getElementById('fileComment').value,
+                private: document.getElementById('filePrivate').checked
+            })
+        });
+        if (!res.ok) {
+            const d = await res.json();
+            throw new Error(d.error || 'Save failed');
+        }
+        currentFile = await res.json();
+        st.style.background = '#14532d';
+        st.textContent = '✓ Saved';
+        document.getElementById('fileUpdated').textContent = new Date(currentFile.updated_at).toLocaleString();
+        setTimeout(() => { st.style.display = 'none'; }, 2000);
+    } catch (err) {
+        st.style.background = '#7f1d1d';
+        st.textContent = '✗ ' + err.message;
+    }
+    btn.disabled = false;
+}
+
+async function deleteFile() {
+    if (!confirm('Delete this file? This cannot be undone.')) return;
+    try {
+        const res = await fetch('/api/v1/files/' + slug, { method: 'DELETE' });
+        if (!res.ok) throw new Error((await res.json()).error || 'Delete failed');
+        location.href = '/files';
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024, u = ['B','KB','MB','GB'];
+    let i = 0;
+    while (bytes >= k && i < u.length - 1) { bytes /= k; i++; }
+    return (i ? bytes.toFixed(2) : bytes) + ' ' + u[i];
+}
+
+async function checkAuth() {
+    try {
+        const res = await fetch('/auth/me');
+        const d = await res.json();
+        currentUser = d.authenticated ? d : null;
+    } catch (_) { currentUser = null; }
+}
+
+window.addEventListener('load', async () => {
+    await checkAuth();
+    await loadFile();
+});
+</script>
+{{end}}

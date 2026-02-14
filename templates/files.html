@@ -1,0 +1,18 @@
+{{define "partial_files_search"}}
+<input type="search"
+       id="files-search"
+       name="q"
+       placeholder="{{t "files.search_placeholder"}}"
+       value="{{.FilesSearch}}"
+       autocomplete="off"
+       aria-label="{{t "files.search_aria"}}">
+{{end}}
+{{define "content_files"}}
+<div id="files-content"
+     hx-get="/files/list?limit=20&offset=0{{if .FilesSearchEncoded}}&q={{.FilesSearchEncoded}}{{end}}"
+     hx-trigger="load, input from:#files-search delay:300ms changed"
+     hx-include="#files-search"
+     hx-swap="innerHTML">
+    <span style="color: var(--muted);">{{t "common.loading_ellipsis"}}</span>
+</div>
+{{end}}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload - zqz.ca</title>
+</head>
+<body>
+    <header>
+        <h1>zqz.ca - File Hosting</h1>
+        <nav>
+            <a href="/">Upload</a> |
+            <a href="/files">Files</a> |
+            <span id="navUsersWrap" style="display: none;"><a href="/users">Users</a> | </span>
+            <a href="/api-docs">API Docs</a>
+            <span id="authStatus">Loading...</span>
+        </nav>
+    </header>
+
+    <hr>
+
+    <h2>Upload Files</h2>
+    
+    <div id="uploadArea" onclick="document.getElementById('fileInput').click()" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer;">
+        <p>Click here or drag files to upload</p>
+        <p><small>Maximum file size: 100MB</small></p>
+    </div>
+    <input type="file" id="fileInput" multiple style="display: none;">
+
+    <h3>Upload Queue</h3>
+    <ul id="uploadQueue"></ul>
+
+    <h3>Statistics</h3>
+    <ul>
+        <li>Total Files: <strong id="totalFiles">-</strong></li>
+        <li>Total Size: <strong id="totalSize">-</strong></li>
+        <li>Completed Uploads: <strong id="completedUploads">0</strong></li>
+    </ul>
+
+    <script>
+        let uploadStats = {
+            completed: 0
+        };
+        let currentUser = null;
+
+        // Drag and drop
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '#f0f0f0';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.background = '';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.background = '';
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFiles(files);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFiles(e.target.files);
+            }
+        });
+
+        async function calculateSHA1(file) {
+            const buffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-1', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function handleFiles(files) {
+            for (let i = 0; i < files.length; i++) {
+                await uploadFile(files[i]);
+            }
+        }
+
+        async function uploadFile(file) {
+            const uploadId = Date.now() + '-' + Math.random();
+            const uploadItem = createUploadItem(uploadId, file.name);
+            
+            try {
+                updateUploadStatus(uploadId, 'Calculating hash...');
+                const hash = await calculateSHA1(file);
+
+                updateUploadStatus(uploadId, 'Creating metadata...');
+                const metaResponse = await fetch('/api/v1/files', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: file.name,
+                        hash: hash,
+                        size: file.size,
+                        content_type: file.type || 'application/octet-stream',
+                        private: false,
+                        comment: ''
+                    })
+                });
+
+                if (!metaResponse.ok) {
+                    throw new Error(`Failed to create file metadata: ${metaResponse.statusText}`);
+                }
+
+                updateUploadStatus(uploadId, 'Uploading data...');
+                const uploadResponse = await fetch(`/api/v1/meta/${hash}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                    },
+                    body: file
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error(`Failed to upload file: ${uploadResponse.statusText}`);
+                }
+
+                const result = await uploadResponse.json();
+                const statusEl = document.getElementById('status-' + uploadId);
+                if (statusEl) {
+                    const downloadUrl = (result.download_url || '/api/v1/files/' + result.slug).replace(/"/g, '&quot;');
+                    const viewUrl = (result.view_url || '').replace(/"/g, '&quot;');
+                    const copySvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+                    statusEl.innerHTML = '✓ Uploaded · <a href="/files#file-' + escapeHtml(result.slug) + '">View in list</a> <button type="button" class="file-copy-link" title="Copy link" aria-label="Copy link" data-view-url="' + viewUrl + '" data-download-url="' + downloadUrl + '">' + copySvg + '</button>';
+                }
+                uploadStats.completed++;
+                document.getElementById('completedUploads').textContent = uploadStats.completed;
+                updateStats();
+
+            } catch (error) {
+                updateUploadStatus(uploadId, `✗ ${error.message}`);
+            }
+        }
+
+        function createUploadItem(id, name) {
+            const queue = document.getElementById('uploadQueue');
+            const item = document.createElement('li');
+            item.id = `upload-${id}`;
+            item.innerHTML = `<strong>${escapeHtml(name)}</strong> - <span id="status-${id}">Preparing...</span>`;
+            queue.insertBefore(item, queue.firstChild);
+            return item;
+        }
+
+        function updateUploadStatus(id, message) {
+            const statusEl = document.getElementById(`status-${id}`);
+            if (statusEl) {
+                statusEl.textContent = message;
+            }
+        }
+
+        async function updateStats() {
+            try {
+                const response = await fetch('/api/v1/files?limit=1000&offset=0');
+                if (response.ok) {
+                    const files = await response.json();
+                    const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+                    document.getElementById('totalFiles').textContent = files.length;
+                    document.getElementById('totalSize').textContent = formatBytes(totalSize);
+                }
+            } catch (error) {
+                console.error('Failed to update stats:', error);
+            }
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Authentication
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me');
+                const data = await response.json();
+                
+                currentUser = data.authenticated ? data : null;
+                updateAuthUI();
+            } catch (error) {
+                console.error('Failed to check auth:', error);
+                currentUser = null;
+                updateAuthUI();
+            }
+        }
+
+        function updateAuthUI() {
+            const authStatus = document.getElementById('authStatus');
+            const navUsersWrap = document.getElementById('navUsersWrap');
+            if (navUsersWrap) navUsersWrap.style.display = (currentUser && currentUser.admin) ? 'inline' : 'none';
+            if (currentUser) {
+                authStatus.innerHTML = ` | Logged in as ${escapeHtml(currentUser.name)} - <a href="/auth/logout">Logout</a>`;
+            } else {
+                authStatus.innerHTML = ` | <a href="/auth/login">Login with Google</a>`;
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.file-copy-link');
+            if (!btn) return;
+            const viewUrl = btn.getAttribute('data-view-url') || '';
+            const downloadUrl = btn.getAttribute('data-download-url') || '';
+            const path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
+            if (!path) return;
+            const url = window.location.origin + path;
+            navigator.clipboard.writeText(url).then(() => {
+                btn.classList.add('copied');
+                btn.setAttribute('title', 'Copied!');
+                setTimeout(() => { btn.classList.remove('copied'); btn.setAttribute('title', 'Copy link'); }, 1500);
+            });
+        });
+
+        // Load on page load
+        window.addEventListener('load', () => {
+            checkAuth();
+            updateStats();
+        });
+    </script>
+    <style>.file-copy-link{margin-left:.35rem;padding:0;border:none;background:none;cursor:pointer;color:#666;vertical-align:middle}.file-copy-link:hover{color:#111}.file-copy-link.copied{color:#15803d}</style>
+</body>
+</html>

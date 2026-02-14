@@ -1,0 +1,96 @@
+{{define "content_user_files"}}
+<div class="main">
+    <p><a href="/users">← {{t "nav.users"}}</a></p>
+    {{if .User}}
+    {{/* Single identity line: tag + name, email, role, status */}}
+    <p class="user-identity">
+        <span class="uploader-tag" style="background:{{.User.Colour}};color:{{.User.TextColour}}">{{if .User.DisplayTag}}{{.User.DisplayTag}}{{else}}—{{end}}</span>
+        <span class="file-name">{{.User.Name}}</span>
+        <span class="file-meta">· {{.User.Email}} · {{.User.Role}}{{if .User.Banned}} · <strong>{{t "user_files.banned"}}</strong>{{end}}</span>
+    </p>
+
+    {{if .ShowBanOption}}
+    <section class="user-admin" aria-label="Edit user">
+        <h3>{{t "user_files.edit_user"}}</h3>
+        <div class="user-admin-grid">
+            <div class="user-admin-row">
+                <form method="post" action="/users/{{.User.ID}}/profile" class="user-admin-form">
+                    <label for="display_tag">{{t "user_files.tag"}}</label>
+                    <input type="text" id="display_tag" name="display_tag" maxlength="3" value="{{.User.DisplayTag}}" placeholder="{{t "user_files.tag_placeholder"}}" style="width: 4rem;">
+                    <label for="colour_hex">{{t "user_files.colour"}}</label>
+                    <input type="color" id="colour_picker" aria-hidden="true" value="{{if .User.Colour}}{{.User.Colour}}{{else}}#737373{{end}}" class="user-colour-picker">
+                    <input type="text" id="colour_hex" name="colour" maxlength="7" value="{{if .User.Colour}}{{.User.Colour}}{{end}}" placeholder="#RRGGBB" style="width: 5.5rem;">
+                    <button type="submit">{{t "common.save"}}</button>
+                </form>
+            </div>
+            <div class="user-admin-row">
+                {{if .User.Banned}}
+                <form method="post" action="/users/{{.User.ID}}/unban" class="user-admin-form">
+                    <button type="submit">{{t "user_files.unban"}}</button>
+                </form>
+                {{else}}
+                <form method="post" action="/users/{{.User.ID}}/ban" class="user-admin-form">
+                    <button type="submit" class="btn-danger">{{t "user_files.ban"}}</button>
+                </form>
+                {{end}}
+                <form method="post" action="/users/{{.User.ID}}/max-file-size" class="user-admin-form user-admin-form-inline">
+                    <label for="max_file_size_mb">{{t "user_files.max_file_size_mb"}}</label>
+                    <input type="number" id="max_file_size_mb" name="max_file_size_mb" min="0" value="{{if .User.MaxFileSizeOverrideMB}}{{.User.MaxFileSizeOverrideMB}}{{end}}" placeholder="default" style="width: 5rem;">
+                    <button type="submit">{{t "common.set"}}</button>
+                </form>
+            </div>
+        </div>
+    </section>
+    <script>
+    (function(){
+        var picker = document.getElementById('colour_picker');
+        var hex = document.getElementById('colour_hex');
+        if (!picker || !hex) return;
+        picker.addEventListener('input', function(){ hex.value = picker.value; });
+        hex.addEventListener('input', function(){
+            var v = hex.value;
+            if (v && v.startsWith('#') && v.length === 7 && /^#[0-9A-Fa-f]{6}$/.test(v)) picker.value = v;
+        });
+    })();
+    </script>
+    {{end}}
+
+    <h3>{{t "user_files.files_heading"}}</h3>
+    {{if .Files}}
+    <ul class="list">
+        {{range .Files}}
+        <li>
+            <span class="file-name">{{.Name}}</span>
+            <span class="file-meta">· {{.SizeFmt}} · {{.ContentType}}</span>
+            <span class="file-actions">
+                {{if .Complete}}
+                    {{if .ViewURL}}<a href="{{.ViewURL}}" target="_blank">{{t "common.view"}}</a>{{end}}
+                    <a href="{{.DownloadURL}}" download>{{t "common.download"}}</a>
+                    <a href="/files/{{.Slug}}">{{t "common.edit"}}</a>
+                {{else}}
+                    <em>{{t "files.uploading"}}</em>
+                {{end}}
+            </span>
+        </li>
+        {{end}}
+    </ul>
+    {{else}}
+    <p class="file-meta">{{t "user_files.no_files"}}</p>
+    {{end}}
+    {{else}}
+    <p class="file-meta">{{t "user_files.user_not_found"}}</p>
+    {{end}}
+</div>
+<style>
+.user-identity { margin-bottom: 1rem; }
+.user-admin { margin-bottom: 1.5rem; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; background: rgba(255,255,255,0.02); }
+.user-admin h3 { margin: 0 0 0.75rem 0; }
+.user-admin-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+.user-admin-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem 1.25rem; }
+.user-admin-form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.5rem 0.75rem; }
+.user-admin-form label { margin-bottom: 0; margin-right: 0.25rem; }
+.user-admin-form-inline { margin-left: 0.5rem; }
+.user-admin-form-inline label { margin-right: 0.35rem; }
+.user-colour-picker { width: 2rem; height: 1.5rem; padding: 0; border: none; cursor: pointer; vertical-align: middle; background: transparent; }
+</style>
+{{end}}

@@ -1,0 +1,155 @@
+{{define "content_upload"}}
+<div class="main">
+    {{if or .User .PublicUploadsEnabled}}
+    <div id="uploadArea" class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <p>{{t "upload.click_or_drag"}}</p>
+        <p style="color: var(--muted); font-size: 11px;">{{if .MaxFileSizeMB}}Max {{.MaxFileSizeMB}} MB per file{{else}}{{t "upload.no_limit"}}{{end}}</p>
+    </div>
+    <input type="file" id="fileInput" multiple style="display: none;">
+
+    <h3>{{t "upload.queue"}}</h3>
+    <p id="queueActions" style="margin-bottom: 0.5rem; display: none;">
+        <button type="button" onclick="startAll()">{{t "upload.start_all"}}</button>
+    </p>
+    <ul id="uploadQueue" class="list"></ul>
+<script>
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+
+let queue = [];
+
+function queueId() {
+    return Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function renderQueue() {
+    const ul = document.getElementById('uploadQueue');
+    const actions = document.getElementById('queueActions');
+    const hasPending = queue.some(q => q.status === 'pending');
+    actions.style.display = queue.length ? 'block' : 'none';
+
+    ul.innerHTML = queue.map(q => {
+        let status = '';
+        let buttons = '';
+        if (q.status === 'pending') {
+            status = '<span class="file-meta">pending</span>';
+            buttons = '<span class="file-actions"><button type="button" onclick="startOne(\'' + q.id + '\')">Start</button> <button type="button" onclick="removeOne(\'' + q.id + '\')">Remove</button></span>';
+        } else if (q.status === 'uploading') {
+            status = '<span class="file-meta" id="status-' + q.id + '">…</span>';
+            buttons = '';
+        } else if (q.status === 'done') {
+            const fileUrl = '/files#file-' + (q.slug || '');
+            const viewUrl = (q.view_url || '').replace(/"/g, '&quot;');
+            const downloadUrl = (q.download_url || '/api/v1/files/' + (q.slug || '')).replace(/"/g, '&quot;');
+            status = '<span class="file-meta">✓ ' + escapeHtml(q.slug || '') + '</span>';
+            buttons = '<span class="file-actions"><a href="' + fileUrl + '">View in list</a> <button type="button" class="file-copy-link" title="Copy link" aria-label="Copy link" data-view-url="' + viewUrl + '" data-download-url="' + downloadUrl + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button> <button type="button" onclick="removeOne(\'' + q.id + '\')">Remove</button></span>';
+        } else {
+            status = '<span class="file-meta">✗ ' + escapeHtml(q.error || 'failed') + '</span>';
+            buttons = '<span class="file-actions"><button type="button" onclick="startOne(\'' + q.id + '\')">Retry</button> <button type="button" onclick="removeOne(\'' + q.id + '\')">Remove</button></span>';
+        }
+        return '<li id="item-' + q.id + '"><span class="file-name">' + escapeHtml(q.file.name) + '</span> ' + status + ' ' + buttons + '</li>';
+    }).join('');
+}
+
+function addToQueue(files) {
+    for (let i = 0; i < files.length; i++) {
+        queue.push({ id: queueId(), file: files[i], status: 'pending' });
+    }
+    renderQueue();
+}
+
+function removeOne(id) {
+    queue = queue.filter(q => q.id !== id);
+    renderQueue();
+}
+
+async function apiErrorMessage(res) {
+    try {
+        const data = await res.json();
+        if (data && (data.error || data.message)) return data.error || data.message;
+    } catch (_) {}
+    return res.statusText || 'Request failed';
+}
+
+async function startOne(id) {
+    const item = queue.find(q => q.id === id);
+    if (!item || item.status !== 'pending' && item.status !== 'error') return;
+    item.status = 'uploading';
+    renderQueue();
+
+    function setStatus(msg) {
+        const el = document.getElementById('status-' + id);
+        if (el) el.textContent = msg;
+    }
+    try {
+        setStatus('hashing…');
+        const hash = await calculateSHA256(item.file);
+        setStatus('creating…');
+        const metaRes = await fetch('/api/v1/files', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: item.file.name,
+                hash: hash,
+                size: item.file.size,
+                content_type: item.file.type || 'application/octet-stream',
+                private: false,
+                comment: ''
+            })
+        });
+        if (!metaRes.ok) throw new Error(await apiErrorMessage(metaRes));
+        setStatus('uploading…');
+        const upRes = await fetch('/api/v1/meta/' + hash, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream' },
+            body: item.file
+        });
+        if (!upRes.ok) throw new Error(await apiErrorMessage(upRes));
+        const result = await upRes.json();
+        item.status = 'done';
+        item.slug = result.slug;
+        item.download_url = result.download_url || '/api/v1/files/' + result.slug;
+        item.view_url = result.view_url || '';
+    } catch (err) {
+        item.status = 'error';
+        item.error = err.message;
+    }
+    renderQueue();
+}
+
+async function startAll() {
+    const pending = queue.filter(q => q.status === 'pending');
+    for (let i = 0; i < pending.length; i++) {
+        await startOne(pending[i].id);
+    }
+}
+
+async function calculateSHA256(file) {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.style.borderColor = 'var(--muted)'; });
+uploadArea.addEventListener('dragleave', () => { uploadArea.style.borderColor = ''; });
+uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.style.borderColor = '';
+    if (e.dataTransfer.files.length) addToQueue(Array.from(e.dataTransfer.files));
+});
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) addToQueue(Array.from(e.target.files));
+    e.target.value = '';
+});
+</script>
+    {{else}}
+    <p class="file-meta">{{t "upload.please_login"}}</p>
+    {{end}}
+</div>
+{{end}}
