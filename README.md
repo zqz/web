@@ -10,7 +10,7 @@
 
 File hosting in Go. Chunked uploads, optional thumbnails, Postgres + sqlc, HTMX UI.
 
-**Requirements:** Go 1.24+, Postgres. Optional: sqlc, goose (or use the Makefile targets that assume them).
+**Requirements:** Go 1.26+, Postgres. Optional: sqlc, goose (or use the Makefile targets that assume them).
 
 ```bash
 cp .env.example .env   # set DATABASE_URL, SESSION_SECRET at least
