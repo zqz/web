@@ -82,8 +82,8 @@ jobs:
       - run: go mod verify
       - run: go build -v -o upl ./cmd/server
 
-      - name: "Build goose for migrations"
-        run: CGO_ENABLED=0 go build -o goose github.com/pressly/goose/v3/cmd/goose
+      - name: "Build goose for migrations (postgres only)"
+        run: CGO_ENABLED=0 go build -tags='no_clickhouse,no_libsql,no_mssql,no_mysql,no_sqlite3,no_vertica,no_ydb' -o goose github.com/pressly/goose/v3/cmd/goose
 
       - name: "Copy binary, goose, and migrations to server"
         uses: appleboy/scp-action@v0.1.7
