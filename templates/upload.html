@@ -45,8 +45,8 @@ function renderQueue() {
             buttons = '';
         } else if (q.status === 'done') {
             const fileUrl = '/files#file-' + (q.slug || '');
-            const viewUrl = (q.view_url || '').replace(/"/g, '&quot;');
-            const downloadUrl = (q.download_url || '/api/v1/files/' + (q.slug || '')).replace(/"/g, '&quot;');
+            const viewUrl = (q.view_url || '').replaceAll('"', '&quot;');
+            const downloadUrl = (q.download_url || '/api/v1/files/' + (q.slug || '')).replaceAll('"', '&quot;');
             status = '<span class="file-meta">✓ ' + escapeHtml(q.slug || '') + '</span>';
             buttons = '<span class="file-actions"><a href="' + fileUrl + '">View in list</a> <button type="button" class="file-copy-link" title="Copy link" aria-label="Copy link" data-view-url="' + viewUrl + '" data-download-url="' + downloadUrl + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button> <button type="button" onclick="removeOne(\'' + q.id + '\')">Remove</button></span>';
         } else {
