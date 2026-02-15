@@ -1,0 +1,19 @@
+{{define "partial_file_row"}}
+<li id="file-{{.Slug}}">
+    <span class="list-badge">{{if .Private}}<span class="badge badge--private">{{t "common.private"}}</span>{{else}}<span class="badge badge--public">{{t "common.public"}}</span>{{end}}</span>
+    <span class="file-name">{{.Name}}{{if .Comment}} <button type="button" class="file-comment-icon" data-comment="{{.Comment}}" title="{{t "files.view_comment"}}" aria-label="{{t "files.has_comment_aria"}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>{{end}}</span>
+    <span class="file-meta">· {{.SizeFmt}} · {{.ContentType}}</span>
+    <span class="file-actions">
+        {{if .Complete}}
+            <a href="/view/{{.Slug}}">{{t "common.view"}}</a>
+            {{if .ViewURL}}<a href="{{.ViewURL}}" target="_blank">{{t "common.preview"}}</a>{{end}}
+            <a href="{{.DownloadURL}}" download>{{t "common.download"}}</a>
+            <button type="button" class="file-copy-link" title="{{t "common.copy_link"}}" aria-label="{{t "common.copy_link_aria"}}" data-view-url="{{.ViewURL}}" data-download-url="{{.DownloadURL}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            {{if .CanEdit}}<a href="/files/{{.Slug}}">{{t "common.edit"}}</a>{{end}}
+            {{if .ShowDelete}}<button type="button" class="danger" onclick="if(confirm('{{t "files.delete_confirm" | quotejs}}')) { fetch('/api/v1/files/{{.Slug}}', { method: 'DELETE' }).then(r => { if(r.ok) { this.closest('li').remove(); } else { r.json().then(d => alert(d.error || '{{t "files.delete_failed" | quotejs}}')); } }); }">{{t "common.delete"}}</button>{{end}}
+        {{else}}
+            <em>{{t "files.uploading"}}</em>
+        {{end}}
+    </span>
+</li>
+{{end}}

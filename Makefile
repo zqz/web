@@ -1,4 +1,4 @@
-.PHONY: help build test test-coverage run clean sqlc-generate migrate-up migrate-down migrate-create docker-up docker-down
+.PHONY: help build test test-coverage run clean sqlc-generate migrate-up migrate-down migrate-create docker-up docker-down sri
 
 # Default target
 help:
@@ -17,6 +17,7 @@ help:
 	@echo "  fmt              - Format code"
 	@echo "  lint             - Run linters"
 	@echo "  mod-tidy         - Tidy go modules"
+	@echo "  sri              - Generate SRI hash for external URL (use URL=...)"
 
 # Build the application
 build:
@@ -118,6 +119,16 @@ lint:
 mod-tidy:
 	@echo "Tidying go modules..."
 	go mod tidy
+
+# Generate Subresource Integrity hash for an external URL (e.g. Google Fonts).
+# Usage: make sri URL='https://fonts.googleapis.com/css2?family=...'
+# Then add to your HTML: integrity="sha384-<hash>" crossorigin="anonymous"
+sri:
+	@if [ -z "$(URL)" ]; then \
+		echo "Usage: make sri URL='https://...'"; \
+		exit 1; \
+	fi; \
+	printf 'sha384-'; curl -sL "$(URL)" | openssl dgst -sha384 -binary | openssl base64 -A; echo
 
 # Run all pre-commit checks
 pre-commit: fmt lint test
