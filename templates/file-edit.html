@@ -34,7 +34,7 @@
 
             <h3>{{t "common.download"}}</h3>
             <p><code id="downloadURL"></code></p>
-            <p><a href="#" id="downloadLink" target="_blank">{{t "file_edit.download"}}</a></p>
+            <p><button type="button" id="downloadLink">{{t "file_edit.download"}}</button></p>
 
             <div id="imagePreview" style="display: none;">
                 <h3>{{t "file_edit.preview"}}</h3>
@@ -85,7 +85,7 @@ function displayFile() {
     document.getElementById('fileStatus').textContent = done ? '✓ Complete' : 'Uploading…';
     const url = location.origin + '/api/v1/files/' + currentFile.slug;
     document.getElementById('downloadURL').textContent = url;
-    document.getElementById('downloadLink').href = url;
+    document.getElementById('downloadLink').onclick = function() { window.open(url, '_blank'); };
     if ((currentFile.content_type || '').startsWith('image/') && done) {
         document.getElementById('imagePreview').style.display = 'block';
         document.getElementById('previewImage').src = url;

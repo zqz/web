@@ -65,7 +65,7 @@
                     (${escapeHtml(user.email)})
                     - Role: <em>${user.role}</em>
                     - Files: ${user.file_count}
-                    <a href="#" onclick="loadUserFiles(${user.id}, '${escapeHtml(user.name)}'); return false;">View Files</a>
+                    <button type="button" onclick="loadUserFiles(${user.id}, '${escapeHtml(user.name)}')">View Files</button>
                 </li>
             `).join('');
         }
@@ -94,7 +94,7 @@
             
             let html = `
                 <li>
-                    <a href="#" onclick="loadUsers(); return false;">← Back to Users</a>
+                    <button type="button" onclick="loadUsers()">← Back to Users</button>
                 </li>
                 <li>
                     <h3>Files uploaded by ${escapeHtml(userName)}</h3>

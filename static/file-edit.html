@@ -65,7 +65,7 @@
 
             <h3>Download URL</h3>
             <p><code id="downloadURL"></code></p>
-            <p><a href="#" id="downloadLink" target="_blank">Download File</a></p>
+            <p><button type="button" id="downloadLink">Download File</button></p>
 
             <div id="imagePreview" style="display: none;">
                 <h3>Preview</h3>
@@ -133,7 +133,7 @@
             // Download link
             const downloadUrl = `${window.location.origin}/api/v1/files/${currentFile.slug}`;
             document.getElementById('downloadURL').textContent = downloadUrl;
-            document.getElementById('downloadLink').href = downloadUrl;
+            document.getElementById('downloadLink').onclick = function() { window.open(downloadUrl, '_blank'); };
 
             // Image preview
             if (currentFile.content_type.startsWith('image/') && isComplete) {

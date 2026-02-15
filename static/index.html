@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>zqz.ca - File Hosting</title>
+    <style>nav button{background:none;border:none;padding:0;font:inherit;cursor:pointer;color:inherit;text-decoration:none}p button[onclick^="setFilter"]{background:none;border:none;padding:0;font:inherit;cursor:pointer;color:inherit;text-decoration:underline}.file-actions button.danger{background:none;border:none;padding:0;font:inherit;cursor:pointer;color:inherit}</style>
     <script src="/static/htmx.min.js"></script>
 </head>
 <body>
     <header>
         <h1>zqz.ca - File Hosting</h1>
         <nav>
-            <a href="#" onclick="showSection('upload'); return false;">Upload</a> |
-            <a href="#" onclick="showSection('files'); return false;">Files</a> |
-            <a href="#" onclick="showSection('api'); return false;">API Docs</a>
+            <button type="button" onclick="showSection('upload')">Upload</button> |
+            <button type="button" onclick="showSection('files')">Files</button> |
+            <button type="button" onclick="showSection('api')">API Docs</button>
             <span id="authStatus">Loading...</span>
         </nav>
     </header>
@@ -55,10 +56,10 @@
 
         <p>
             <strong>Filter:</strong>
-            <a href="#" onclick="setFilter('all'); return false;">All Files</a> |
-            <a href="#" onclick="setFilter('images'); return false;">Images</a> |
-            <a href="#" onclick="setFilter('documents'); return false;">Documents</a> |
-            <a href="#" onclick="setFilter('other'); return false;">Other</a>
+            <button type="button" onclick="setFilter('all')">All Files</button> |
+            <button type="button" onclick="setFilter('images')">Images</button> |
+            <button type="button" onclick="setFilter('documents')">Documents</button> |
+            <button type="button" onclick="setFilter('other')">Other</button>
         </p>
 
         <div id="fileListLoading">
@@ -350,7 +351,7 @@ Content-Type: application/octet-stream
                         <strong>${escapeHtml(file.name)}</strong> 
                         (${formatBytes(file.size)}, ${file.content_type})
                         ${isComplete ? 
-                            `- <a href="/api/v1/files/${file.slug}" download>Download</a> | <a href="#" onclick="showFileDetails('${file.slug}'); return false;">Details</a>` :
+                            `- <a href="/api/v1/files/${file.slug}" download>Download</a> | <button type="button" onclick="showFileDetails('${file.slug}')">Details</button>` :
                             '- <em>Uploading...</em>'
                         }
                     </li>

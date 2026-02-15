@@ -30,8 +30,8 @@
         header { margin-bottom: 2rem; }
         .site-title { font-size: 1rem; font-weight: 500; margin: 0 0 0.75rem 0; letter-spacing: 0.02em; }
         nav { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 1rem; }
-        nav a { color: var(--text); text-decoration: none; }
-        nav a:hover { color: var(--accent); }
+        nav a, nav button { color: var(--text); text-decoration: none; background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
+        nav a:hover, nav button:hover { color: var(--accent); }
         .nav-user { display: inline-flex; align-items: center; margin-left: auto; }
         .nav-user a { color: inherit; text-decoration: none; }
         .nav-user a:hover { opacity: 0.9; }
@@ -56,13 +56,13 @@
         .file-comment-tooltip.is-visible { display: block; }
         .file-meta { font-size: 11px; color: var(--muted); }
         .file-actions { font-size: 11px; margin-left: auto; }
-        .file-actions a { color: var(--muted); text-decoration: none; }
-        .file-actions a:hover { color: var(--text); }
-        .file-actions a + a { margin-left: 0.6rem; }
+        .file-actions a, .file-actions button { color: var(--muted); text-decoration: none; background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
+        .file-actions a:hover, .file-actions button:hover { color: var(--text); }
+        .file-actions a + a, .file-actions a + button, .file-actions button + a, .file-actions button + button { margin-left: 0.6rem; }
         .file-actions .file-copy-link { margin-left: 0.6rem; padding: 0; border: none; background: none; cursor: pointer; color: var(--muted); font: inherit; line-height: 1; vertical-align: middle; }
         .file-actions .file-copy-link:hover { color: var(--text); }
         .file-actions .file-copy-link.copied { color: #4ade80; }
-        .file-actions a.danger:hover { color: #f87171; }
+        .file-actions a.danger:hover, .file-actions button.danger:hover { color: #f87171; }
         .badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
         .badge--public { color: #4ade80; }
         .badge--private { color: #f87171; }

@@ -119,14 +119,22 @@
             margin-left: auto;
         }
 
-        .file-actions a {
+        .file-actions a,
+        .file-actions button {
             color: var(--text-muted);
             text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            cursor: pointer;
         }
 
-        .file-actions a:hover {
+        .file-actions a:hover,
+        .file-actions button:hover {
             color: var(--text);
         }
+
 
         .file-comment-icon {
             display: inline-flex;
@@ -167,8 +175,15 @@
             margin-left: 0.75rem;
         }
 
-        .file-actions a.danger:hover {
+        .file-actions a.danger:hover,
+        .file-actions button.danger:hover {
             color: #b91c1c;
+        }
+
+        .file-actions a + button,
+        .file-actions button + a,
+        .file-actions button + button {
+            margin-left: 0.75rem;
         }
 
         .file-actions .file-copy-link {
@@ -346,7 +361,7 @@
             const copyPath = (isImage && file.view_url) ? file.view_url : file.download_url;
             html += ' <button type="button" class="file-copy-link" title="Copy link" aria-label="Copy link" data-copy-url="' + escapeAttr(copyPath) + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>';
             if (canEdit) html += '<a href="/files/' + file.slug + '">Edit</a>';
-            if (isAdmin) html += '<a href="#" class="danger" onclick="deleteFile(\'' + file.slug + '\'); return false;">Delete</a>';
+            if (isAdmin) html += '<button type="button" class="danger" onclick="deleteFile(\'' + file.slug + '\')">Delete</button>';
             return html;
         }
 
