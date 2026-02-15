@@ -14,9 +14,8 @@ COPY . .
 # Build static server binary
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
 
-# Build goose for migrations (postgres only; uses version from go.mod)
-RUN go build -tags='no_clickhouse no_libsql no_mssql no_mysql no_sqlite3 no_vertica no_ydb' \
-    -ldflags="-s -w" -o /go/bin/goose github.com/pressly/goose/v3/cmd/goose
+# Install goose for migrations (version from go.mod)
+RUN go install github.com/pressly/goose/v3/cmd/goose@v3.26.0
 
 # Run stage
 FROM alpine:3.21
