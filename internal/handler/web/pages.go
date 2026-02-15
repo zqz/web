@@ -129,6 +129,11 @@ func (h *PagesHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	RenderLayout(w, h.templates, "content_file_edit", "page.file_edit", r)
 }
 
+// View serves the read-only file view page (slug from URL in JS). Access: guests = public, users = public + own, admins = all.
+func (h *PagesHandler) View(w http.ResponseWriter, r *http.Request) {
+	RenderLayout(w, h.templates, "content_file_view", "page.file_view", r)
+}
+
 // Users serves the users list page (admin only; middleware enforces).
 func (h *PagesHandler) Users(w http.ResponseWriter, r *http.Request) {
 	RenderLayout(w, h.templates, "content_users", "page.users", r)

@@ -273,7 +273,9 @@ func (h *FileHandler) ViewFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := auth.GetUserIDFromContext(r.Context())
-	reader, file, err := h.fileSvc.DownloadFile(r.Context(), slug, userID)
+	user := auth.GetUserFromContext(r.Context())
+	isAdmin := user != nil && user.IsAdmin()
+	reader, file, err := h.fileSvc.DownloadFile(r.Context(), slug, userID, isAdmin)
 	if err != nil {
 		if handleFileServiceError(w, err) {
 			return
@@ -297,7 +299,9 @@ func (h *FileHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := auth.GetUserIDFromContext(r.Context())
-	reader, file, err := h.fileSvc.DownloadFile(r.Context(), slug, userID)
+	user := auth.GetUserFromContext(r.Context())
+	isAdmin := user != nil && user.IsAdmin()
+	reader, file, err := h.fileSvc.DownloadFile(r.Context(), slug, userID, isAdmin)
 	if err != nil {
 		if handleFileServiceError(w, err) {
 			return
@@ -359,7 +363,9 @@ func (h *FileHandler) GetFileBySlug(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	userID := auth.GetUserIDFromContext(r.Context())
-	file, err := h.fileSvc.GetFileBySlug(r.Context(), slug, userID)
+	user := auth.GetUserFromContext(r.Context())
+	isAdmin := user != nil && user.IsAdmin()
+	file, err := h.fileSvc.GetFileBySlug(r.Context(), slug, userID, isAdmin)
 	if err != nil {
 		if handleFileServiceError(w, err) {
 			return

@@ -1,0 +1,119 @@
+{{define "content_file_view"}}
+<div class="main">
+    <div id="loadingState" style="color: var(--muted);">{{t "common.loading"}}</div>
+
+    <div id="errorState" style="display: none;">
+        <p id="errorMessage"></p>
+        <p><a href="/files">← {{t "common.back_to_files"}}</a></p>
+    </div>
+
+    <div id="fileContent" style="display: none;">
+        <div class="page-title-row" style="margin-bottom: 1rem;">
+            <h2>{{t "page.file_view"}}</h2>
+            <span class="title-extra">
+                <a href="#" id="editLink" class="file-actions">{{t "common.edit"}}</a>
+            </span>
+        </div>
+
+        <div class="form-group">
+            <span class="file-meta">{{t "file_edit.name"}}</span>
+            <p id="fileName" style="margin: 0.25rem 0 0 0;"></p>
+        </div>
+        <div class="form-group" id="commentGroup" style="display: none;">
+            <span class="file-meta">{{t "file_edit.comment"}}</span>
+            <p id="fileComment" style="margin: 0.25rem 0 0 0; white-space: pre-wrap;"></p>
+        </div>
+        <div class="form-group">
+            <span class="file-meta">{{t "file_edit.private"}}</span>
+            <p id="filePrivateLabel" style="margin: 0.25rem 0 0 0;"></p>
+        </div>
+
+        <h3>{{t "file_edit.info"}}</h3>
+        <ul class="list">
+            <li><span class="file-meta">{{t "file_edit.slug"}}</span> <span id="fileSlug"></span></li>
+            <li><span class="file-meta">{{t "file_edit.size"}}</span> <span id="fileSize"></span></li>
+            <li><span class="file-meta">{{t "file_edit.type"}}</span> <span id="fileType"></span></li>
+            <li><span class="file-meta">{{t "file_edit.hash"}}</span> <code id="fileHash"></code></li>
+            <li><span class="file-meta">{{t "file_edit.uploaded"}}</span> <span id="fileCreated"></span></li>
+            <li><span class="file-meta">{{t "file_edit.updated"}}</span> <span id="fileUpdated"></span></li>
+            <li><span class="file-meta">{{t "file_edit.status"}}</span> <span id="fileStatus"></span></li>
+        </ul>
+
+        <h3>{{t "common.download"}}</h3>
+        <p><code id="downloadURL"></code></p>
+        <p><a href="#" id="downloadLink" target="_blank">{{t "file_edit.download"}}</a></p>
+
+        <div id="imagePreview" style="display: none;">
+            <h3>{{t "file_edit.preview"}}</h3>
+            <img id="previewImage" style="max-width: 100%; max-height: 20rem;" alt="">
+        </div>
+
+        <p style="margin-top: 1.5rem;">
+            <a href="/files" class="file-actions">{{t "common.back_to_files"}}</a>
+        </p>
+    </div>
+</div>
+<script>
+let currentFile = null;
+const slug = window.location.pathname.replace(/^\/view\//, '').replace(/\/$/, '') || window.location.pathname.split('/').pop();
+
+async function loadFile() {
+    try {
+        const res = await fetch('/api/v1/file-metadata/' + encodeURIComponent(slug));
+        if (!res.ok) {
+            showError(res.status === 404 ? 'File not found' : (res.status === 403 ? 'You don\'t have access to this file' : 'Failed to load'));
+            return;
+        }
+        currentFile = await res.json();
+        displayFile();
+    } catch (e) {
+        showError(e.message);
+    }
+}
+
+function displayFile() {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('fileContent').style.display = 'block';
+    document.getElementById('fileName').textContent = currentFile.name;
+    const comment = (currentFile.comment || '').trim();
+    if (comment) {
+        document.getElementById('commentGroup').style.display = 'block';
+        document.getElementById('fileComment').textContent = comment;
+    }
+    document.getElementById('filePrivateLabel').textContent = currentFile.private ? '{{t "common.private"}}' : '{{t "common.public"}}';
+    document.getElementById('fileSlug').textContent = currentFile.slug;
+    document.getElementById('fileSize').textContent = formatBytes(currentFile.size);
+    document.getElementById('fileType').textContent = currentFile.content_type;
+    document.getElementById('fileHash').textContent = currentFile.hash;
+    document.getElementById('fileCreated').textContent = new Date(currentFile.created_at).toLocaleString();
+    document.getElementById('fileUpdated').textContent = new Date(currentFile.updated_at).toLocaleString();
+    const done = currentFile.bytes_received === currentFile.size;
+    document.getElementById('fileStatus').textContent = done ? '✓ Complete' : 'Uploading…';
+    const url = location.origin + '/api/v1/files/' + currentFile.slug;
+    document.getElementById('downloadURL').textContent = url;
+    document.getElementById('downloadLink').href = url;
+    if ((currentFile.content_type || '').startsWith('image/') && done) {
+        document.getElementById('imagePreview').style.display = 'block';
+        document.getElementById('previewImage').src = url;
+    }
+    const editLink = document.getElementById('editLink');
+    if (editLink) editLink.href = '/files/' + currentFile.slug;
+}
+
+function showError(msg) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+    document.getElementById('errorMessage').textContent = msg;
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024, u = ['B','KB','MB','GB'];
+    let i = 0;
+    while (bytes >= k && i < u.length - 1) { bytes /= k; i++; }
+    return (i ? bytes.toFixed(2) : bytes) + ' ' + u[i];
+}
+
+window.addEventListener('load', loadFile);
+</script>
+{{end}}

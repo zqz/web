@@ -273,8 +273,9 @@ func (s *FileService) UploadFileData(ctx context.Context, hash string, data io.R
 	return file, nil
 }
 
-// GetFileBySlug retrieves a file by its slug
-func (s *FileService) GetFileBySlug(ctx context.Context, slug string, userID *int32) (*domain.File, error) {
+// GetFileBySlug retrieves a file by its slug.
+// Access: guests see public only; users see public + their private; admins see all.
+func (s *FileService) GetFileBySlug(ctx context.Context, slug string, userID *int32, isAdmin bool) (*domain.File, error) {
 	dbFile, err := s.repo.Files.GetBySlug(ctx, slug)
 	if err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -294,8 +295,8 @@ func (s *FileService) GetFileBySlug(ctx context.Context, slug string, userID *in
 		file.BytesReceived = int32(size)
 	}
 
-	// Check access permissions
-	if !file.CanBeAccessedBy(userID) {
+	// Admins can access everything; otherwise enforce guest/user visibility
+	if !isAdmin && !file.CanBeAccessedBy(userID) {
 		return nil, ErrUnauthorized
 	}
 
@@ -327,9 +328,9 @@ func (s *FileService) GetFileByHash(ctx context.Context, hash string) (*domain.F
 }
 
 // DownloadFile returns a reader for downloading the file data
-func (s *FileService) DownloadFile(ctx context.Context, slug string, userID *int32) (io.ReadCloser, *domain.File, error) {
+func (s *FileService) DownloadFile(ctx context.Context, slug string, userID *int32, isAdmin bool) (io.ReadCloser, *domain.File, error) {
 	// Get file metadata and check permissions
-	file, err := s.GetFileBySlug(ctx, slug, userID)
+	file, err := s.GetFileBySlug(ctx, slug, userID, isAdmin)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -413,7 +414,7 @@ type UpdateFileRequest struct {
 // UpdateFile updates file metadata. Owners and admins can update.
 func (s *FileService) UpdateFile(ctx context.Context, slug string, req UpdateFileRequest, userID *int32, isAdmin bool) (*domain.File, error) {
 	// Get file to check ownership
-	file, err := s.GetFileBySlug(ctx, slug, userID)
+	file, err := s.GetFileBySlug(ctx, slug, userID, isAdmin)
 	if err != nil {
 		return nil, err
 	}
@@ -449,7 +450,7 @@ func (s *FileService) UpdateFile(ctx context.Context, slug string, req UpdateFil
 // DeleteFile deletes a file and its data
 func (s *FileService) DeleteFile(ctx context.Context, slug string, userID *int32, isAdmin bool) error {
 	// Get file to check ownership
-	file, err := s.GetFileBySlug(ctx, slug, userID)
+	file, err := s.GetFileBySlug(ctx, slug, userID, isAdmin)
 	if err != nil {
 		return err
 	}

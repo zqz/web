@@ -143,6 +143,7 @@ func setupRouter(cfg *config.Config, logger *zerolog.Logger, repo *repository.Re
 	r.Get("/", pagesHandler.Upload)
 	r.Get("/files", filesHandler.Page)
 	r.Get("/files/list", filesHandler.List)
+	r.Get("/view/{slug}", pagesHandler.View)
 	r.Get("/files/{slug}", pagesHandler.Edit)
 	r.Group(func(r chi.Router) {
 		r.Use(func(next http.Handler) http.Handler {

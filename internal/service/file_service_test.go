@@ -197,7 +197,7 @@ func TestFileService_GetFileBySlug_Public(t *testing.T) {
 	require.NoError(t, err)
 
 	// Anyone can access public file
-	file, err := svc.GetFileBySlug(ctx, created.Slug, nil)
+	file, err := svc.GetFileBySlug(ctx, created.Slug, nil, false)
 	require.NoError(t, err)
 	assert.Equal(t, created.ID, file.ID)
 }
@@ -239,12 +239,12 @@ func TestFileService_GetFileBySlug_Private_Unauthorized(t *testing.T) {
 	require.NoError(t, err)
 
 	// Unauthenticated user cannot access
-	_, err = svc.GetFileBySlug(ctx, created.Slug, nil)
+	_, err = svc.GetFileBySlug(ctx, created.Slug, nil, false)
 	assert.ErrorIs(t, err, ErrUnauthorized)
 
 	// Different user cannot access
 	otherUserID := int32(2)
-	_, err = svc.GetFileBySlug(ctx, created.Slug, &otherUserID)
+	_, err = svc.GetFileBySlug(ctx, created.Slug, &otherUserID, false)
 	assert.ErrorIs(t, err, ErrUnauthorized)
 }
 
@@ -284,7 +284,7 @@ func TestFileService_GetFileBySlug_Private_Authorized(t *testing.T) {
 	require.NoError(t, err)
 
 	// Owner can access
-	file, err := svc.GetFileBySlug(ctx, created.Slug, &ownerID)
+	file, err := svc.GetFileBySlug(ctx, created.Slug, &ownerID, false)
 	require.NoError(t, err)
 	assert.Equal(t, created.ID, file.ID)
 }
@@ -321,7 +321,7 @@ func TestFileService_DownloadFile(t *testing.T) {
 	require.NoError(t, err)
 
 	// Download file (use updated slug from upload)
-	reader, file, err := svc.DownloadFile(ctx, uploaded.Slug, nil)
+	reader, file, err := svc.DownloadFile(ctx, uploaded.Slug, nil, false)
 	require.NoError(t, err)
 	defer reader.Close()
 
