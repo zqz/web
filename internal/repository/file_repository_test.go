@@ -11,7 +11,7 @@ import (
 
 const contentTypePlain = "text/plain"
 
-func TestFileRepository_Create(t *testing.T) {
+func TestFileRepositoryCreate(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -42,7 +42,7 @@ func TestFileRepository_Create(t *testing.T) {
 	assert.Equal(t, "Test file", file.Comment)
 }
 
-func TestFileRepository_GetByID(t *testing.T) {
+func TestFileRepositoryGetByID(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -75,7 +75,7 @@ func TestFileRepository_GetByID(t *testing.T) {
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
-func TestFileRepository_GetBySlug(t *testing.T) {
+func TestFileRepositoryGetBySlug(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -107,7 +107,7 @@ func TestFileRepository_GetBySlug(t *testing.T) {
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
-func TestFileRepository_GetByHash(t *testing.T) {
+func TestFileRepositoryGetByHash(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -139,7 +139,7 @@ func TestFileRepository_GetByHash(t *testing.T) {
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
-func TestFileRepository_List(t *testing.T) {
+func TestFileRepositoryList(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -177,7 +177,7 @@ func TestFileRepository_List(t *testing.T) {
 	assert.Len(t, files, 2)
 }
 
-func TestFileRepository_Update(t *testing.T) {
+func TestFileRepositoryUpdate(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -213,7 +213,7 @@ func TestFileRepository_Update(t *testing.T) {
 	assert.Equal(t, created.Hash, updated.Hash) // Hash should remain unchanged
 }
 
-func TestFileRepository_Delete(t *testing.T) {
+func TestFileRepositoryDelete(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -243,7 +243,7 @@ func TestFileRepository_Delete(t *testing.T) {
 	assert.ErrorIs(t, err, ErrNotFound)
 }
 
-func TestFileRepository_Count(t *testing.T) {
+func TestFileRepositoryCount(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()

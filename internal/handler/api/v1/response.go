@@ -3,6 +3,8 @@ package v1
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/zqz/web/backend/internal/handler"
 )
 
 // ErrorResponse represents an API error response
@@ -14,7 +16,7 @@ type ErrorResponse struct {
 
 // JSON writes a JSON response
 func JSON(w http.ResponseWriter, status int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
+	handler.SetContentType(w, handler.ContentTypeJSON)
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
 }

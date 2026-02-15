@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/zqz/web/backend/internal/handler"
 	"github.com/zqz/web/backend/internal/handler/auth"
 	"github.com/zqz/web/backend/internal/repository"
 	"github.com/zqz/web/backend/internal/service"
@@ -160,7 +161,7 @@ func (h *PagesHandler) UserFiles(w http.ResponseWriter, r *http.Request) {
 				Files []userFileRow
 			}{nil, nil})
 			data.Content = template.HTML(buf.String())
-			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			handler.SetContentType(w, handler.ContentTypeHTML)
 			w.WriteHeader(http.StatusNotFound)
 			_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 			return
@@ -223,7 +224,7 @@ func (h *PagesHandler) UserFiles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 }
 
@@ -371,7 +372,7 @@ func (h *PagesHandler) NotFound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	w.WriteHeader(http.StatusNotFound)
 	_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 }
@@ -390,7 +391,7 @@ func (h *PagesHandler) Forbidden(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	w.WriteHeader(http.StatusForbidden)
 	_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 }
@@ -409,7 +410,7 @@ func (h *PagesHandler) Unauthorized(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	w.WriteHeader(http.StatusUnauthorized)
 	_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 }
@@ -434,6 +435,6 @@ func RenderLayoutWithData(w http.ResponseWriter, templates *template.Template, c
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	_ = templates.ExecuteTemplate(w, "layout.html", data)
 }

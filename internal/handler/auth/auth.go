@@ -15,6 +15,7 @@ import (
 
 	"github.com/zqz/web/backend/internal/config"
 	"github.com/zqz/web/backend/internal/domain"
+	"github.com/zqz/web/backend/internal/handler"
 	"github.com/zqz/web/backend/internal/service"
 )
 
@@ -157,7 +158,7 @@ type meResponse struct {
 func (h *AuthHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserIDFromContext(r.Context())
 	if userID == nil {
-		w.Header().Set("Content-Type", "application/json")
+		handler.SetContentType(w, handler.ContentTypeJSON)
 		json.NewEncoder(w).Encode(meResponse{Authenticated: false})
 		return
 	}
@@ -169,7 +170,7 @@ func (h *AuthHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	handler.SetContentType(w, handler.ContentTypeJSON)
 	json.NewEncoder(w).Encode(meResponse{
 		Authenticated: true,
 		ID:            user.ID,
@@ -217,7 +218,7 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	handler.SetContentType(w, handler.ContentTypeJSON)
 	json.NewEncoder(w).Encode(meResponse{
 		Authenticated: true,
 		ID:            user.ID,

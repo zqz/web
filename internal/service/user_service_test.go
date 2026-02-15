@@ -11,7 +11,7 @@ import (
 	"github.com/zqz/web/backend/internal/tests"
 )
 
-func TestUserService_GetOrCreateUser_CreateNew(t *testing.T) {
+func TestUserServiceGetOrCreateUserCreateNew(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -38,7 +38,7 @@ func TestUserService_GetOrCreateUser_CreateNew(t *testing.T) {
 	assert.False(t, user.Banned)
 }
 
-func TestUserService_GetOrCreateUser_IdempotentByProviderID(t *testing.T) {
+func TestUserServiceGetOrCreateUserIdempotentByProviderID(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -63,7 +63,7 @@ func TestUserService_GetOrCreateUser_IdempotentByProviderID(t *testing.T) {
 	assert.Equal(t, user1.ProviderID, user2.ProviderID)
 }
 
-func TestUserService_GetOrCreateUser_SecondUserIsMember(t *testing.T) {
+func TestUserServiceGetOrCreateUserSecondUserIsMember(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -91,7 +91,7 @@ func TestUserService_GetOrCreateUser_SecondUserIsMember(t *testing.T) {
 	assert.Equal(t, testRoleMember, second.Role)
 }
 
-func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
+func TestUserServiceGetOrCreateUserValidationErrors(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -140,7 +140,7 @@ func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
 	assert.Contains(t, err.Error(), "provider ID is required")
 }
 
-func TestUserService_GetUserByID(t *testing.T) {
+func TestUserServiceGetUserByID(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -166,7 +166,7 @@ func TestUserService_GetUserByID(t *testing.T) {
 	assert.ErrorIs(t, err, ErrUserNotFound)
 }
 
-func TestUserService_GetUserByProviderID(t *testing.T) {
+func TestUserServiceGetUserByProviderID(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -192,7 +192,7 @@ func TestUserService_GetUserByProviderID(t *testing.T) {
 	assert.ErrorIs(t, err, ErrUserNotFound)
 }
 
-func TestUserService_ListUsers(t *testing.T) {
+func TestUserServiceListUsers(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -224,7 +224,7 @@ func TestUserService_ListUsers(t *testing.T) {
 	assert.Len(t, users, 1)
 }
 
-func TestUserService_SetBanned(t *testing.T) {
+func TestUserServiceSetBanned(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -254,7 +254,7 @@ func TestUserService_SetBanned(t *testing.T) {
 	assert.ErrorIs(t, err, ErrUserNotFound)
 }
 
-func TestUserService_SetMaxFileSize(t *testing.T) {
+func TestUserServiceSetMaxFileSize(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -286,7 +286,7 @@ func TestUserService_SetMaxFileSize(t *testing.T) {
 	assert.ErrorIs(t, err, ErrUserNotFound)
 }
 
-func TestUserService_UpdateProfile(t *testing.T) {
+func TestUserServiceUpdateProfile(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -314,7 +314,7 @@ func TestUserService_UpdateProfile(t *testing.T) {
 	assert.Equal(t, "#00ff00", updated2.Colour)
 }
 
-func TestUserService_UpdateProfile_ValidationErrors(t *testing.T) {
+func TestUserServiceUpdateProfileValidationErrors(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()

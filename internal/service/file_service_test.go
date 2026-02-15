@@ -34,7 +34,7 @@ const testRoleMember = "member"
 const settingDefaultPrivateUpload = "default_private_upload"
 const settingValueTrue = "true"
 
-func TestFileService_CreateFile(t *testing.T) {
+func TestFileServiceCreateFile(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -65,7 +65,7 @@ func TestFileService_CreateFile(t *testing.T) {
 	assert.Equal(t, contentTypePlain, file.ContentType)
 }
 
-func TestFileService_CreateFile_Duplicate(t *testing.T) {
+func TestFileServiceCreateFileDuplicate(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -105,7 +105,7 @@ func TestFileService_CreateFile_Duplicate(t *testing.T) {
 	assert.Equal(t, file1.Hash, file2.Hash)
 }
 
-func TestFileService_UploadFileData(t *testing.T) {
+func TestFileServiceUploadFileData(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -142,7 +142,7 @@ func TestFileService_UploadFileData(t *testing.T) {
 	assert.NotEqual(t, file.Slug, uploadedFile.Slug) // Slug should be updated
 }
 
-func TestFileService_UploadFileData_Chunked(t *testing.T) {
+func TestFileServiceUploadFileDataChunked(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -183,7 +183,7 @@ func TestFileService_UploadFileData_Chunked(t *testing.T) {
 	assert.Equal(t, int32(len(content)), file2.BytesReceived)
 }
 
-func TestFileService_GetFileBySlug_Public(t *testing.T) {
+func TestFileServiceGetFileBySlugPublic(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -212,7 +212,7 @@ func TestFileService_GetFileBySlug_Public(t *testing.T) {
 	assert.Equal(t, created.ID, file.ID)
 }
 
-func TestFileService_GetFileBySlug_Private_Unauthorized(t *testing.T) {
+func TestFileServiceGetFileBySlugPrivateUnauthorized(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -258,7 +258,7 @@ func TestFileService_GetFileBySlug_Private_Unauthorized(t *testing.T) {
 	assert.ErrorIs(t, err, ErrUnauthorized)
 }
 
-func TestFileService_GetFileBySlug_Private_Authorized(t *testing.T) {
+func TestFileServiceGetFileBySlugPrivateAuthorized(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -299,7 +299,7 @@ func TestFileService_GetFileBySlug_Private_Authorized(t *testing.T) {
 	assert.Equal(t, created.ID, file.ID)
 }
 
-func TestFileService_DownloadFile(t *testing.T) {
+func TestFileServiceDownloadFile(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -342,7 +342,7 @@ func TestFileService_DownloadFile(t *testing.T) {
 	assert.Equal(t, created.Hash, file.Hash)
 }
 
-func TestFileService_ListFiles_Public(t *testing.T) {
+func TestFileServiceListFilesPublic(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()

@@ -12,6 +12,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/zqz/web/backend/internal/domain"
+	"github.com/zqz/web/backend/internal/handler"
 	"github.com/zqz/web/backend/internal/handler/auth"
 	"github.com/zqz/web/backend/internal/service"
 )
@@ -130,7 +131,7 @@ func handleCreateFileError(w http.ResponseWriter, err error) bool {
 // streamFileWithHeaders sets response headers and streams the file body. disposition is "inline" or "attachment".
 func streamFileWithHeaders(w http.ResponseWriter, r *http.Request, reader io.Reader, file *domain.File, disposition string) {
 	safeName := sanitizeContentDispositionFilename(file.Name)
-	w.Header().Set("Content-Type", file.ContentType)
+	handler.SetContentType(w, file.ContentType)
 	w.Header().Set("Content-Length", strconv.Itoa(int(file.Size)))
 	w.Header().Set("Content-Disposition", disposition+`; filename="`+safeName+`"`)
 	w.Header().Set("ETag", file.Hash)

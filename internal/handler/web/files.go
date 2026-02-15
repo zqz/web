@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/zqz/web/backend/internal/handler"
 	"github.com/zqz/web/backend/internal/handler/auth"
 	"github.com/zqz/web/backend/internal/service"
 )
@@ -81,7 +82,7 @@ func (h *FilesHandler) Page(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	data.Content = template.HTML(buf.String())
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	if err := h.templates.ExecuteTemplate(w, "layout.html", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -164,7 +165,7 @@ func (h *FilesHandler) List(w http.ResponseWriter, r *http.Request) {
 		SearchEncoded string
 	}{Rows: rows, Offset: offset, Limit: limit, HasMore: hasMore, NextOffset: nextOffset, Search: search, SearchEncoded: searchEncoded}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	if offset == 0 {
 		if err := h.templates.ExecuteTemplate(w, "files_list.html", data); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

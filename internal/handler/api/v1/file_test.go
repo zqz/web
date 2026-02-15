@@ -63,7 +63,7 @@ func setupFileHandlerTest(t *testing.T, ctx context.Context) (*chi.Mux, *service
 	return r, fileSvc, cleanup
 }
 
-func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
+func TestFileHandlerCreateFileListFilesGetBySlugDelete(t *testing.T) {
 	ctx := context.Background()
 	router, _, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()
@@ -131,7 +131,7 @@ func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
 	assert.Len(t, listResp, 1)
 }
 
-func TestFileHandler_CreateFile_PublicUploadsDisabled(t *testing.T) {
+func TestFileHandlerCreateFilePublicUploadsDisabled(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	defer cleanup()
@@ -176,7 +176,7 @@ func TestFileHandler_CreateFile_PublicUploadsDisabled(t *testing.T) {
 // Upload + list flow is covered by service tests (file_service_test.go).
 // API upload can hit 413 when GetEffectiveMaxFileSize differs in test DB; list/create/delete are covered above.
 
-func TestFileHandler_GetFile_ByHash(t *testing.T) {
+func TestFileHandlerGetFileByHash(t *testing.T) {
 	ctx := context.Background()
 	router, fileSvc, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()
@@ -203,7 +203,7 @@ func TestFileHandler_GetFile_ByHash(t *testing.T) {
 	assert.Equal(t, testHash64, metaResp.Hash)
 }
 
-func TestFileHandler_GetFile_NotFound(t *testing.T) {
+func TestFileHandlerGetFileNotFound(t *testing.T) {
 	ctx := context.Background()
 	router, _, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()
@@ -214,7 +214,7 @@ func TestFileHandler_GetFile_NotFound(t *testing.T) {
 	assert.Equal(t, http.StatusNotFound, rec.Code)
 }
 
-func TestFileHandler_CreateFile_InvalidHash(t *testing.T) {
+func TestFileHandlerCreateFileInvalidHash(t *testing.T) {
 	ctx := context.Background()
 	router, _, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()
@@ -233,7 +233,7 @@ func TestFileHandler_CreateFile_InvalidHash(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestFileHandler_CreateFile_ValidationLimits(t *testing.T) {
+func TestFileHandlerCreateFileValidationLimits(t *testing.T) {
 	ctx := context.Background()
 	router, _, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()

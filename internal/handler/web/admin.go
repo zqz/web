@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/zqz/web/backend/internal/handler"
 	"github.com/zqz/web/backend/internal/handler/auth"
 	"github.com/zqz/web/backend/internal/repository"
 )
@@ -95,7 +96,7 @@ func (h *AdminHandler) Page(w http.ResponseWriter, r *http.Request) {
 	}
 	data.Content = template.HTML(buf.String())
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	handler.SetContentType(w, handler.ContentTypeHTML)
 	_ = h.templates.ExecuteTemplate(w, "layout.html", data)
 }
 
