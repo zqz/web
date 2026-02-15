@@ -9,7 +9,12 @@ WORKDIR /build
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY . .
+# Copy only what's needed to build and run
+COPY cmd ./cmd
+COPY internal ./internal
+COPY templates ./templates
+COPY static ./static
+COPY db ./db
 
 # Build static server binary
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
