@@ -1,0 +1,39 @@
+# Git and IDE
+.git
+.gitignore
+.cursor
+.vscode
+*.swp
+*~
+
+# Build artifacts
+bin/
+*.exe
+coverage.out
+coverage.html
+
+# Local dev
+.env
+.env.local
+files/
+
+# Docs and misc
+README.md
+*.md
+!db/migrations/*.sql
+
+# Tests (not needed in image)
+*_test.go
+**/testdata/
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
+.docker/
+
+# CI / deploy
+.github/
+deploy/
+Makefile
+sonar-project.properties
