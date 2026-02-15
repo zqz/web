@@ -45,7 +45,7 @@ function contrastTextColour(hex) {
     if (!hex || typeof hex !== 'string') return '#0d0d0d';
     hex = hex.replace(/^#/, '');
     if (hex.length !== 6 || !/^[0-9A-Fa-f]{6}$/.test(hex)) return '#0d0d0d';
-    const r = parseInt(hex.slice(0, 2), 16), g = parseInt(hex.slice(2, 4), 16), b = parseInt(hex.slice(4, 6), 16);
+    const r = Number.parseInt(hex.slice(0, 2), 16), g = Number.parseInt(hex.slice(2, 4), 16), b = Number.parseInt(hex.slice(4, 6), 16);
     const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return lum <= 0.45 ? '#ffffff' : '#0d0d0d';
 }
