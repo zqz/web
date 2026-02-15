@@ -1,6 +1,6 @@
 {{define "files_list_append.html"}}
 {{range .Rows}}
-<li id="file-{{.Slug}}" hx-swap-oob="beforeend:#file-list">
+<li id="file-{{.Slug}}">
     <span class="list-badge">{{if .Private}}<span class="badge badge--private">{{t "common.private"}}</span>{{else}}<span class="badge badge--public">{{t "common.public"}}</span>{{end}}</span>
     <span class="file-name">{{.Name}}{{if .Comment}} <span class="file-comment-icon" data-comment="{{.Comment}}" title="{{t "files.view_comment"}}" aria-label="{{t "files.has_comment_aria"}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>{{end}}</span>
     <span class="file-meta">· {{.SizeFmt}} · {{.ContentType}}</span>
