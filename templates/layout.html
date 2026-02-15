@@ -135,7 +135,7 @@
         if (!tooltip) return;
         var hoverTimer = null, hideTimer = null, pinned = false;
         function show(el) {
-            var comment = el.getAttribute('data-comment');
+            var comment = el.dataset.comment;
             if (!comment) return;
             clearTimeout(hideTimer);
             tooltip.textContent = comment;
@@ -209,12 +209,12 @@
     document.addEventListener('click', function(e) {
         var btn = e.target.closest && e.target.closest('.file-copy-link');
         if (!btn) return;
-        var viewUrl = btn.getAttribute('data-view-url');
-        var downloadUrl = btn.getAttribute('data-download-url');
+        var viewUrl = btn.dataset.viewUrl;
+        var downloadUrl = btn.dataset.downloadUrl;
         var path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
         if (!path) return;
         var url = window.location.origin + path;
-        var copied = document.body.getAttribute('data-copied') || 'Copied!';
+        var copied = document.body.dataset.copied || 'Copied!';
         var copyLink = btn.getAttribute('title');
         navigator.clipboard.writeText(url).then(function() {
             btn.classList.add('copied');

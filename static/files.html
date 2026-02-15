@@ -425,7 +425,7 @@
             let pinned = false;
 
             function show(el) {
-                const comment = el.getAttribute('data-comment');
+                const comment = el.dataset.comment;
                 if (!comment) return;
                 clearTimeout(hideTimer);
                 tooltip.textContent = comment;
@@ -520,7 +520,7 @@
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.file-copy-link');
             if (!btn) return;
-            const path = btn.getAttribute('data-copy-url');
+            const path = btn.dataset.copyUrl;
             if (!path) return;
             const url = window.location.origin + path;
             navigator.clipboard.writeText(url).then(() => {

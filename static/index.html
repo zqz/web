@@ -466,8 +466,8 @@ Content-Type: application/octet-stream
         document.addEventListener('click', (e) => {
             const btn = e.target.closest('.file-copy-link');
             if (!btn) return;
-            const viewUrl = btn.getAttribute('data-view-url') || '';
-            const downloadUrl = btn.getAttribute('data-download-url') || '';
+            const viewUrl = btn.dataset.viewUrl || '';
+            const downloadUrl = btn.dataset.downloadUrl || '';
             const path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
             if (!path) return;
             const url = window.location.origin + path;
