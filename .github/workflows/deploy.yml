@@ -32,10 +32,10 @@ jobs:
       - run: go version
       - run: go mod verify
 
-      - name: "Build goose (postgres only) and run migrations"
+      - name: "Install goose and run migrations"
         run: |
-          go build -tags='no_clickhouse no_libsql no_mssql no_mysql no_sqlite3 no_vertica no_ydb' -o goose github.com/pressly/goose/v3/cmd/goose
-          ./goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev?sslmode=disable" up
+          go install github.com/pressly/goose/v3/cmd/goose@v3.26.0
+          goose -dir ./db/migrations postgres "postgres://dylan@postgres:5432/zqz-dev?sslmode=disable" up
 
       - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
