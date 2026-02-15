@@ -25,13 +25,23 @@ import (
 
 const testHash64 = "0000000000000000000000000000000000000000000000000000000000000001"
 
+const pathAPIV1Files        = "/api/v1/files/"
+const pathAPIV1FileMetadata = "/api/v1/file-metadata/"
+const pathAPIV1Meta          = "/api/v1/meta/"
+const headerContentType     = "Content-Type"
+const contentTypeJSON      = "application/json"
+const contentTypePlain     = "text/plain"
+const settingPublicUploadsEnabled = "public_uploads_enabled"
+const settingValueTrue      = "true"
+const settingValueFalse     = "false"
+
 func setupFileHandlerTest(t *testing.T, ctx context.Context) (*chi.Mux, *service.FileService, func()) {
 	t.Helper()
 
 	pg, cleanup := tests.SetupTestDB(t, ctx)
 	repo := repository.NewRepository(pg.Pool)
 
-	err := repo.Settings.Set(ctx, "public_uploads_enabled", "true")
+	err := repo.Settings.Set(ctx, settingPublicUploadsEnabled, settingValueTrue)
 	require.NoError(t, err)
 
 	stor, err := storage.NewDiskStorage(t.TempDir())
@@ -63,14 +73,14 @@ func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
 		"name":         "api-test.txt",
 		"hash":         testHash64,
 		"size":         100,
-		"content_type": "text/plain",
+		"content_type": contentTypePlain,
 		"private":      false,
 		"comment":      "API test",
 	}
 	bodyBytes, _ := json.Marshal(createBody)
 
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/files/", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, pathAPIV1Files, bytes.NewReader(bodyBytes))
+	req.Header.Set(headerContentType, contentTypeJSON)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -85,7 +95,7 @@ func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
 	assert.Equal(t, int32(100), createResp.Size)
 
 	// List files
-	req = httptest.NewRequest(http.MethodGet, "/api/v1/files/", nil)
+	req = httptest.NewRequest(http.MethodGet, pathAPIV1Files, nil)
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -96,7 +106,7 @@ func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
 	assert.Equal(t, createResp.ID, listResp[0].ID)
 
 	// Get file metadata by slug (before upload complete, slug is the initial one)
-	req = httptest.NewRequest(http.MethodGet, "/api/v1/file-metadata/"+createResp.Slug, nil)
+	req = httptest.NewRequest(http.MethodGet, pathAPIV1FileMetadata+createResp.Slug, nil)
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -106,13 +116,13 @@ func TestFileHandler_CreateFile_ListFiles_GetBySlug_Delete(t *testing.T) {
 	assert.Equal(t, createResp.ID, metaResp.ID)
 
 	// Delete file (no auth = no ownership, so we expect 403 unless we allow anonymous delete for unowned? Check: DeleteFile checks ownership; anonymous can't delete a file they don't own. So we get 403.
-	req = httptest.NewRequest(http.MethodDelete, "/api/v1/files/"+createResp.Slug, nil)
+	req = httptest.NewRequest(http.MethodDelete, pathAPIV1Files+createResp.Slug, nil)
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 
 	// List still has the file
-	req = httptest.NewRequest(http.MethodGet, "/api/v1/files/", nil)
+	req = httptest.NewRequest(http.MethodGet, pathAPIV1Files, nil)
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -128,7 +138,7 @@ func TestFileHandler_CreateFile_PublicUploadsDisabled(t *testing.T) {
 
 	repo := repository.NewRepository(pg.Pool)
 	// Disable public uploads (migration inserts 'true' by default)
-	err := repo.Settings.Set(ctx, "public_uploads_enabled", "false")
+	err := repo.Settings.Set(ctx, settingPublicUploadsEnabled, settingValueFalse)
 	require.NoError(t, err)
 	stor, err := storage.NewDiskStorage(t.TempDir())
 	require.NoError(t, err)
@@ -146,13 +156,13 @@ func TestFileHandler_CreateFile_PublicUploadsDisabled(t *testing.T) {
 		"name":         "anon.txt",
 		"hash":         testHash64,
 		"size":         10,
-		"content_type": "text/plain",
+		"content_type": contentTypePlain,
 		"private":      false,
 		"comment":      "",
 	}
 	bodyBytes, _ := json.Marshal(createBody)
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/files/", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, pathAPIV1Files, bytes.NewReader(bodyBytes))
+	req.Header.Set(headerContentType, contentTypeJSON)
 	rec := httptest.NewRecorder()
 	r.ServeHTTP(rec, req)
 
@@ -175,14 +185,14 @@ func TestFileHandler_GetFile_ByHash(t *testing.T) {
 		Name:        "meta.txt",
 		Hash:        testHash64,
 		Size:        50,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
 	}, 0)
 	require.NoError(t, err)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/meta/"+testHash64, nil)
+	req := httptest.NewRequest(http.MethodGet, pathAPIV1Meta+testHash64, nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -198,7 +208,7 @@ func TestFileHandler_GetFile_NotFound(t *testing.T) {
 	router, _, cleanup := setupFileHandlerTest(t, ctx)
 	defer cleanup()
 
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/meta/0000000000000000000000000000000000000000000000000000000000009999", nil)
+	req := httptest.NewRequest(http.MethodGet, pathAPIV1Meta+"0000000000000000000000000000000000000000000000000000000000009999", nil)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusNotFound, rec.Code)
@@ -213,11 +223,11 @@ func TestFileHandler_CreateFile_InvalidHash(t *testing.T) {
 		"name":         "bad.txt",
 		"hash":         "not-64-hex",
 		"size":         10,
-		"content_type": "text/plain",
+		"content_type": contentTypePlain,
 	}
 	bodyBytes, _ := json.Marshal(createBody)
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/files/", bytes.NewReader(bodyBytes))
-	req.Header.Set("Content-Type", "application/json")
+	req := httptest.NewRequest(http.MethodPost, pathAPIV1Files, bytes.NewReader(bodyBytes))
+	req.Header.Set(headerContentType, contentTypeJSON)
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -234,11 +244,11 @@ func TestFileHandler_CreateFile_ValidationLimits(t *testing.T) {
 			"name":         name,
 			"hash":         testHash64,
 			"size":         10,
-			"content_type": "text/plain",
+			"content_type": contentTypePlain,
 		}
 		bodyBytes, _ := json.Marshal(createBody)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/files/", bytes.NewReader(bodyBytes))
-		req.Header.Set("Content-Type", "application/json")
+		req := httptest.NewRequest(http.MethodPost, pathAPIV1Files, bytes.NewReader(bodyBytes))
+		req.Header.Set(headerContentType, contentTypeJSON)
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
@@ -253,8 +263,8 @@ func TestFileHandler_CreateFile_ValidationLimits(t *testing.T) {
 			"content_type": contentType,
 		}
 		bodyBytes, _ := json.Marshal(createBody)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/files/", bytes.NewReader(bodyBytes))
-		req.Header.Set("Content-Type", "application/json")
+		req := httptest.NewRequest(http.MethodPost, pathAPIV1Files, bytes.NewReader(bodyBytes))
+		req.Header.Set(headerContentType, contentTypeJSON)
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
 		assert.Equal(t, http.StatusBadRequest, rec.Code)

@@ -20,7 +20,7 @@ func TestTimeoutForNonUpload(t *testing.T) {
 		})
 
 		handler := timeoutForNonUpload(next)
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/files/", nil)
+		req := httptest.NewRequest(http.MethodGet, pathAPIV1Files, nil)
 		rec := httptest.NewRecorder()
 		before := time.Now()
 
@@ -39,7 +39,7 @@ func TestTimeoutForNonUpload(t *testing.T) {
 		})
 
 		handler := timeoutForNonUpload(next)
-		req := httptest.NewRequest(http.MethodPost, "/api/v1/meta/abc123hash", nil)
+		req := httptest.NewRequest(http.MethodPost, pathAPIV1Meta+"abc123hash", nil)
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)

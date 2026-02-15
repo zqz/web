@@ -19,10 +19,20 @@ import (
 // valid SHA-256 hex hashes (64 chars) for tests that don't verify content
 const testHash1 = "0000000000000000000000000000000000000000000000000000000000000001"
 const testHash2 = "0000000000000000000000000000000000000000000000000000000000000002"
+const testHash3 = "0000000000000000000000000000000000000000000000000000000000000003"
 const testHashSame = "0000000000000000000000000000000000000000000000000000000000000abc"
 const testHashPublic = "0000000000000000000000000000000000000000000000000000000000000def"
 const testHashPrivate = "0000000000000000000000000000000000000000000000000000000000000bad"
 const testHashPrivate2 = "0000000000000000000000000000000000000000000000000000000000000bed"
+
+const contentTypePlain = "text/plain"
+const testOwnerName = "Owner"
+const testOwnerEmail = "owner@example.com"
+const testProviderGoogle = "google"
+const testOwnerProviderID = "owner-123"
+const testRoleMember = "member"
+const settingDefaultPrivateUpload = "default_private_upload"
+const settingValueTrue = "true"
 
 func TestFileService_CreateFile(t *testing.T) {
 	ctx := context.Background()
@@ -40,7 +50,7 @@ func TestFileService_CreateFile(t *testing.T) {
 		Name:        "test.txt",
 		Hash:        testHash1,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "Test file",
@@ -52,7 +62,7 @@ func TestFileService_CreateFile(t *testing.T) {
 	assert.Equal(t, testHash1, file.Hash)
 	assert.NotEmpty(t, file.Slug)
 	assert.Equal(t, int32(100), file.Size)
-	assert.Equal(t, "text/plain", file.ContentType)
+	assert.Equal(t, contentTypePlain, file.ContentType)
 }
 
 func TestFileService_CreateFile_Duplicate(t *testing.T) {
@@ -71,7 +81,7 @@ func TestFileService_CreateFile_Duplicate(t *testing.T) {
 		Name:        "test.txt",
 		Hash:        testHashSame,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -83,7 +93,7 @@ func TestFileService_CreateFile_Duplicate(t *testing.T) {
 		Name:        "duplicate.txt",
 		Hash:        testHashSame, // Same hash
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -115,7 +125,7 @@ func TestFileService_UploadFileData(t *testing.T) {
 		Name:        "upload.txt",
 		Hash:        hash,
 		Size:        int32(len(content)),
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -152,7 +162,7 @@ func TestFileService_UploadFileData_Chunked(t *testing.T) {
 		Name:        "chunked.txt",
 		Hash:        hash,
 		Size:        int32(len(content)),
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -189,7 +199,7 @@ func TestFileService_GetFileBySlug_Public(t *testing.T) {
 		Name:        "public.txt",
 		Hash:        testHashPublic,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -215,23 +225,23 @@ func TestFileService_GetFileBySlug_Private_Unauthorized(t *testing.T) {
 
 	// Create owner user
 	owner, err := repo.Users.Create(ctx, repository.CreateUserParams{
-		Name:       "Owner",
-		Email:      "owner@example.com",
-		Provider:   "google",
-		ProviderID: "owner-123",
-		Role:       "member",
+		Name:       testOwnerName,
+		Email:      testOwnerEmail,
+		Provider:   testProviderGoogle,
+		ProviderID: testOwnerProviderID,
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 	ownerID := owner.ID
 
 	// Private comes from settings
-	err = repo.Settings.Set(ctx, "default_private_upload", "true")
+	err = repo.Settings.Set(ctx, settingDefaultPrivateUpload, settingValueTrue)
 	require.NoError(t, err)
 	created, err := svc.CreateFile(ctx, domain.CreateFileRequest{
 		Name:        "private.txt",
 		Hash:        testHashPrivate,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      &ownerID,
 		Private:     false, // ignored; from settings
 		Comment:     "",
@@ -261,22 +271,22 @@ func TestFileService_GetFileBySlug_Private_Authorized(t *testing.T) {
 
 	// Create owner user
 	owner, err := repo.Users.Create(ctx, repository.CreateUserParams{
-		Name:       "Owner",
-		Email:      "owner@example.com",
-		Provider:   "google",
-		ProviderID: "owner-123",
-		Role:       "member",
+		Name:       testOwnerName,
+		Email:      testOwnerEmail,
+		Provider:   testProviderGoogle,
+		ProviderID: testOwnerProviderID,
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 	ownerID := owner.ID
 
-	err = repo.Settings.Set(ctx, "default_private_upload", "true")
+	err = repo.Settings.Set(ctx, settingDefaultPrivateUpload, settingValueTrue)
 	require.NoError(t, err)
 	created, err := svc.CreateFile(ctx, domain.CreateFileRequest{
 		Name:        "private.txt",
 		Hash:        testHashPrivate,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      &ownerID,
 		Private:     false,
 		Comment:     "",
@@ -309,7 +319,7 @@ func TestFileService_DownloadFile(t *testing.T) {
 		Name:        "download.txt",
 		Hash:        hash,
 		Size:        int32(len(content)),
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -344,13 +354,13 @@ func TestFileService_ListFiles_Public(t *testing.T) {
 	svc := NewFileService(repo, stor)
 
 	// Create public and private files (use valid 64-char hex hashes)
-	hashes := []string{testHash1, testHash2, "0000000000000000000000000000000000000000000000000000000000000003"}
+	hashes := []string{testHash1, testHash2, testHash3}
 	for i := 0; i < 3; i++ {
 		_, err := svc.CreateFile(ctx, domain.CreateFileRequest{
 			Name:        fmt.Sprintf("public%d.txt", i),
 			Hash:        hashes[i],
 			Size:        100,
-			ContentType: "text/plain",
+			ContentType: contentTypePlain,
 			UserID:      nil,
 			Private:     false,
 			Comment:     "",
@@ -360,23 +370,23 @@ func TestFileService_ListFiles_Public(t *testing.T) {
 
 	// Create owner user
 	owner, err := repo.Users.Create(ctx, repository.CreateUserParams{
-		Name:       "Owner",
-		Email:      "owner@example.com",
-		Provider:   "google",
-		ProviderID: "owner-123",
-		Role:       "member",
+		Name:       testOwnerName,
+		Email:      testOwnerEmail,
+		Provider:   testProviderGoogle,
+		ProviderID: testOwnerProviderID,
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 	ownerID := owner.ID
 
 	// Private comes from settings; set so this file is created private
-	err = repo.Settings.Set(ctx, "default_private_upload", "true")
+	err = repo.Settings.Set(ctx, settingDefaultPrivateUpload, settingValueTrue)
 	require.NoError(t, err)
 	_, err = svc.CreateFile(ctx, domain.CreateFileRequest{
 		Name:        "private.txt",
 		Hash:        testHashPrivate2,
 		Size:        100,
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      &ownerID,
 		Private:     false, // ignored; taken from settings
 		Comment:     "",

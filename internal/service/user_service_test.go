@@ -22,9 +22,9 @@ func TestUserService_GetOrCreateUser_CreateNew(t *testing.T) {
 	req := domain.CreateUserRequest{
 		Name:       "Alice",
 		Email:      "alice@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-alice-123",
-		Role:       "member",
+		Role:       testRoleMember,
 	}
 
 	user, err := svc.GetOrCreateUser(ctx, req)
@@ -32,7 +32,7 @@ func TestUserService_GetOrCreateUser_CreateNew(t *testing.T) {
 	assert.NotZero(t, user.ID)
 	assert.Equal(t, "Alice", user.Name)
 	assert.Equal(t, "alice@example.com", user.Email)
-	assert.Equal(t, "google", user.Provider)
+	assert.Equal(t, testProviderGoogle, user.Provider)
 	assert.Equal(t, "google-alice-123", user.ProviderID)
 	assert.Equal(t, "admin", user.Role) // First user becomes admin
 	assert.False(t, user.Banned)
@@ -49,9 +49,9 @@ func TestUserService_GetOrCreateUser_IdempotentByProviderID(t *testing.T) {
 	req := domain.CreateUserRequest{
 		Name:       "Bob",
 		Email:      "bob@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-bob-456",
-		Role:       "member",
+		Role:       testRoleMember,
 	}
 
 	user1, err := svc.GetOrCreateUser(ctx, req)
@@ -74,21 +74,21 @@ func TestUserService_GetOrCreateUser_SecondUserIsMember(t *testing.T) {
 	_, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "First",
 		Email:      "first@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-first",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 
 	second, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "Second",
 		Email:      "second@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-second",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "member", second.Role)
+	assert.Equal(t, testRoleMember, second.Role)
 }
 
 func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
@@ -102,9 +102,9 @@ func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
 	_, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "",
 		Email:      "a@b.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "pid",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "name is required")
@@ -112,9 +112,9 @@ func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
 	_, err = svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "A",
 		Email:      "",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "pid",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "email is required")
@@ -124,7 +124,7 @@ func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
 		Email:      "a@b.com",
 		Provider:   "",
 		ProviderID: "pid",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "provider is required")
@@ -132,9 +132,9 @@ func TestUserService_GetOrCreateUser_ValidationErrors(t *testing.T) {
 	_, err = svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "A",
 		Email:      "a@b.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "provider ID is required")
@@ -151,9 +151,9 @@ func TestUserService_GetUserByID(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "Lookup",
 		Email:      "lookup@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-lookup",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 
@@ -177,9 +177,9 @@ func TestUserService_GetUserByProviderID(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "ProviderLookup",
 		Email:      "pl@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-pl-789",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 
@@ -204,9 +204,9 @@ func TestUserService_ListUsers(t *testing.T) {
 		_, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 			Name:       "User" + string(rune('A'+i)),
 			Email:      "user" + string(rune('a'+i)) + "@example.com",
-			Provider:   "google",
+			Provider:   testProviderGoogle,
 			ProviderID: "google-list-" + string(rune('0'+i)),
-			Role:       "member",
+			Role:       testRoleMember,
 		})
 		require.NoError(t, err)
 	}
@@ -235,9 +235,9 @@ func TestUserService_SetBanned(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "BanTarget",
 		Email:      "ban@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-ban",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 	assert.False(t, created.Banned)
@@ -265,9 +265,9 @@ func TestUserService_SetMaxFileSize(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "SizeUser",
 		Email:      "size@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-size",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 	assert.Nil(t, created.MaxFileSizeOverride)
@@ -297,9 +297,9 @@ func TestUserService_UpdateProfile(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "ProfileUser",
 		Email:      "profile@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-profile",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 
@@ -325,9 +325,9 @@ func TestUserService_UpdateProfile_ValidationErrors(t *testing.T) {
 	created, err := svc.GetOrCreateUser(ctx, domain.CreateUserRequest{
 		Name:       "BadProfile",
 		Email:      "bad@example.com",
-		Provider:   "google",
+		Provider:   testProviderGoogle,
 		ProviderID: "google-bad",
-		Role:       "member",
+		Role:       testRoleMember,
 	})
 	require.NoError(t, err)
 

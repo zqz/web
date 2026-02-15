@@ -9,6 +9,8 @@ import (
 	"github.com/zqz/web/backend/internal/tests"
 )
 
+const contentTypePlain = "text/plain"
+
 func TestFileRepository_Create(t *testing.T) {
 	ctx := context.Background()
 	pg, cleanup := tests.SetupTestDB(t, ctx)
@@ -23,7 +25,7 @@ func TestFileRepository_Create(t *testing.T) {
 		Alias:       "test",
 		Hash:        "abc123",
 		Slug:        "test-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "Test file",
@@ -35,7 +37,7 @@ func TestFileRepository_Create(t *testing.T) {
 	assert.Equal(t, "test.txt", file.Name)
 	assert.Equal(t, "abc123", file.Hash)
 	assert.Equal(t, "test-slug", file.Slug)
-	assert.Equal(t, "text/plain", file.ContentType)
+	assert.Equal(t, contentTypePlain, file.ContentType)
 	assert.False(t, file.Private)
 	assert.Equal(t, "Test file", file.Comment)
 }
@@ -54,7 +56,7 @@ func TestFileRepository_GetByID(t *testing.T) {
 		Alias:       "get",
 		Hash:        "def456",
 		Slug:        "get-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -87,7 +89,7 @@ func TestFileRepository_GetBySlug(t *testing.T) {
 		Alias:       "slug",
 		Hash:        "ghi789",
 		Slug:        "unique-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -119,7 +121,7 @@ func TestFileRepository_GetByHash(t *testing.T) {
 		Alias:       "hash",
 		Hash:        "unique-hash-123",
 		Slug:        "hash-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -152,7 +154,7 @@ func TestFileRepository_List(t *testing.T) {
 			Alias:       "file" + string(rune('a'+i)),
 			Hash:        "hash" + string(rune('a'+i)),
 			Slug:        "slug" + string(rune('a'+i)),
-			ContentType: "text/plain",
+			ContentType: contentTypePlain,
 			UserID:      nil,
 			Private:     false,
 			Comment:     "",
@@ -189,7 +191,7 @@ func TestFileRepository_Update(t *testing.T) {
 		Alias:       "update",
 		Hash:        "update-hash",
 		Slug:        "update-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "Original comment",
@@ -225,7 +227,7 @@ func TestFileRepository_Delete(t *testing.T) {
 		Alias:       "delete",
 		Hash:        "delete-hash",
 		Slug:        "delete-slug",
-		ContentType: "text/plain",
+		ContentType: contentTypePlain,
 		UserID:      nil,
 		Private:     false,
 		Comment:     "",
@@ -261,7 +263,7 @@ func TestFileRepository_Count(t *testing.T) {
 			Alias:       "count" + string(rune('a'+i)),
 			Hash:        "counthash" + string(rune('a'+i)),
 			Slug:        "countslug" + string(rune('a'+i)),
-			ContentType: "text/plain",
+			ContentType: contentTypePlain,
 			UserID:      nil,
 			Private:     false,
 			Comment:     "",
