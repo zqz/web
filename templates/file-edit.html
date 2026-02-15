@@ -53,7 +53,7 @@
 <script>
 let currentUser = null;
 let currentFile = null;
-const slug = window.location.pathname.split('/').pop();
+const slug = globalThis.location.pathname.split('/').pop();
 
 async function loadFile() {
     try {
@@ -85,7 +85,7 @@ function displayFile() {
     document.getElementById('fileStatus').textContent = done ? '✓ Complete' : 'Uploading…';
     const url = location.origin + '/api/v1/files/' + currentFile.slug;
     document.getElementById('downloadURL').textContent = url;
-    document.getElementById('downloadLink').onclick = function() { window.open(url, '_blank'); };
+    document.getElementById('downloadLink').onclick = function() { globalThis.open(url, '_blank'); };
     if ((currentFile.content_type || '').startsWith('image/') && done) {
         document.getElementById('imagePreview').style.display = 'block';
         document.getElementById('previewImage').src = url;
@@ -164,7 +164,7 @@ async function checkAuth() {
     } catch (_) { currentUser = null; }
 }
 
-window.addEventListener('load', async () => {
+globalThis.addEventListener('load', async () => {
     await checkAuth();
     await loadFile();
 });

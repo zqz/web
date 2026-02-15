@@ -142,6 +142,10 @@
             margin-left: 0.25rem;
             color: var(--text-muted);
             cursor: help;
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
             vertical-align: middle;
         }
 
@@ -382,7 +386,7 @@
                     ? '<span class="badge badge--private">private</span>'
                     : '<span class="badge badge--public">public</span>';
                 const commentIcon = (file.comment && file.comment.trim())
-                    ? ' <span class="file-comment-icon" role="button" tabindex="0" data-comment="' + escapeAttr(file.comment) + '" title="View comment" aria-label="Has comment">' + commentIconSvg + '</span>'
+                    ? ' <button type="button" class="file-comment-icon" data-comment="' + escapeAttr(file.comment) + '" title="View comment" aria-label="Has comment">' + commentIconSvg + '</button>'
                     : '';
                 return '<li id="file-' + escapeAttr(file.slug) + '">' +
                     '<span class="file-name">' + escapeHtml(file.name) + commentIcon + '</span>' +
@@ -390,7 +394,7 @@
                     '<span class="file-actions">' + fileActionsHtml(file) + '</span>' +
                     '</li>';
             }).join('');
-            const hash = window.location.hash;
+            const hash = globalThis.location.hash;
             if (hash && hash.startsWith('#file-')) {
                 const el = document.getElementById(hash.slice(1));
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -451,9 +455,9 @@
                     const ttRect = tooltip.getBoundingClientRect();
                     let left = rect.left;
                     let top = rect.bottom + 6;
-                    if (left + ttRect.width > window.innerWidth) left = window.innerWidth - ttRect.width - 8;
+                    if (left + ttRect.width > globalThis.innerWidth) left = globalThis.innerWidth - ttRect.width - 8;
                     if (left < 8) left = 8;
-                    if (top + ttRect.height > window.innerHeight - 8) top = rect.top - ttRect.height - 6;
+                    if (top + ttRect.height > globalThis.innerHeight - 8) top = rect.top - ttRect.height - 6;
                     if (top < 8) top = 8;
                     tooltip.style.left = left + 'px';
                     tooltip.style.top = top + 'px';
@@ -543,7 +547,7 @@
             if (!btn) return;
             const path = btn.dataset.copyUrl;
             if (!path) return;
-            const url = window.location.origin + path;
+            const url = globalThis.location.origin + path;
             navigator.clipboard.writeText(url).then(() => {
                 btn.classList.add('copied');
                 btn.setAttribute('title', 'Copied!');
@@ -554,7 +558,7 @@
             });
         });
 
-        window.addEventListener('load', () => {
+        globalThis.addEventListener('load', () => {
             checkAuth();
             loadFiles();
         });

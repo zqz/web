@@ -36,10 +36,10 @@
     <div id="uploadSection">
         <h2>Upload Files</h2>
         
-        <div id="uploadArea" tabindex="0" role="button" onclick="document.getElementById('fileInput').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInput').click();}" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer;">
+        <label id="uploadArea" for="fileInput" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer; display: block;">
             <p>Click here or drag files to upload</p>
             <p><small>Maximum file size: 100MB</small></p>
-        </div>
+        </label>
         <input type="file" id="fileInput" multiple style="display: none;">
 
         <h3>Upload Queue</h3>
@@ -357,7 +357,7 @@ Content-Type: application/octet-stream
                     </li>
                 `;
             }).join('');
-            const hash = window.location.hash;
+            const hash = globalThis.location.hash;
             if (hash && hash.startsWith('#file-')) {
                 const el = document.getElementById(hash.slice(1));
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -383,7 +383,7 @@ Content-Type: application/octet-stream
                     <li><strong>Type:</strong> ${file.content_type}</li>
                     <li><strong>Uploaded:</strong> ${new Date(file.created_at).toLocaleString()}</li>
                     ${file.comment ? `<li><strong>Comment:</strong> ${escapeHtml(file.comment)}</li>` : ''}
-                    <li><strong>Download URL:</strong><br><code>${window.location.origin}/api/v1/files/${file.slug}</code></li>
+                    <li><strong>Download URL:</strong><br><code>${globalThis.location.origin}/api/v1/files/${file.slug}</code></li>
                 </ul>
                 ${isComplete ? `
                     <p><a href="/api/v1/files/${file.slug}" download>Download File</a></p>
@@ -471,7 +471,7 @@ Content-Type: application/octet-stream
             const downloadUrl = btn.dataset.downloadUrl || '';
             const path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
             if (!path) return;
-            const url = window.location.origin + path;
+            const url = globalThis.location.origin + path;
             navigator.clipboard.writeText(url).then(() => {
                 btn.classList.add('copied');
                 btn.setAttribute('title', 'Copied!');
@@ -480,7 +480,7 @@ Content-Type: application/octet-stream
         });
 
         // Load on page load
-        window.addEventListener('load', () => {
+        globalThis.addEventListener('load', () => {
             checkAuth();
             loadFiles();
         });

@@ -76,7 +76,7 @@
 
             <p>
                 <button type="submit" id="saveButton">Save Changes</button>
-                <button type="button" onclick="window.location.href='/files'">Cancel</button>
+                <button type="button" onclick="globalThis.location.href='/files'">Cancel</button>
                 <button type="button" onclick="deleteFile()" style="float: right; background: #dc2626; color: white;">Delete File</button>
             </p>
 
@@ -87,7 +87,7 @@
     <script>
         let currentUser = null;
         let currentFile = null;
-        const slug = window.location.pathname.split('/').pop();
+        const slug = globalThis.location.pathname.split('/').pop();
 
         async function loadFile() {
             try {
@@ -131,9 +131,9 @@
             document.getElementById('fileStatus').textContent = isComplete ? '✓ Complete' : `Uploading (${currentFile.bytes_received}/${currentFile.size} bytes)`;
 
             // Download link
-            const downloadUrl = `${window.location.origin}/api/v1/files/${currentFile.slug}`;
+            const downloadUrl = `${globalThis.location.origin}/api/v1/files/${currentFile.slug}`;
             document.getElementById('downloadURL').textContent = downloadUrl;
-            document.getElementById('downloadLink').onclick = function() { window.open(downloadUrl, '_blank'); };
+            document.getElementById('downloadLink').onclick = function() { globalThis.open(downloadUrl, '_blank'); };
 
             // Image preview
             if (currentFile.content_type.startsWith('image/') && isComplete) {
@@ -222,7 +222,7 @@
                 }
 
                 alert('File deleted successfully');
-                window.location.href = '/files';
+                globalThis.location.href = '/files';
 
             } catch (error) {
                 alert('Error deleting file: ' + error.message);
@@ -270,7 +270,7 @@
         }
 
         // Load on page load
-        window.addEventListener('load', async () => {
+        globalThis.addEventListener('load', async () => {
             await checkAuth();
             await loadFile();
         });

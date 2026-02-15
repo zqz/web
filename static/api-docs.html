@@ -166,7 +166,7 @@ curl http://localhost:3001/api/v1/files/AbCdEf -o downloaded.txt</pre>
         }
 
         // Load on page load
-        window.addEventListener('load', () => {
+        globalThis.addEventListener('load', () => {
             checkAuth();
         });
     </script>

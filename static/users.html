@@ -166,7 +166,7 @@
         }
 
         // Load on page load
-        window.addEventListener('load', () => {
+        globalThis.addEventListener('load', () => {
             checkAuth();
             loadUsers();
         });

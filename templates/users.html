@@ -9,7 +9,7 @@
 let currentUser = null;
 
 async function loadUsers() {
-    const i18n = window.I18N || {};
+    const i18n = globalThis.I18N || {};
     try {
         const res = await fetch('/api/v1/users');
         if (!res.ok) throw new Error(i18n['users.failed_to_load'] || 'Failed to load');
@@ -23,7 +23,7 @@ async function loadUsers() {
 }
 
 function displayUsers(users) {
-    const i18n = window.I18N || {};
+    const i18n = globalThis.I18N || {};
     const list = document.getElementById('userList');
     if (!users.length) {
         list.innerHTML = '<li class="file-meta">' + (i18n['users.no_users'] || 'No users yet.') + '</li>';
@@ -58,6 +58,6 @@ async function checkAuth() {
     } catch (_) { currentUser = null; }
 }
 
-window.addEventListener('load', () => { checkAuth(); loadUsers(); });
+globalThis.addEventListener('load', () => { checkAuth(); loadUsers(); });
 </script>
 {{end}}

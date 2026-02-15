@@ -21,10 +21,10 @@
 
     <h2>Upload Files</h2>
     
-    <div id="uploadArea" tabindex="0" role="button" onclick="document.getElementById('fileInput').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInput').click();}" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer;">
+    <label id="uploadArea" for="fileInput" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer; display: block;">
         <p>Click here or drag files to upload</p>
         <p><small>Maximum file size: 100MB</small></p>
-    </div>
+    </label>
     <input type="file" id="fileInput" multiple style="display: none;">
 
     <h3>Upload Queue</h3>
@@ -219,7 +219,7 @@
             const downloadUrl = btn.dataset.downloadUrl || '';
             const path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
             if (!path) return;
-            const url = window.location.origin + path;
+            const url = globalThis.location.origin + path;
             navigator.clipboard.writeText(url).then(() => {
                 btn.classList.add('copied');
                 btn.setAttribute('title', 'Copied!');
@@ -228,7 +228,7 @@
         });
 
         // Load on page load
-        window.addEventListener('load', () => {
+        globalThis.addEventListener('load', () => {
             checkAuth();
             updateStats();
         });

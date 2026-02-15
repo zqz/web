@@ -50,7 +50,7 @@
         .file-name { font-weight: 500; min-width: 0; }
         .file-name a, .main a { color: var(--text); text-decoration: none; }
         .file-name a:hover, .main a:hover { text-decoration: underline; }
-        .file-comment-icon { display: inline-flex; align-items: center; margin-left: 0.25rem; color: var(--muted); cursor: help; vertical-align: middle; }
+        .file-comment-icon { display: inline-flex; align-items: center; margin-left: 0.25rem; color: var(--muted); cursor: help; vertical-align: middle; background: none; border: none; padding: 0; font: inherit; }
         .file-comment-icon:hover { color: var(--text); }
         .file-comment-tooltip { position: fixed; z-index: 1000; max-width: 20rem; padding: 0.5rem 0.75rem; font-size: 11px; line-height: 1.4; color: var(--text); background: #1a1a1a; border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: pre-wrap; word-break: break-word; pointer-events: none; display: none; }
         .file-comment-tooltip.is-visible { display: block; }
@@ -90,7 +90,7 @@
     </style>
 </head>
 <body data-copied="{{t "common.copied"}}">
-    <script>window.I18N = {{ i18nJSON }};</script>
+    <script>globalThis.I18N = {{ i18nJSON }};</script>
     {{if and .User .User.Banned}}
     <div class="wrap">
         <p>{{t "site.banned"}}</p>
@@ -145,9 +145,9 @@
                 var rect = el.getBoundingClientRect();
                 var ttRect = tooltip.getBoundingClientRect();
                 var left = rect.left, top = rect.bottom + 6;
-                if (left + ttRect.width > window.innerWidth) left = window.innerWidth - ttRect.width - 8;
+                if (left + ttRect.width > globalThis.innerWidth) left = globalThis.innerWidth - ttRect.width - 8;
                 if (left < 8) left = 8;
-                if (top + ttRect.height > window.innerHeight - 8) top = rect.top - ttRect.height - 6;
+                if (top + ttRect.height > globalThis.innerHeight - 8) top = rect.top - ttRect.height - 6;
                 if (top < 8) top = 8;
                 tooltip.style.left = left + 'px';
                 tooltip.style.top = top + 'px';
@@ -198,15 +198,15 @@
             if (e.key === 'Escape' && pinned) { pinned = false; hide(); }
         });
     })();
-    window.addEventListener('load', function() {
-        var hash = window.location.hash;
+    globalThis.addEventListener('load', function() {
+        var hash = globalThis.location.hash;
         if (hash && hash.indexOf('file-') === 1) {
             var el = document.getElementById(hash.slice(1));
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     });
     document.body.addEventListener('htmx:afterSettle', function() {
-        var hash = window.location.hash;
+        var hash = globalThis.location.hash;
         if (hash && hash.indexOf('file-') === 1) {
             var el = document.getElementById(hash.slice(1));
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -219,7 +219,7 @@
         var downloadUrl = btn.dataset.downloadUrl;
         var path = (viewUrl && viewUrl.trim() !== '') ? viewUrl : downloadUrl;
         if (!path) return;
-        var url = window.location.origin + path;
+        var url = globalThis.location.origin + path;
         var copied = document.body.dataset.copied || 'Copied!';
         var copyLink = btn.getAttribute('title');
         navigator.clipboard.writeText(url).then(function() {
