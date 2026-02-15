@@ -21,10 +21,10 @@
 
     <h2>Upload Files</h2>
     
-    <label id="uploadArea" for="fileInput" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer; display: block;">
+    <div id="uploadArea" tabindex="0" role="button" onclick="document.getElementById('fileInput').click()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();document.getElementById('fileInput').click();}" style="border: 2px dashed #ccc; padding: 20px; cursor: pointer;">
         <p>Click here or drag files to upload</p>
         <p><small>Maximum file size: 100MB</small></p>
-    </label>
+    </div>
     <input type="file" id="fileInput" multiple style="display: none;">
 
     <h3>Upload Queue</h3>
