@@ -367,7 +367,7 @@
                     ? '<span class="badge badge--private">private</span>'
                     : '<span class="badge badge--public">public</span>';
                 const commentIcon = (file.comment && file.comment.trim())
-                    ? ' <span class="file-comment-icon" data-comment="' + escapeAttr(file.comment) + '" title="View comment" aria-label="Has comment">' + commentIconSvg + '</span>'
+                    ? ' <span class="file-comment-icon" role="button" tabindex="0" data-comment="' + escapeAttr(file.comment) + '" title="View comment" aria-label="Has comment">' + commentIconSvg + '</span>'
                     : '';
                 return '<li id="file-' + escapeAttr(file.slug) + '">' +
                     '<span class="file-name">' + escapeHtml(file.name) + commentIcon + '</span>' +
@@ -494,6 +494,12 @@
             });
 
             document.addEventListener('keydown', function(e) {
+                const icon = e.target.closest && e.target.closest('.file-comment-icon');
+                if (icon && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    icon.click();
+                    return;
+                }
                 if (e.key === 'Escape' && pinned) {
                     pinned = false;
                     hide();

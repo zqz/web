@@ -1,10 +1,10 @@
 {{define "content_upload"}}
 <div class="main">
     {{if or .User .PublicUploadsEnabled}}
-    <div id="uploadArea" class="upload-zone" onclick="document.getElementById('fileInput').click()">
+    <label id="uploadArea" for="fileInput" class="upload-zone">
         <p>{{t "upload.click_or_drag"}}</p>
         <p style="color: var(--muted); font-size: 11px;">{{if .MaxFileSizeMB}}Max {{.MaxFileSizeMB}} MB per file{{else}}{{t "upload.no_limit"}}{{end}}</p>
-    </div>
+    </label>
     <input type="file" id="fileInput" multiple style="display: none;">
 
     <h3>{{t "upload.queue"}}</h3>

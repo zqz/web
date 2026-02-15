@@ -80,7 +80,7 @@
         button:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-danger { color: #f87171; border-color: #7f1d1d; }
         .btn-danger:hover { border-color: #f87171; }
-        .upload-zone { border: 2px dashed var(--border); padding: 1.5rem; cursor: pointer; margin-bottom: 1rem; }
+        .upload-zone { display: block; border: 2px dashed var(--border); padding: 1.5rem; cursor: pointer; margin-bottom: 1rem; }
         .upload-zone:hover { border-color: var(--muted); }
         pre, code { font-size: 11px; background: #1a1a1a; padding: 0.25rem 0.4rem; border-radius: 2px; }
         pre { padding: 0.75rem; overflow-x: auto; margin: 0.5rem 0; }
@@ -189,6 +189,12 @@
             if (pinned) { pinned = false; hide(); }
         });
         document.addEventListener('keydown', function(e) {
+            var icon = e.target.closest && e.target.closest('.file-comment-icon');
+            if (icon && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                icon.click();
+                return;
+            }
             if (e.key === 'Escape' && pinned) { pinned = false; hide(); }
         });
     })();
