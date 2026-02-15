@@ -85,7 +85,7 @@
         }
 
         async function uploadFile(file) {
-            const uploadId = Date.now() + '-' + Math.random();
+            const uploadId = Date.now() + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4))).map(b => b.toString(16).padStart(2, '0')).join('');
             const uploadItem = createUploadItem(uploadId, file.name);
             
             try {

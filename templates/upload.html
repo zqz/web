@@ -19,7 +19,7 @@ const fileInput = document.getElementById('fileInput');
 let queue = [];
 
 function queueId() {
-    return Date.now() + '-' + Math.random().toString(36).slice(2, 9);
+    return Date.now() + '-' + Array.from(crypto.getRandomValues(new Uint8Array(4))).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
 function escapeHtml(text) {
