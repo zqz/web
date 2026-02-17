@@ -181,7 +181,7 @@ func (h *PagesHandler) UserFiles(w http.ResponseWriter, r *http.Request) {
 			Name:        f.Name,
 			Slug:        f.Slug,
 			SizeFmt:     formatBytesForUserFiles(int64(f.Size)),
-			ContentType: f.ContentType,
+			ContentType: humanReadableContentType(f.ContentType),
 			Complete:    f.BytesReceived == f.Size,
 			DownloadURL: "/api/v1/files/" + f.Slug,
 			ViewURL:     viewURL,

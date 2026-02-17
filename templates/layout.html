@@ -44,25 +44,50 @@
         .page-title-row .title-extra input[type="search"] { min-width: 12rem; }
         h3 { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 1.25rem 0 0.5rem 0; }
         .list { list-style: none; padding: 0; margin: 0; }
-        .list li { padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 1rem; }
+        .list li { padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; }
         .list-badge { flex-shrink: 0; width: 3.5rem; }
         .list li:last-child { border-bottom: none; }
-        .file-name { font-weight: 500; min-width: 0; }
+        .file-name { font-weight: 500; min-width: 0; flex: 1 1 14rem; display: inline-flex; align-items: center; gap: 0.25rem; }
+        .file-name-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .file-name a, .main a { color: var(--text); text-decoration: none; }
         .file-name a:hover, .main a:hover { text-decoration: underline; }
         .file-comment-icon { display: inline-flex; align-items: center; margin-left: 0.25rem; color: var(--muted); cursor: help; vertical-align: middle; background: none; border: none; padding: 0; font: inherit; }
         .file-comment-icon:hover { color: var(--text); }
         .file-comment-tooltip { position: fixed; z-index: 1000; max-width: 20rem; padding: 0.5rem 0.75rem; font-size: 11px; line-height: 1.4; color: var(--text); background: #1a1a1a; border: 1px solid var(--border); border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: pre-wrap; word-break: break-word; pointer-events: none; display: none; }
         .file-comment-tooltip.is-visible { display: block; }
-        .file-meta { font-size: 11px; color: var(--muted); }
-        .file-actions { font-size: 11px; margin-left: auto; }
+        .file-meta { font-size: 11px; color: var(--muted); min-width: 0; flex: 0 1 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-type { display: inline-block; max-width: 5.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+        .file-actions { font-size: 11px; margin-left: auto; display: inline-flex; align-items: center; gap: 0.55rem; white-space: nowrap; flex-shrink: 0; }
         .file-actions a, .file-actions button { color: var(--muted); text-decoration: none; background: none; border: none; padding: 0; font: inherit; cursor: pointer; }
         .file-actions a:hover, .file-actions button:hover { color: var(--text); }
-        .file-actions a + a, .file-actions a + button, .file-actions button + a, .file-actions button + button { margin-left: 0.6rem; }
-        .file-actions .file-copy-link { margin-left: 0.6rem; padding: 0; border: none; background: none; cursor: pointer; color: var(--muted); font: inherit; line-height: 1; vertical-align: middle; }
+        .file-actions .action-icon, .file-actions .file-copy-link { display: inline-flex; align-items: center; justify-content: center; line-height: 1; }
+        .file-actions .file-copy-link { padding: 0; border: none; background: none; cursor: pointer; color: var(--muted); font: inherit; line-height: 1; vertical-align: middle; }
         .file-actions .file-copy-link:hover { color: var(--text); }
         .file-actions .file-copy-link.copied { color: #4ade80; }
         .file-actions a.danger:hover, .file-actions button.danger:hover { color: #f87171; }
+        #file-list > li {
+            display: grid;
+            grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 8rem) 8.5rem;
+            align-items: center;
+            column-gap: 1rem;
+        }
+        #file-list .list-badge { grid-column: 1; width: auto; }
+        #file-list .file-name { grid-column: 2; min-width: 0; flex: none; }
+        #file-list .file-meta { grid-column: 3; min-width: 0; flex: none; }
+        #file-list .file-actions { grid-column: 4; width: 8.5rem; margin-left: 0; justify-self: end; justify-content: flex-end; }
+        @media (max-width: 48rem) {
+            .list li { align-items: baseline; }
+            .file-name { flex: 1 1 100%; }
+            .file-meta { flex: 1 1 auto; max-width: 100%; }
+            #file-list > li {
+                grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+                row-gap: 0.2rem;
+            }
+            #file-list .list-badge { grid-column: 1; grid-row: 1; }
+            #file-list .file-name { grid-column: 2; grid-row: 1; }
+            #file-list .file-meta { grid-column: 2; grid-row: 2; max-width: 100%; }
+            #file-list .file-actions { grid-column: 3; grid-row: 1 / span 2; width: auto; }
+        }
         .badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
         .badge--public { color: #4ade80; }
         .badge--private { color: #f87171; }

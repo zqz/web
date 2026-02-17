@@ -3,6 +3,7 @@ package web
 import (
 	"bytes"
 	"html/template"
+	"mime"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -88,7 +89,11 @@ func (h *FilesHandler) Page(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-const maxListLimit = 2000
+const (
+	maxListLimit        = 2000
+	defaultListLimit    = 50
+	loadMoreListLimit   = 100
+)
 
 // parseListParams reads limit and offset from the request query.
 func parseListParams(r *http.Request, defaultLimit int32) (limit, offset int32) {
@@ -111,7 +116,7 @@ func parseListParams(r *http.Request, defaultLimit int32) (limit, offset int32) 
 
 // List returns the file list fragment (initial load or load-more with OOB).
 func (h *FilesHandler) List(w http.ResponseWriter, r *http.Request) {
-	limit, offset := parseListParams(r, 20)
+	limit, offset := parseListParams(r, defaultListLimit)
 	search := strings.TrimSpace(r.URL.Query().Get("q"))
 
 	userID := auth.GetUserIDFromContext(r.Context())
@@ -137,7 +142,7 @@ func (h *FilesHandler) List(w http.ResponseWriter, r *http.Request) {
 			Slug:        f.Slug,
 			Size:        int64(f.Size),
 			SizeFmt:     formatBytes(int64(f.Size)),
-			ContentType: f.ContentType,
+			ContentType: humanReadableContentType(f.ContentType),
 			Private:     f.Private,
 			ViewURL:     viewURL,
 			DownloadURL: "/api/v1/files/" + f.Slug,
@@ -156,14 +161,15 @@ func (h *FilesHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Rows         []FileRow
-		Offset       int32
-		Limit        int32
-		HasMore      bool
-		NextOffset   int32
-		Search       string
+		Rows          []FileRow
+		Offset        int32
+		Limit         int32
+		LoadMoreLimit int32
+		HasMore       bool
+		NextOffset    int32
+		Search        string
 		SearchEncoded string
-	}{Rows: rows, Offset: offset, Limit: limit, HasMore: hasMore, NextOffset: nextOffset, Search: search, SearchEncoded: searchEncoded}
+	}{Rows: rows, Offset: offset, Limit: limit, LoadMoreLimit: loadMoreListLimit, HasMore: hasMore, NextOffset: nextOffset, Search: search, SearchEncoded: searchEncoded}
 
 	handler.SetContentType(w, handler.ContentTypeHTML)
 	if offset == 0 {
@@ -186,6 +192,69 @@ type authUser struct {
 	Colour     string
 	TextColour string // contrasting text colour when Colour is set
 	Banned     bool
+}
+
+// humanReadableContentType converts MIME types into short labels (pdf, jpg, mp4, etc).
+func humanReadableContentType(contentType string) string {
+	ct := strings.TrimSpace(contentType)
+	if ct == "" {
+		return "unknown"
+	}
+
+	mediaType := strings.ToLower(ct)
+	if parsed, _, err := mime.ParseMediaType(ct); err == nil && parsed != "" {
+		mediaType = strings.ToLower(parsed)
+	}
+
+	switch mediaType {
+	case "application/pdf":
+		return "pdf"
+	case "image/jpeg":
+		return "jpg"
+	case "image/png":
+		return "png"
+	case "image/gif":
+		return "gif"
+	case "image/webp":
+		return "webp"
+	case "image/svg+xml":
+		return "svg"
+	case "video/mp4":
+		return "mp4"
+	case "video/webm":
+		return "webm"
+	case "audio/mpeg":
+		return "mp3"
+	case "application/zip":
+		return "zip"
+	case "application/x-7z-compressed":
+		return "7z"
+	case "application/json":
+		return "json"
+	case "text/plain":
+		return "txt"
+	case "text/csv":
+		return "csv"
+	case "application/msword":
+		return "doc"
+	case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+		return "docx"
+	case "application/vnd.ms-excel":
+		return "xls"
+	case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+		return "xlsx"
+	case "application/vnd.ms-powerpoint":
+		return "ppt"
+	case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+		return "pptx"
+	}
+
+	if strings.HasPrefix(mediaType, "image/") || strings.HasPrefix(mediaType, "video/") || strings.HasPrefix(mediaType, "audio/") || strings.HasPrefix(mediaType, "text/") {
+		if idx := strings.IndexByte(mediaType, '/'); idx >= 0 && idx+1 < len(mediaType) {
+			return mediaType[idx+1:]
+		}
+	}
+	return mediaType
 }
 
 func formatBytes(n int64) string {

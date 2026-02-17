@@ -8,7 +8,7 @@
 </ul>
 {{if .HasMore}}
 <p class="load-more" id="load-more-wrap">
-    <button hx-get="/files/list?limit={{.Limit}}&offset={{.NextOffset}}{{if .SearchEncoded}}&q={{.SearchEncoded}}{{end}}"
+    <button hx-get="/files/list?limit={{.LoadMoreLimit}}&offset={{.NextOffset}}{{if .SearchEncoded}}&q={{.SearchEncoded}}{{end}}"
             hx-target="#file-list"
             hx-swap="beforeend">
         {{t "files.load_more"}}
