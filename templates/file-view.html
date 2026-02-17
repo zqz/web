@@ -1,3 +1,6 @@
+{{define "partial_file_view_title_extra"}}
+<button type="button" id="editLink" class="file-actions" style="display: none;">{{t "common.edit"}}</button>
+{{end}}
 {{define "content_file_view"}}
 <div class="main">
     <div id="loadingState" style="color: var(--muted);">{{t "common.loading"}}</div>
@@ -8,12 +11,6 @@
     </div>
 
     <div id="fileContent" style="display: none;">
-        <div class="page-title-row" style="margin-bottom: 1rem;">
-            <h2>{{t "page.file_view"}}</h2>
-            <span class="title-extra">
-                <button type="button" id="editLink" class="file-actions">{{t "common.edit"}}</button>
-            </span>
-        </div>
 
         <div class="form-group">
             <span class="file-meta">{{t "file_edit.name"}}</span>
@@ -97,7 +94,15 @@ function displayFile() {
         document.getElementById('previewImage').src = url;
     }
     const editLink = document.getElementById('editLink');
-    if (editLink) editLink.onclick = function() { location.href = '/files/' + currentFile.slug; };
+    if (editLink) {
+        if (currentFile.can_edit) {
+            editLink.style.display = 'inline-flex';
+            editLink.onclick = function() { location.href = '/files/' + currentFile.slug; };
+        } else {
+            editLink.style.display = 'none';
+            editLink.onclick = null;
+        }
+    }
 }
 
 function showError(msg) {

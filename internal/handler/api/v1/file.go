@@ -45,6 +45,7 @@ type FileResponse struct {
 	UserID        *int32    `json:"user_id,omitempty"`
 	ViewURL       string    `json:"view_url,omitempty"`
 	DownloadURL   string    `json:"download_url"`
+	CanEdit       bool      `json:"can_edit"`
 }
 
 // toFileResponse converts a domain file to API response
@@ -71,6 +72,13 @@ func toFileResponse(f *domain.File) FileResponse {
 	}
 
 	return resp
+}
+
+func canEditFile(f *domain.File, userID *int32, isAdmin bool) bool {
+	if isAdmin || userID == nil || f.UserID == nil {
+		return isAdmin
+	}
+	return *userID == *f.UserID
 }
 
 // sanitizeContentDispositionFilename removes or replaces characters that could
@@ -205,7 +213,9 @@ func (h *FileHandler) CreateFile(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	JSON(w, http.StatusCreated, toFileResponse(file))
+	resp := toFileResponse(file)
+	resp.CanEdit = canEditFile(file, userID, isAdmin)
+	JSON(w, http.StatusCreated, resp)
 }
 
 // UploadFileData uploads file data (supports chunked uploads). Stops when max size exceeded; verifies SHA-256 on completion.
@@ -245,7 +255,9 @@ func (h *FileHandler) UploadFileData(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	JSON(w, http.StatusOK, toFileResponse(file))
+	resp := toFileResponse(file)
+	resp.CanEdit = canEditFile(file, userID, isAdmin)
+	JSON(w, http.StatusOK, resp)
 }
 
 // GetFile retrieves file metadata by hash
@@ -255,6 +267,9 @@ func (h *FileHandler) GetFile(w http.ResponseWriter, r *http.Request) {
 		ErrorMessage(w, http.StatusBadRequest, "hash parameter is required")
 		return
 	}
+	userID := auth.GetUserIDFromContext(r.Context())
+	user := auth.GetUserFromContext(r.Context())
+	isAdmin := user != nil && user.IsAdmin()
 	file, err := h.fileSvc.GetFileByHash(r.Context(), hash)
 	if err != nil {
 		if handleFileServiceError(w, err) {
@@ -263,7 +278,9 @@ func (h *FileHandler) GetFile(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	JSON(w, http.StatusOK, toFileResponse(file))
+	resp := toFileResponse(file)
+	resp.CanEdit = canEditFile(file, userID, isAdmin)
+	JSON(w, http.StatusOK, resp)
 }
 
 // ViewFile serves file for viewing (inline, images only)
@@ -330,6 +347,7 @@ func (h *FileHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
 	response := make([]FileResponse, len(files))
 	for i, f := range files {
 		response[i] = toFileResponse(f)
+		response[i].CanEdit = canEditFile(f, userID, isAdmin)
 	}
 	JSON(w, http.StatusOK, response)
 }
@@ -374,7 +392,9 @@ func (h *FileHandler) GetFileBySlug(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	JSON(w, http.StatusOK, toFileResponse(file))
+	resp := toFileResponse(file)
+	resp.CanEdit = canEditFile(file, userID, isAdmin)
+	JSON(w, http.StatusOK, resp)
 }
 
 // UpdateFileRequest represents a file update request
@@ -412,5 +432,7 @@ func (h *FileHandler) UpdateFile(w http.ResponseWriter, r *http.Request) {
 		Error(w, http.StatusInternalServerError, err)
 		return
 	}
-	JSON(w, http.StatusOK, toFileResponse(file))
+	resp := toFileResponse(file)
+	resp.CanEdit = canEditFile(file, userID, isAdmin)
+	JSON(w, http.StatusOK, resp)
 }
